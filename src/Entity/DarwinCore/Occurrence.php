@@ -2,6 +2,7 @@
 
 namespace App\Entity\DarwinCore;
 
+use App\Entity\OccurrenceImport;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -166,6 +167,9 @@ class Occurrence
 
     #[ORM\Column(name: 'dynamicProperties', type: 'string', nullable: true)]
     private ?string $dynamicProperties = null;
+
+    #[ORM\OneToOne(mappedBy: 'occurrence', cascade: ['persist', 'remove'])]
+    private ?OccurrenceImport $import = null;
 
     public function getId(): ?int
     {
@@ -631,6 +635,23 @@ class Occurrence
     public function setTaxon(?Taxon $taxon): static
     {
         $this->taxon = $taxon;
+        return $this;
+    }
+
+    public function getImport(): ?OccurrenceImport
+    {
+        return $this->import;
+    }
+
+    public function setImport(OccurrenceImport $import): static
+    {
+        // set the owning side of the relation if necessary
+        if ($import->getOccurrence() !== $this) {
+            $import->setOccurrence($this);
+        }
+
+        $this->import = $import;
+
         return $this;
     }
 

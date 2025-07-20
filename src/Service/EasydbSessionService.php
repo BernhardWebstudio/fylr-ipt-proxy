@@ -20,7 +20,7 @@ class EasydbSessionService
     private string $searchUrl;
     private string $pluginUrl;
     private string $serverUrl;
-    
+
     private ?string $token = null;
     private ?array $sessionContent = null;
     private ?array $sessionHeader = null;
@@ -58,18 +58,18 @@ class EasydbSessionService
     public function startSession(): array
     {
         $this->logger->info('Starting EasyDB session');
-        
+
         try {
             $response = $this->httpClient->request('GET', $this->newSessionUrl);
             $this->checkStatusCode($response);
-            
+
             $content = $response->toArray();
             $this->sessionContent = $content;
             $this->sessionHeader = $response->getHeaders();
             $this->token = $this->getValue($content, 'token');
-            
+
             $this->logger->info('EasyDB session started successfully', ['token' => $this->token]);
-            
+
             return $content;
         } catch (\Exception $e) {
             $this->logger->error('Failed to start EasyDB session', [
@@ -91,21 +91,21 @@ class EasydbSessionService
         }
 
         $payload = ['token' => $this->token];
-        
+
         $this->logger->info('Retrieving current EasyDB session', $payload);
-        
+
         $response = $this->httpClient->request('GET', $this->newSessionUrl, [
             'query' => $payload
         ]);
-        
+
         $this->checkStatusCode($response);
         $content = $response->toArray();
-        
+
         // Proof that the session is the same
         if ($this->getValue($content, 'instance') === $this->getValue($this->sessionContent, 'instance')) {
             $this->logger->info('Retrieved correct EasyDB session');
         }
-        
+
         return $content;
     }
 
@@ -139,9 +139,9 @@ class EasydbSessionService
 
         $this->checkStatusCode($response);
         $content = $response->toArray();
-        
+
         $this->logger->info('EasyDB session authenticated successfully');
-        
+
         return $content;
     }
 
@@ -164,16 +164,16 @@ class EasydbSessionService
 
         $this->checkStatusCode($response, false);
         $content = $response->toArray();
-        
+
         // Clear session data
         $this->token = null;
         $this->sessionContent = null;
         $this->sessionHeader = null;
         $this->login = null;
         $this->password = null;
-        
+
         $this->logger->info('EasyDB session deauthenticated successfully');
-        
+
         return $content;
     }
 
@@ -233,25 +233,25 @@ class EasydbSessionService
     /**
      * Check HTTP status code and throw exception if not 200
      */
-    private function checkStatusCode(ResponseInterface $response, bool $exitOnFailure = true): void
+    public function checkStatusCode(ResponseInterface $response, bool $exitOnFailure = true): void
     {
         $statusCode = $response->getStatusCode();
-        
+
         if ($statusCode !== 200) {
             $errorMessage = sprintf('Got status code %d', $statusCode);
-            
+
             try {
                 $content = $response->toArray(false);
                 $errorMessage .= ': ' . json_encode($content, JSON_PRETTY_PRINT);
             } catch (\Exception $e) {
                 $errorMessage .= ': Could not decode response body';
             }
-            
+
             $this->logger->error('EasyDB API request failed', [
                 'status_code' => $statusCode,
                 'response' => $errorMessage
             ]);
-            
+
             if ($exitOnFailure) {
                 throw new \RuntimeException($errorMessage);
             }

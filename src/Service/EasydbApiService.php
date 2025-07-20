@@ -4,6 +4,7 @@ namespace App\Service;
 
 use Symfony\Component\HttpFoundation\RequestStack;
 use Psr\Log\LoggerInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
  * Utility service for EasyDB operations in authenticated context
@@ -11,6 +12,7 @@ use Psr\Log\LoggerInterface;
 class EasydbApiService
 {
     public function __construct(
+        private HttpClientInterface $httpClient,
         private EasydbSessionService $sessionService,
         private RequestStack $requestStack,
         private LoggerInterface $logger
@@ -81,19 +83,66 @@ class EasydbApiService
     }
 
     /**
-     * Get EasyDB server status
+     * Load an entity by its global object ID
      */
-    public function getServerStatus(): array
+    public function loadEntityByGlobalObjectID(string $globalObjectID): ?array
     {
         if (!$this->initializeFromSession()) {
             throw new \RuntimeException('No valid EasyDB session available');
         }
 
-        // Implementation would use the session service to get server status
-        return [
-            'status' => 'connected',
-            'token' => $this->sessionService->getToken()
-        ];
+        $response = $this->httpClient->request('POST', $this->sessionService->getUrl("search"), [
+            'json' => [
+                'format' => 'long',
+                'search' => [
+                    [
+                        'fields' => ['_global_object_id'],
+                        'in' => [$globalObjectID],
+                        'type' => 'in',
+                    ]
+                ]
+            ]
+        ]);
+
+        $this->sessionService->checkStatusCode($response);
+        $content = $response->toArray();
+        return $content;
+    }
+
+    /**
+     * Load entities for a specific pool type
+     */
+    public function loadEntitiesForPool(string $poolType, int $offset = 0, int $limit = 100): array
+    {
+        if (!$this->initializeFromSession()) {
+            throw new \RuntimeException('No valid EasyDB session available');
+        }
+
+        $response = $this->httpClient->request('POST', $this->sessionService->getUrl("search"), [
+            'json' => [
+                'format' => 'long',
+                'search' => [
+                    [
+                        'type' => 'object',
+                        'objecttypes' => [$poolType],
+                        'offset' => $offset,
+                        'limit' => $limit,
+                        'search' => [],
+                        'sort' => [
+                            [
+                                'field' => '_system_object_id',
+                                'order' => 'DESC',
+                                '_level' => 0
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ]);
+
+        $this->sessionService->checkStatusCode($response);
+        $content = $response->toArray();
+        return $content;
     }
 
     /**

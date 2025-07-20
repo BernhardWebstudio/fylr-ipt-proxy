@@ -1,0 +1,339 @@
+<?php
+
+namespace App\Service\Mapping;
+
+use App\Entity\DarwinCore\Occurrence;
+use App\Entity\DarwinCore\Taxon;
+use App\Entity\DarwinCore\Event;
+use App\Entity\DarwinCore\Location;
+use App\Entity\DarwinCore\Identification;
+use App\Entity\OccurrenceImport;
+
+class FungariumDwCMapping implements EasydbDwCMappingInterface
+{
+    public function mapOccurrence(array $source, OccurrenceImport $target): void
+    {
+        // Set basic import metadata
+        $target->setGlobalObjectID($source["_global_object_id"]);
+        $target->setRemoteLastUpdatedAt(new \DateTimeImmutable($source["_last_modified"] ?? $source["_created"]));
+
+        // Create or get the occurrence entity
+        $occurrence = $target->getOccurrence() ?? new Occurrence();
+
+        // Map basic occurrence information
+        $this->mapBasicOccurrenceInfo($source, $occurrence);
+
+        // Map taxonomic information
+        $this->mapTaxonomicInfo($source, $occurrence);
+
+        // Map collection event information
+        $this->mapCollectionEventInfo($source, $occurrence);
+
+        // Map location information
+        $this->mapLocationInfo($source, $occurrence);
+
+        // Set institutional information
+        $this->mapInstitutionalInfo($source, $occurrence);
+
+        // Map media
+        $this->mapMedia($source, $occurrence);
+
+        // Associate the occurrence with the import
+        $target->setOccurrence($occurrence);
+    }
+
+    private function mapBasicOccurrenceInfo(array $source, Occurrence $occurrence): void
+    {
+        // Use global object ID as occurrence ID
+        $occurrence->setOccurrenceID($source["_global_object_id"]);
+
+        // Extract catalog number from fungarium.zugangsnummer
+        if (isset($source["fungarium"]["zugangsnummer"])) {
+            $occurrence->setCatalogNumber($source["fungarium"]["zugangsnummer"]);
+        }
+
+        // Set basis of record
+        $occurrence->setBasisOfRecord("PreservedSpecimen");
+
+        // Set occurrence status
+        $occurrence->setOccurrenceStatus("present");
+    }
+
+    private function mapTaxonomicInfo(array $source, Occurrence $occurrence): void
+    {
+        // Look for taxonomic information in bestimmung (identification) reverse nested
+        $bestimmungen = $source["fungarium"]["_reverse_nested:bestimmung:fungarium"] ?? [];
+
+        if (!empty($bestimmungen)) {
+            $bestimmung = $bestimmungen[0]; // Take the first identification
+
+            // Create taxon entity
+            $taxon = new Taxon();
+            $taxon->setTaxonID($bestimmung["_global_object_id"] ?? uniqid('taxon_'));
+
+            // Extract scientific name from taxonname or taxonnametrans
+            $scientificName = null;
+            if (isset($bestimmung["taxonname"]["_standard"]["1"]["text"]["en-US"])) {
+                $scientificName = $bestimmung["taxonname"]["_standard"]["1"]["text"]["en-US"];
+            } elseif (isset($bestimmung["taxonname"]["_standard"]["1"]["text"]["de-DE"])) {
+                $scientificName = $bestimmung["taxonname"]["_standard"]["1"]["text"]["de-DE"];
+            } elseif (isset($bestimmung["taxonnametrans"])) {
+                $scientificName = $bestimmung["taxonnametrans"];
+            }
+
+            if ($scientificName) {
+                $taxon->setScientificName($scientificName);
+
+                // Extract genus from scientific name or genus field
+                if (isset($bestimmung["genus"]["_standard"]["1"]["text"]["en-US"])) {
+                    $taxon->setGenus($bestimmung["genus"]["_standard"]["1"]["text"]["en-US"]);
+                } elseif (isset($bestimmung["genus"]["_standard"]["1"]["text"]["de-DE"])) {
+                    $taxon->setGenus($bestimmung["genus"]["_standard"]["1"]["text"]["de-DE"]);
+                } else {
+                    // Try to extract genus from scientific name
+                    $parts = explode(' ', $scientificName);
+                    if (count($parts) >= 1) {
+                        $taxon->setGenus($parts[0]);
+                    }
+                }
+
+                // Extract specific epithet from scientific name
+                $parts = explode(' ', $scientificName);
+                if (count($parts) >= 2) {
+                    $taxon->setSpecificEpithet($parts[1]);
+                }
+            }
+
+            // Set taxonomic authority if available
+            if (isset($bestimmung["fungarium"]["autor"]["_standard"]["1"]["text"]["en-US"])) {
+                $taxon->setScientificNameAuthorship($bestimmung["fungarium"]["autor"]["_standard"]["1"]["text"]["en-US"]);
+            } elseif (isset($bestimmung["fungarium"]["autor"]["_standard"]["1"]["text"]["de-DE"])) {
+                $taxon->setScientificNameAuthorship($bestimmung["fungarium"]["autor"]["_standard"]["1"]["text"]["de-DE"]);
+            } elseif (isset($bestimmung["taxonnametrans"])) {
+                $taxon->setScientificNameAuthorship($this->extractAuthorship($bestimmung["taxonnametrans"]));
+            }
+
+            // Set specific epithet
+            if (isset($bestimmung["art"]["_standard"]["1"]["text"]["en-US"])) {
+                $taxon->setSpecificEpithet($bestimmung["art"]["_standard"]["1"]["text"]["en-US"]);
+            } elseif (isset($bestimmung["art"]["_standard"]["1"]["text"]["de-DE"])) {
+                $taxon->setSpecificEpithet($bestimmung["art"]["_standard"]["1"]["text"]["de-DE"]);
+            } elseif (!$taxon->getSpecificEpithet()) {
+                $taxon->setSpecificEpithet($bestimmung["arttrans"] ?? null);
+            }
+
+            // set infraspecific epithet if available
+            if (isset($bestimmung["infraspezifischestaxon"]["_standard"]["1"]["text"]["en-US"])) {
+                $taxon->setInfraspecificEpithet($bestimmung["infraspezifischestaxon"]["_standard"]["1"]["text"]["en-US"]);
+            } elseif (isset($bestimmung["infraspezifischestaxon"]["_standard"]["1"]["text"]["de-DE"])) {
+                $taxon->setInfraspecificEpithet($bestimmung["infraspezifischestaxon"]["_standard"]["1"]["text"]["de-DE"]);
+            } elseif (!$taxon->getInfraspecificEpithet()) {
+                $taxon->setInfraspecificEpithet($bestimmung["infraspezifischestaxontrans"] ?? null);
+            }
+
+            // Set infraspecific rank
+            if (isset($bestimmung["infraspezifischerrang"]["_standard"]["1"]["text"]["en-US"])) {
+                $taxon->setTaxonRank($bestimmung["infraspezifischerrang"]["_standard"]["1"]["text"]["en-US"]);
+            } elseif (isset($bestimmung["infraspezifischerrang"]["_standard"]["1"]["text"]["de-DE"])) {
+                $taxon->setTaxonRank($bestimmung["infraspezifischerrang"]["_standard"]["1"]["text"]["de-DE"]);
+            } elseif (!$taxon->getTaxonRank()) {
+                $taxon->setTaxonRank($bestimmung["infraspezifischerrangtrans"] ?? null);
+            }
+
+            // Set kingdom (fungi for fungarium)
+            $taxon->setKingdom("Fungi");
+
+            // Set type status if specimen is a type
+            if (isset($bestimmung["typus"]) && $bestimmung["typus"] === true) {
+                $identification = new Identification();
+                $identification->setIdentificationID($bestimmung["_global_object_id"] ?? uniqid('id_'));
+                $identification->setTypeStatus("Type");
+                $identification->setTaxon($taxon);
+                $occurrence->setIdentification($identification);
+            }
+
+            $occurrence->setTaxon($taxon);
+
+            if (count($bestimmungen) > 1) {
+                // TODO: add scientificNames of other bestimmungen as previous identification to organism
+
+            }
+        }
+    }
+
+    private function mapCollectionEventInfo(array $source, Occurrence $occurrence): void
+    {
+        // Look for collection information in aufsammlung reverse nested
+        $aufsammlungen = $source["fungarium"]["_reverse_nested:aufsammlung:fungarium"] ?? [];
+
+        if (!empty($aufsammlungen)) {
+            $aufsammlung = $aufsammlungen[0]; // Take the first collection event
+
+            // Create event entity
+            $event = new Event();
+            $event->setEventID($aufsammlung["_global_object_id"] ?? uniqid('event_'));
+
+            // Map collection date
+            if (isset($aufsammlung["sammeldatum"])) {
+                $dateInfo = $aufsammlung["sammeldatum"];
+                if (isset($dateInfo["value"])) {
+                    $event->setEventDate($dateInfo["value"]);
+
+                    // Try to extract year, month from the date
+                    if (preg_match('/(\d{4})/', $dateInfo["value"], $matches)) {
+                        $event->setYear($matches[1]);
+                    }
+                    if (preg_match('/(\d{4})-(\d{2})/', $dateInfo["value"], $matches)) {
+                        $event->setMonth($matches[2]);
+                    }
+                }
+            }
+            $event->setVerbatimEventDate($aufsammlung["sammeldatumtrans"] ?? null);
+
+            // Map habitat information
+            if (isset($aufsammlung["neuhabitat"]["de-DE"])) {
+                $event->setHabitat($aufsammlung["neuhabitat"]["de-DE"]);
+            } elseif (isset($aufsammlung["habitattrans"])) {
+                $event->setHabitat($aufsammlung["habitattrans"]);
+            }
+
+            // Map collector information
+            $sammler = $aufsammlung["_nested:aufsammlung__sammler"] ?? [];
+            if (!empty($sammler)) {
+                $collectors = [];
+                foreach ($sammler as $sammlerInfo) {
+                    if (isset($sammlerInfo["sammler"]["_standard"]["1"]["text"]["en-US"])) {
+                        $collectors[] = $sammlerInfo["sammler"]["_standard"]["1"]["text"]["en-US"];
+                    } elseif (isset($sammlerInfo["sammler"]["_standard"]["1"]["text"]["de-DE"])) {
+                        $collectors[] = $sammlerInfo["sammler"]["_standard"]["1"]["text"]["de-DE"];
+                    }
+                }
+                if (!empty($collectors)) {
+                    $occurrence->setRecordedBy(implode(' | ', $collectors));
+                }
+            } else {
+                $occurrence->setRecordedBy($aufsammlung["sammlertrans"] ?? null);
+            }
+
+            // Set associated taxa
+            $occurrence->setAssociatedTaxa($aufsammlung["traegerorganismus"]["de-DE"] ?? $aufsammlung["traegerorganismustrans"] ?? null);
+
+            $occurrence->setEvent($event);
+        }
+    }
+
+    private function mapLocationInfo(array $source, Occurrence $occurrence): void
+    {
+        // Look for location information in aufsammlung.sammelort
+        $aufsammlungen = $source["fungarium"]["_reverse_nested:aufsammlung:fungarium"] ?? [];
+
+        if (!empty($aufsammlungen)) {
+            $aufsammlung = $aufsammlungen[0];
+
+            if (isset($aufsammlung["sammelort"])) {
+                $sammelort = $aufsammlung["sammelort"];
+
+                // Create location entity
+                $location = new Location();
+                $location->setLocationID($sammelort["_global_object_id"] ?? uniqid('loc_'));
+
+                // Extract country information
+                if (isset($sammelort["_standard"]["1"]["text"]["en-US"])) {
+                    $locationText = $sammelort["_standard"]["1"]["text"]["en-US"];
+                } elseif (isset($sammelort["_standard"]["1"]["text"]["de-DE"])) {
+                    $locationText = $sammelort["_standard"]["1"]["text"]["de-DE"];
+                }
+
+                // Set higher geography from path if available
+                if (isset($sammelort["_path"])) {
+                    $pathElements = [];
+                    foreach ($sammelort["_path"] as $pathItem) {
+                        if (isset($pathItem["_standard"]["1"]["text"]["en-US"])) {
+                            $pathElements[] = $pathItem["_standard"]["1"]["text"]["en-US"];
+                        } elseif (isset($pathItem["_standard"]["1"]["text"]["de-DE"])) {
+                            $pathElements[] = $pathItem["_standard"]["1"]["text"]["de-DE"];
+                        }
+                    }
+                    if (!empty($pathElements)) {
+                        $location->setHigherGeography(implode(' | ', $pathElements));
+                    }
+                }
+
+                $location->setLocality($aufsammlung["lokalitaet"]);
+
+                $occurrence->setLocation($location);
+            }
+
+            $location->setGeodeticDatum(
+                $aufsammlung["datumsformatgeodaeischeskooordinatensystem"]["_standard"]["en-US"] ?? null
+            );
+
+            $location->setCoordinateUncertaintyInMeters(
+                $aufsammlung["fehlerradius"]
+            );
+
+            $location->setVerbatimLocality(implode(" | ", array_filter(array_map(function ($coll) {
+                return $coll["lokalitaettrans"];
+            }, $aufsammlungen))));
+        }
+    }
+
+    private function mapInstitutionalInfo(array $source, Occurrence $occurrence): void
+    {
+        // Set institution information
+        $occurrence->setInstitutionCode("ETHZ");
+
+        // Set collection information
+        $occurrence->setCollectionCode("ETHZ-ZT");
+    }
+
+    private function mapMedia(array $source, Occurrence $occurrence): void
+    {
+        // Look for media information in media reverse nested
+        $mediaItems = $source["fungarium"]["_reverse_nested:fungarium_mediaassetpublic:fungarium"] ?? [];
+
+        $mediaUrls = [];
+        foreach ($mediaItems as $mediaItem) {
+            $publicEas = $mediaItem["Mediaassetpublic"]["_standard"]["eas"] ?? [];
+            if (empty($publicEas)) {
+                continue; // Skip if no public eas found
+            }
+
+            $assets = array_merge(...array_values($publicEas));
+            if (empty($assets)) {
+                continue; // Skip if no assets found
+            }
+
+            foreach ($assets as $asset) {
+                $versions = $asset["versions"];
+                $mediaUrls[] = $versions["original"]["download_url"] ?? reset($versions)["download_url"];
+            }
+        }
+        $occurrence->setAssociatedMedia(implode(' | ', $mediaUrls));
+    }
+
+    private function extractAuthorship(string $scientificName): string
+    {
+        // Simple regex to extract authorship (everything after the species name)
+        if (preg_match('/^[A-Z][a-z]+ [a-z]+ (.+)$/', $scientificName, $matches)) {
+            return $matches[1];
+        }
+
+        // If it's just genus + author
+        if (preg_match('/^[A-Z][a-z]+ (.+)$/', $scientificName, $matches)) {
+            // Check if this looks like an author (contains typical abbreviations)
+            $potential_author = $matches[1];
+            if (preg_match('/[A-Z]/', $potential_author)) {
+                return $potential_author;
+            }
+        }
+
+        return '';
+    }
+
+    public function supportsPools(): array
+    {
+        // Return the types this mapping supports
+        return ['fungarium'];
+    }
+}
