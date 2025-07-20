@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Choose type to import
+{% endblock %}
+
+{% block body %}
+	<div class="example-wrapper">
+		<h1>Hello!</h1>
+
+		Choose a type to import:
+		<ul>
+			{% for type in typesToSelectFrom %}
+				<li>
+					<a href="{{ path('app_import_management_type', { type: type }) }}">{{ type }}</a>
+				</li>
+			{% endfor %}
+		</ul>
+	</div>
+{% endblock %}

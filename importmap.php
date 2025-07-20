@@ -25,4 +25,11 @@ return [
     '@hotwired/turbo' => [
         'version' => '7.3.0',
     ],
+    'halfmoon' => [
+        'version' => '2.0.2',
+    ],
+    'halfmoon/css/halfmoon.min.css' => [
+        'version' => '2.0.2',
+        'type' => 'css',
+    ],
 ];

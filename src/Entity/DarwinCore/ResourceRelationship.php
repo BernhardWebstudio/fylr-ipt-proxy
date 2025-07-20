@@ -26,7 +26,7 @@ class ResourceRelationship
 
     #[ORM\ManyToOne(targetEntity: Occurrence::class)]
     #[ORM\JoinColumn(name: 'relatedResourceID', referencedColumnName: 'occurrenceID', nullable: true)]
-    private ?Occurrence $occurrence = null;
+    private ?Occurrence $relatedOccurrence = null;
 
     #[ORM\Column(name: 'relationshipOfResourceID', type: 'string', nullable: true)]
     private ?string $relationshipOfResourceID = null;
@@ -279,15 +279,14 @@ class ResourceRelationship
         return $this;
     }
 
-    public function getOccurrence(): ?Occurrence
+    public function getRelatedOccurrence(): ?Occurrence
     {
-        return $this->occurrence;
+        return $this->relatedOccurrence;
     }
 
-    public function setOccurrence(?Occurrence $occurrence): static
+    public function setRelatedOccurrence(?Occurrence $relatedOccurrence): static
     {
-        $this->occurrence = $occurrence;
+        $this->relatedOccurrence = $relatedOccurrence;
         return $this;
     }
-
 }

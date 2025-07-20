@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello HomeController!
+{% endblock %}
+
+{% block body %}
+	<div class="example-wrapper">
+		<h1>Hello!</h1>
+
+		<p>This is a small web-app with a darwin-core database, storing data from easydb5 and/or fylr to export via IPT to GBIF.</p>
+
+		<p>Please log in to access the application.</p>
+
+		<a href="{{ path('app_login') }}" class="btn btn-primary">Log in</a>
+	</div>
+{% endblock %}

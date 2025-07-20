@@ -1,3 +1,29 @@
-body {
-    background-color: skyblue;
+/* Custom styles for fylr IPT Proxy */
+
+/* Override or extend Halfmoon styles as needed */
+.navbar-brand {
+    font-weight: 600;
+}
+
+.sidebar-title {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 1rem;
+}
+
+/* Custom styling for flash messages */
+.alert {
+    margin-bottom: 1rem;
+}
+
+/* Ensure proper spacing in content */
+.content-wrapper {
+    padding: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .content-wrapper {
+        padding: 1rem;
+    }
 }
