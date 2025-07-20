@@ -3,6 +3,8 @@
 namespace App\Entity\DarwinCore;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
@@ -17,6 +19,9 @@ class Organism
     #[Assert\NotBlank]
     #[ORM\Column(name: 'organismID', type: 'string')]
     private string $organismID;
+
+    #[ORM\OneToMany(mappedBy: 'organism', targetEntity: Occurrence::class)]
+    private Collection $occurrences;
 
     #[ORM\Column(name: 'organismName', type: 'string', nullable: true)]
     private ?string $organismName = null;
@@ -65,6 +70,11 @@ class Organism
 
     #[ORM\Column(name: 'dynamicProperties', type: 'string', nullable: true)]
     private ?string $dynamicProperties = null;
+
+    public function __construct()
+    {
+        $this->occurrences = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -255,6 +265,28 @@ class Organism
     public function setDynamicProperties(string $dynamicProperties): static
     {
         $this->dynamicProperties = $dynamicProperties;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Occurrence>
+     */
+    public function getOccurrences(): Collection
+    {
+        return $this->occurrences;
+    }
+
+    public function addOccurrence(Occurrence $occurrence): static
+    {
+        if (!$this->occurrences->contains($occurrence)) {
+            $this->occurrences->add($occurrence);
+        }
+        return $this;
+    }
+
+    public function removeOccurrence(Occurrence $occurrence): static
+    {
+        $this->occurrences->removeElement($occurrence);
         return $this;
     }
 

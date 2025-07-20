@@ -3,6 +3,8 @@
 namespace App\Entity\DarwinCore;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
@@ -17,6 +19,16 @@ class Identification
     #[Assert\NotBlank]
     #[ORM\Column(name: 'identificationID', type: 'string')]
     private string $identificationID;
+
+    /**
+     * Reference to Taxon
+     */
+    #[ORM\ManyToOne(targetEntity: Taxon::class)]
+    #[ORM\JoinColumn(name: 'taxonID', referencedColumnName: 'taxonID', nullable: true)]
+    private ?Taxon $taxon = null;
+
+    #[ORM\OneToMany(mappedBy: 'identification', targetEntity: Occurrence::class)]
+    private Collection $occurrences;
 
     #[ORM\Column(name: 'verbatimIdentification', type: 'string', nullable: true)]
     private ?string $verbatimIdentification = null;
@@ -77,6 +89,11 @@ class Identification
 
     #[ORM\Column(name: 'dynamicProperties', type: 'string', nullable: true)]
     private ?string $dynamicProperties = null;
+
+    public function __construct()
+    {
+        $this->occurrences = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -311,6 +328,39 @@ class Identification
     public function setDynamicProperties(string $dynamicProperties): static
     {
         $this->dynamicProperties = $dynamicProperties;
+        return $this;
+    }
+
+    public function getTaxon(): ?Taxon
+    {
+        return $this->taxon;
+    }
+
+    public function setTaxon(?Taxon $taxon): static
+    {
+        $this->taxon = $taxon;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Occurrence>
+     */
+    public function getOccurrences(): Collection
+    {
+        return $this->occurrences;
+    }
+
+    public function addOccurrence(Occurrence $occurrence): static
+    {
+        if (!$this->occurrences->contains($occurrence)) {
+            $this->occurrences->add($occurrence);
+        }
+        return $this;
+    }
+
+    public function removeOccurrence(Occurrence $occurrence): static
+    {
+        $this->occurrences->removeElement($occurrence);
         return $this;
     }
 

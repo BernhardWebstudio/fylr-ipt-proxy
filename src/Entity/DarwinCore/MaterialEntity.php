@@ -3,6 +3,8 @@
 namespace App\Entity\DarwinCore;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
@@ -17,6 +19,16 @@ class MaterialEntity
     #[Assert\NotBlank]
     #[ORM\Column(name: 'materialEntityID', type: 'string')]
     private string $materialEntityID;
+
+    /**
+     * Reference to MaterialSample
+     */
+    #[ORM\ManyToOne(targetEntity: MaterialSample::class)]
+    #[ORM\JoinColumn(name: 'materialSampleID', referencedColumnName: 'materialSampleID', nullable: true)]
+    private ?MaterialSample $materialsample = null;
+
+    #[ORM\OneToMany(mappedBy: 'materialEntity', targetEntity: Occurrence::class)]
+    private Collection $occurrences;
 
     #[ORM\Column(name: 'preparations', type: 'string', nullable: true)]
     private ?string $preparations = null;
@@ -65,6 +77,11 @@ class MaterialEntity
 
     #[ORM\Column(name: 'dynamicProperties', type: 'string', nullable: true)]
     private ?string $dynamicProperties = null;
+
+    public function __construct()
+    {
+        $this->occurrences = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -255,6 +272,39 @@ class MaterialEntity
     public function setDynamicProperties(string $dynamicProperties): static
     {
         $this->dynamicProperties = $dynamicProperties;
+        return $this;
+    }
+
+    public function getMaterialsample(): ?MaterialSample
+    {
+        return $this->materialsample;
+    }
+
+    public function setMaterialsample(?MaterialSample $materialsample): static
+    {
+        $this->materialsample = $materialsample;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Occurrence>
+     */
+    public function getOccurrences(): Collection
+    {
+        return $this->occurrences;
+    }
+
+    public function addOccurrence(Occurrence $occurrence): static
+    {
+        if (!$this->occurrences->contains($occurrence)) {
+            $this->occurrences->add($occurrence);
+        }
+        return $this;
+    }
+
+    public function removeOccurrence(Occurrence $occurrence): static
+    {
+        $this->occurrences->removeElement($occurrence);
         return $this;
     }
 

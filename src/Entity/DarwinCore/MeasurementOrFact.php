@@ -3,6 +3,8 @@
 namespace App\Entity\DarwinCore;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
@@ -17,6 +19,34 @@ class MeasurementOrFact
     #[Assert\NotBlank]
     #[ORM\Column(name: 'measurementID', type: 'string')]
     private string $measurementID;
+
+    /**
+     * Reference to Occurrence
+     */
+    #[ORM\ManyToOne(targetEntity: Occurrence::class)]
+    #[ORM\JoinColumn(name: 'occurrenceID', referencedColumnName: 'occurrenceID', nullable: true)]
+    private ?Occurrence $occurrence = null;
+
+    /**
+     * Reference to Event
+     */
+    #[ORM\ManyToOne(targetEntity: Event::class)]
+    #[ORM\JoinColumn(name: 'eventID', referencedColumnName: 'eventID', nullable: true)]
+    private ?Event $event = null;
+
+    /**
+     * Reference to Location
+     */
+    #[ORM\ManyToOne(targetEntity: Location::class)]
+    #[ORM\JoinColumn(name: 'locationID', referencedColumnName: 'locationID', nullable: true)]
+    private ?Location $location = null;
+
+    /**
+     * Reference to Taxon
+     */
+    #[ORM\ManyToOne(targetEntity: Taxon::class)]
+    #[ORM\JoinColumn(name: 'taxonID', referencedColumnName: 'taxonID', nullable: true)]
+    private ?Taxon $taxon = null;
 
     #[ORM\Column(name: 'institutionID', type: 'string', nullable: true)]
     private ?string $institutionID = null;
@@ -185,6 +215,50 @@ class MeasurementOrFact
     public function setDynamicProperties(string $dynamicProperties): static
     {
         $this->dynamicProperties = $dynamicProperties;
+        return $this;
+    }
+
+    public function getOccurrence(): ?Occurrence
+    {
+        return $this->occurrence;
+    }
+
+    public function setOccurrence(?Occurrence $occurrence): static
+    {
+        $this->occurrence = $occurrence;
+        return $this;
+    }
+
+    public function getEvent(): ?Event
+    {
+        return $this->event;
+    }
+
+    public function setEvent(?Event $event): static
+    {
+        $this->event = $event;
+        return $this;
+    }
+
+    public function getLocation(): ?Location
+    {
+        return $this->location;
+    }
+
+    public function setLocation(?Location $location): static
+    {
+        $this->location = $location;
+        return $this;
+    }
+
+    public function getTaxon(): ?Taxon
+    {
+        return $this->taxon;
+    }
+
+    public function setTaxon(?Taxon $taxon): static
+    {
+        $this->taxon = $taxon;
         return $this;
     }
 

@@ -18,7 +18,7 @@ class DwcSchemeToEntityCommand extends Command
 {
     private const SCHEME_DIR = __DIR__ . '/../../resources/schemes/';
     private const ENTITY_DIR = __DIR__ . '/../Entity/DarwinCore/';
-    
+
     private SymfonyStyle $io;
     private array $xmlSchemas = [];
     private array $typeMapping = [
@@ -38,6 +38,58 @@ class DwcSchemeToEntityCommand extends Command
         'dwc:decimalLongitudeDataType' => 'float',
     ];
 
+    private array $entityRelationships = [
+        'Occurrence' => [
+            'taxonID' => ['target' => 'Taxon', 'type' => 'ManyToOne'],
+            'eventID' => ['target' => 'Event', 'type' => 'ManyToOne'],
+            'organismID' => ['target' => 'Organism', 'type' => 'ManyToOne'],
+            'materialEntityID' => ['target' => 'MaterialEntity', 'type' => 'ManyToOne'],
+            'locationID' => ['target' => 'Location', 'type' => 'ManyToOne'],
+            'identificationID' => ['target' => 'Identification', 'type' => 'ManyToOne'],
+        ],
+        'Event' => [
+            'locationID' => ['target' => 'Location', 'type' => 'ManyToOne'],
+            'occurrences' => ['target' => 'Occurrence', 'type' => 'OneToMany', 'mappedBy' => 'event'],
+        ],
+        'Identification' => [
+            'taxonID' => ['target' => 'Taxon', 'type' => 'ManyToOne'],
+            'occurrences' => ['target' => 'Occurrence', 'type' => 'OneToMany', 'mappedBy' => 'identification'],
+        ],
+        'MaterialEntity' => [
+            'materialSampleID' => ['target' => 'MaterialSample', 'type' => 'ManyToOne'],
+            'occurrences' => ['target' => 'Occurrence', 'type' => 'OneToMany', 'mappedBy' => 'materialEntity'],
+        ],
+        'Location' => [
+            'geologicalContextID' => ['target' => 'GeologicalContext', 'type' => 'ManyToOne'],
+            'events' => ['target' => 'Event', 'type' => 'OneToMany', 'mappedBy' => 'location'],
+            'occurrences' => ['target' => 'Occurrence', 'type' => 'OneToMany', 'mappedBy' => 'location'],
+        ],
+        'Taxon' => [
+            'occurrences' => ['target' => 'Occurrence', 'type' => 'OneToMany', 'mappedBy' => 'taxon'],
+            'identifications' => ['target' => 'Identification', 'type' => 'OneToMany', 'mappedBy' => 'taxon'],
+            'measurementOrFacts' => ['target' => 'MeasurementOrFact', 'type' => 'OneToMany', 'mappedBy' => 'taxon'],
+        ],
+        'Organism' => [
+            'occurrences' => ['target' => 'Occurrence', 'type' => 'OneToMany', 'mappedBy' => 'organism'],
+        ],
+        'GeologicalContext' => [
+            'locations' => ['target' => 'Location', 'type' => 'OneToMany', 'mappedBy' => 'geologicalContext'],
+        ],
+        'MaterialSample' => [
+            'materialEntities' => ['target' => 'MaterialEntity', 'type' => 'OneToMany', 'mappedBy' => 'materialSample'],
+        ],
+        'MeasurementOrFact' => [
+            'occurrenceID' => ['target' => 'Occurrence', 'type' => 'ManyToOne'],
+            'eventID' => ['target' => 'Event', 'type' => 'ManyToOne'],
+            'taxonID' => ['target' => 'Taxon', 'type' => 'ManyToOne'],
+            'locationID' => ['target' => 'Location', 'type' => 'ManyToOne'],
+        ],
+        'ResourceRelationship' => [
+            'resourceID' => ['target' => 'Occurrence', 'type' => 'ManyToOne', 'property' => 'occurrenceID'],
+            'relatedResourceID' => ['target' => 'Occurrence', 'type' => 'ManyToOne', 'property' => 'occurrenceID'],
+        ],
+    ];
+
     public function __construct()
     {
         parent::__construct();
@@ -54,9 +106,9 @@ class DwcSchemeToEntityCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->io = new SymfonyStyle($input, $output);
-        
+
         $this->io->title('Converting Darwin Core Scheme to Doctrine Entities');
-        
+
         // Check if scheme files exist
         if (!is_dir(self::SCHEME_DIR)) {
             $this->io->error('Scheme directory not found. Please run app:download-dwc-scheme first.');
@@ -65,7 +117,7 @@ class DwcSchemeToEntityCommand extends Command
 
         // Load XML schemas
         $this->loadXmlSchemas();
-        
+
         // Create entity directory if it doesn't exist
         if (!$input->getOption('dry-run')) {
             if (!is_dir(self::ENTITY_DIR)) {
@@ -79,7 +131,7 @@ class DwcSchemeToEntityCommand extends Command
         $this->generateEntities($entities, $input->getOption('force'), $input->getOption('dry-run'));
 
         $this->io->success('Darwin Core entity generation completed!');
-        
+
         return Command::SUCCESS;
     }
 
@@ -87,7 +139,7 @@ class DwcSchemeToEntityCommand extends Command
     {
         $schemaFiles = [
             'tdwg_dwc_classes.xsd',
-            'tdwg_dwc_class_terms.xsd', 
+            'tdwg_dwc_class_terms.xsd',
             'tdwg_dwcterms.xsd',
             'tdwg_basetypes.xsd'
         ];
@@ -111,14 +163,14 @@ class DwcSchemeToEntityCommand extends Command
     private function parseSchemas(): array
     {
         $entities = [];
-        
+
         // Parse main classes from tdwg_dwc_class_terms.xsd
         if (isset($this->xmlSchemas['tdwg_dwc_class_terms.xsd'])) {
             $classes = $this->parseMainClasses();
             $entities = array_merge($entities, $classes);
         }
 
-        // Parse terms from tdwg_dwcterms.xsd  
+        // Parse terms from tdwg_dwcterms.xsd
         if (isset($this->xmlSchemas['tdwg_dwcterms.xsd'])) {
             $this->parseTerms($entities);
         }
@@ -133,16 +185,17 @@ class DwcSchemeToEntityCommand extends Command
 
         // Find all main class elements
         $classElements = $xml->xpath('//xs:element[@substitutionGroup="dwc:anyClass"]');
-        
+
         foreach ($classElements as $element) {
             $className = (string) $element['name'];
             $this->io->note("Found Darwin Core class: $className");
-            
+
             $entities[$className] = [
                 'name' => $className,
                 'properties' => [],
                 'identifiers' => [],
                 'recordLevelTerms' => [],
+                'relationships' => [],
                 'description' => $this->extractDocumentation($element)
             ];
         }
@@ -157,7 +210,7 @@ class DwcSchemeToEntityCommand extends Command
         // Parse different domain terms
         $domains = [
             'anyOccurrenceTerm' => 'Occurrence',
-            'anyOrganismTerm' => 'Organism', 
+            'anyOrganismTerm' => 'Organism',
             'anyMaterialEntityTerm' => 'MaterialEntity',
             'anyMaterialSampleTerm' => 'MaterialSample',
             'anyEventTerm' => 'Event',
@@ -174,7 +227,7 @@ class DwcSchemeToEntityCommand extends Command
         foreach ($identifiers as $element) {
             $name = (string) $element['name'];
             $type = $this->mapXmlTypeToPhp((string) $element['type']);
-            
+
             // Determine which entity this identifier belongs to
             $entityName = $this->getEntityNameFromIdentifier($name);
             if ($entityName && isset($entities[$entityName])) {
@@ -186,12 +239,22 @@ class DwcSchemeToEntityCommand extends Command
             }
         }
 
+        // Parse all identifier references in IdentifierTerms group for potential relationships
+        $identifierTerms = $xml->xpath('//xs:group[@name="IdentifierTerms"]//xs:element');
+        $allIdentifierNames = [];
+        foreach ($identifierTerms as $element) {
+            $refName = (string) $element['ref'];
+            if (strpos($refName, 'dwc:') === 0) {
+                $allIdentifierNames[] = substr($refName, 4); // Remove 'dwc:' prefix
+            }
+        }
+
         // Parse record level terms
         $recordLevelTerms = $xml->xpath('//xs:element[@substitutionGroup="dwc:anyRecordLevelTerm"]');
         foreach ($recordLevelTerms as $element) {
             $name = (string) $element['name'];
             $type = $this->mapXmlTypeToPhp((string) $element['type']);
-            
+
             $term = [
                 'name' => $name,
                 'type' => $type,
@@ -201,6 +264,25 @@ class DwcSchemeToEntityCommand extends Command
             // Add to all entities as these are common
             foreach ($entities as &$entity) {
                 $entity['recordLevelTerms'][] = $term;
+            }
+        }
+
+        // Now process identifier terms that can be relationships
+        foreach ($entities as $entityName => &$entity) {
+            foreach ($allIdentifierNames as $identifierName) {
+                // Check if this identifier should be a relationship for this entity
+                if ($this->isRelationshipField($entityName, $identifierName)) {
+                    $relationshipInfo = $this->entityRelationships[$entityName][$identifierName];
+                    $entity['relationships'][] = [
+                        'name' => $identifierName,
+                        'type' => 'string',
+                        'target' => $relationshipInfo['target'],
+                        'relationshipType' => $relationshipInfo['type'],
+                        'targetProperty' => $relationshipInfo['property'] ?? $identifierName,
+                        'mappedBy' => $relationshipInfo['mappedBy'] ?? null,
+                        'description' => 'Reference to ' . $relationshipInfo['target']
+                    ];
+                }
             }
         }
 
@@ -214,12 +296,74 @@ class DwcSchemeToEntityCommand extends Command
             foreach ($terms as $element) {
                 $name = (string) $element['name'];
                 $type = $this->mapXmlTypeToPhp((string) $element['type']);
-                
-                $entities[$entityName]['properties'][] = [
-                    'name' => $name,
-                    'type' => $type,
-                    'description' => $this->extractDocumentation($element)
-                ];
+
+                // Check if this is a relationship field
+                if ($this->isRelationshipField($entityName, $name)) {
+                    $relationshipInfo = $this->entityRelationships[$entityName][$name];
+                    $entities[$entityName]['relationships'][] = [
+                        'name' => $name,
+                        'type' => $type,
+                        'target' => $relationshipInfo['target'],
+                        'relationshipType' => $relationshipInfo['type'],
+                        'targetProperty' => $relationshipInfo['property'] ?? $name,
+                        'mappedBy' => $relationshipInfo['mappedBy'] ?? null,
+                        'description' => $this->extractDocumentation($element)
+                    ];
+                } else {
+                    $entities[$entityName]['properties'][] = [
+                        'name' => $name,
+                        'type' => $type,
+                        'description' => $this->extractDocumentation($element)
+                    ];
+                }
+            }
+        }
+
+        // Add record-level terms that might be relationships
+        foreach ($entities as $entityName => &$entity) {
+            foreach ($entity['recordLevelTerms'] as $key => $term) {
+                if ($this->isRelationshipField($entityName, $term['name'])) {
+                    $relationshipInfo = $this->entityRelationships[$entityName][$term['name']];
+                    $entity['relationships'][] = [
+                        'name' => $term['name'],
+                        'type' => $term['type'],
+                        'target' => $relationshipInfo['target'],
+                        'relationshipType' => $relationshipInfo['type'],
+                        'targetProperty' => $relationshipInfo['property'] ?? $term['name'],
+                        'mappedBy' => $relationshipInfo['mappedBy'] ?? null,
+                        'description' => $term['description']
+                    ];
+                    // Remove from record level terms since it's now a relationship
+                    unset($entity['recordLevelTerms'][$key]);
+                }
+            }
+            // Re-index array after unsetting elements
+            $entity['recordLevelTerms'] = array_values($entity['recordLevelTerms']);
+
+            // Add configured relationships that are not from schema parsing (like OneToMany reverse relationships)
+            if (isset($this->entityRelationships[$entityName])) {
+                foreach ($this->entityRelationships[$entityName] as $relationshipName => $relationshipInfo) {
+                    // Check if this relationship is not already added from schema parsing
+                    $alreadyExists = false;
+                    foreach ($entity['relationships'] as $existingRel) {
+                        if ($existingRel['name'] === $relationshipName) {
+                            $alreadyExists = true;
+                            break;
+                        }
+                    }
+
+                    if (!$alreadyExists && $relationshipInfo['type'] === 'OneToMany') {
+                        $entity['relationships'][] = [
+                            'name' => $relationshipName,
+                            'type' => 'Collection',
+                            'target' => $relationshipInfo['target'],
+                            'relationshipType' => $relationshipInfo['type'],
+                            'targetProperty' => $relationshipInfo['property'] ?? $relationshipName,
+                            'mappedBy' => $relationshipInfo['mappedBy'] ?? null,
+                            'description' => ''
+                        ];
+                    }
+                }
             }
         }
     }
@@ -229,7 +373,7 @@ class DwcSchemeToEntityCommand extends Command
         $mapping = [
             'occurrenceID' => 'Occurrence',
             'organismID' => 'Organism',
-            'materialEntityID' => 'MaterialEntity', 
+            'materialEntityID' => 'MaterialEntity',
             'materialSampleID' => 'MaterialSample',
             'eventID' => 'Event',
             'locationID' => 'Location',
@@ -241,6 +385,12 @@ class DwcSchemeToEntityCommand extends Command
         ];
 
         return $mapping[$identifier] ?? null;
+    }
+
+    private function isRelationshipField(string $entityName, string $fieldName): bool
+    {
+        return isset($this->entityRelationships[$entityName]) &&
+            isset($this->entityRelationships[$entityName][$fieldName]);
     }
 
     private function mapXmlTypeToPhp(string $xmlType): string
@@ -261,14 +411,14 @@ class DwcSchemeToEntityCommand extends Command
     {
         foreach ($entities as $entityData) {
             $fileName = self::ENTITY_DIR . $entityData['name'] . '.php';
-            
+
             if (!$force && !$dryRun && file_exists($fileName)) {
                 $this->io->warning("Entity {$entityData['name']} already exists. Use --force to overwrite.");
                 continue;
             }
 
             $entityCode = $this->generateEntityCode($entityData);
-            
+
             if ($dryRun) {
                 $this->io->section("Would generate: {$entityData['name']}.php");
                 $this->io->text($entityCode);
@@ -283,17 +433,19 @@ class DwcSchemeToEntityCommand extends Command
     {
         $className = $entityData['name'];
         $tableName = $this->camelCaseToSnakeCase($className);
-        
+
         $code = "<?php\n\nnamespace App\\Entity\\DarwinCore;\n\n";
         $code .= "use Doctrine\\ORM\\Mapping as ORM;\n";
+        $code .= "use Doctrine\\Common\\Collections\\ArrayCollection;\n";
+        $code .= "use Doctrine\\Common\\Collections\\Collection;\n";
         $code .= "use Symfony\\Component\\Validator\\Constraints as Assert;\n\n";
-        
+
         if (!empty($entityData['description'])) {
             $code .= "/**\n";
             $code .= " * {$entityData['description']}\n";
             $code .= " */\n";
         }
-        
+
         $code .= "#[ORM\\Entity]\n";
         $code .= "#[ORM\\Table(name: 'dwc_{$tableName}')]\n";
         $code .= "class $className\n{\n";
@@ -309,6 +461,11 @@ class DwcSchemeToEntityCommand extends Command
             $code .= $this->generatePropertyCode($identifier, true);
         }
 
+        // Add relationships
+        foreach ($entityData['relationships'] as $relationship) {
+            $code .= $this->generateRelationshipCode($relationship);
+        }
+
         // Add domain-specific properties
         foreach ($entityData['properties'] as $property) {
             $code .= $this->generatePropertyCode($property);
@@ -317,6 +474,27 @@ class DwcSchemeToEntityCommand extends Command
         // Add record level terms
         foreach ($entityData['recordLevelTerms'] as $term) {
             $code .= $this->generatePropertyCode($term);
+        }
+
+        // Add constructor if there are OneToMany relationships
+        $hasCollections = false;
+        foreach ($entityData['relationships'] as $relationship) {
+            if ($relationship['relationshipType'] === 'OneToMany') {
+                $hasCollections = true;
+                break;
+            }
+        }
+
+        if ($hasCollections) {
+            $code .= "    public function __construct()\n";
+            $code .= "    {\n";
+            foreach ($entityData['relationships'] as $relationship) {
+                if ($relationship['relationshipType'] === 'OneToMany') {
+                    $propertyName = $this->snakeCaseToCamelCase($relationship['name']);
+                    $code .= "        \$this->$propertyName = new ArrayCollection();\n";
+                }
+            }
+            $code .= "    }\n\n";
         }
 
         // Add getter and setter methods
@@ -328,12 +506,17 @@ class DwcSchemeToEntityCommand extends Command
         // Generate getters and setters for all properties
         $allProperties = array_merge(
             $entityData['identifiers'],
-            $entityData['properties'], 
+            $entityData['properties'],
             $entityData['recordLevelTerms']
         );
 
         foreach ($allProperties as $prop) {
             $code .= $this->generateGetterSetter($prop);
+        }
+
+        // Generate getters and setters for relationships
+        foreach ($entityData['relationships'] as $relationship) {
+            $code .= $this->generateRelationshipGetterSetter($relationship);
         }
 
         $code .= "}\n";
@@ -347,9 +530,9 @@ class DwcSchemeToEntityCommand extends Command
         $type = $property['type'];
         $description = $property['description'];
         $camelCase = $this->snakeCaseToCamelCase($name);
-        
+
         $code = "";
-        
+
         if (!empty($description)) {
             $code .= "    /**\n";
             $code .= "     * $description\n";
@@ -364,20 +547,20 @@ class DwcSchemeToEntityCommand extends Command
         // Add Doctrine mapping
         $doctrineType = $this->getDoctrineType($type);
         $code .= "    #[ORM\\Column(name: '$name', type: '$doctrineType'";
-        
+
         if (!$isIdentifier) {
             $code .= ", nullable: true";
         }
-        
+
         $code .= ")]\n";
-        
+
         $phpType = $this->getPhpType($type, !$isIdentifier);
         $code .= "    private $phpType \$$camelCase";
-        
+
         if (!$isIdentifier) {
             $code .= " = null";
         }
-        
+
         $code .= ";\n\n";
 
         return $code;
@@ -406,11 +589,99 @@ class DwcSchemeToEntityCommand extends Command
         return $code;
     }
 
+    private function generateRelationshipCode(array $relationship): string
+    {
+        $name = $relationship['name'];
+        $target = $relationship['target'];
+        $relationshipType = $relationship['relationshipType'];
+        $targetProperty = $relationship['targetProperty'] ?? $name;
+        $description = $relationship['description'] ?? '';
+
+        // For foreign key relationships, use the target entity name as property name
+        $propertyName = $relationshipType === 'ManyToOne' && str_ends_with($name, 'ID')
+            ? strtolower($target)
+            : $this->snakeCaseToCamelCase($name);
+
+        $code = "";
+
+        if (!empty($description)) {
+            $code .= "    /**\n";
+            $code .= "     * $description\n";
+            $code .= "     */\n";
+        }
+
+        if ($relationshipType === 'ManyToOne') {
+            $code .= "    #[ORM\\ManyToOne(targetEntity: {$target}::class)]\n";
+            $code .= "    #[ORM\\JoinColumn(name: '{$name}', referencedColumnName: '{$targetProperty}', nullable: true)]\n";
+            $code .= "    private ?{$target} \${$propertyName} = null;\n\n";
+        } elseif ($relationshipType === 'OneToMany') {
+            $mappedBy = $relationship['mappedBy'] ?? $propertyName;
+            $code .= "    #[ORM\\OneToMany(mappedBy: '{$mappedBy}', targetEntity: {$target}::class)]\n";
+            $code .= "    private Collection \${$propertyName};\n\n";
+        }
+
+        return $code;
+    }
+
+    private function generateRelationshipGetterSetter(array $relationship): string
+    {
+        $name = $relationship['name'];
+        $target = $relationship['target'];
+        $relationshipType = $relationship['relationshipType'];
+
+        // Use consistent property naming
+        $propertyName = $relationshipType === 'ManyToOne' && str_ends_with($name, 'ID')
+            ? strtolower($target)
+            : $this->snakeCaseToCamelCase($name);
+        $pascalCase = ucfirst($propertyName);
+
+        $code = "";
+
+        if ($relationshipType === 'ManyToOne') {
+            $code .= "    public function get$pascalCase(): ?$target\n";
+            $code .= "    {\n";
+            $code .= "        return \$this->$propertyName;\n";
+            $code .= "    }\n\n";
+
+            $code .= "    public function set$pascalCase(?$target \$$propertyName): static\n";
+            $code .= "    {\n";
+            $code .= "        \$this->$propertyName = \$$propertyName;\n";
+            $code .= "        return \$this;\n";
+            $code .= "    }\n\n";
+        } elseif ($relationshipType === 'OneToMany') {
+            $code .= "    /**\n";
+            $code .= "     * @return Collection<int, $target>\n";
+            $code .= "     */\n";
+            $code .= "    public function get$pascalCase(): Collection\n";
+            $code .= "    {\n";
+            $code .= "        return \$this->$propertyName;\n";
+            $code .= "    }\n\n";
+
+            $singularTarget = rtrim($target, 's');
+            $singularProperty = rtrim($propertyName, 's');
+            $code .= "    public function add$singularTarget($target \$$singularProperty): static\n";
+            $code .= "    {\n";
+            $code .= "        if (!\$this->{$propertyName}->contains(\$$singularProperty)) {\n";
+            $code .= "            \$this->{$propertyName}->add(\$$singularProperty);\n";
+            $code .= "        }\n";
+            $code .= "        return \$this;\n";
+            $code .= "    }\n\n";
+
+            $code .= "    public function remove$singularTarget($target \$$singularProperty): static\n";
+            $code .= "    {\n";
+            $code .= "        \$this->{$propertyName}->removeElement(\$$singularProperty);\n";
+            $code .= "        return \$this;\n";
+            $code .= "    }\n\n";
+        }
+
+        return $code;
+    }
+
     private function getDoctrineType(string $phpType): string
     {
-        return match($phpType) {
+        return match ($phpType) {
             'int' => 'integer',
-            'float' => 'float', 
+            'float' => 'float',
             'bool' => 'boolean',
             '\\DateTime' => 'datetime',
             default => 'string'

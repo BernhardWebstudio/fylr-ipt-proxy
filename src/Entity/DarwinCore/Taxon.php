@@ -3,6 +3,8 @@
 namespace App\Entity\DarwinCore;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
@@ -17,6 +19,15 @@ class Taxon
     #[Assert\NotBlank]
     #[ORM\Column(name: 'taxonID', type: 'string')]
     private string $taxonID;
+
+    #[ORM\OneToMany(mappedBy: 'taxon', targetEntity: Occurrence::class)]
+    private Collection $occurrences;
+
+    #[ORM\OneToMany(mappedBy: 'taxon', targetEntity: Identification::class)]
+    private Collection $identifications;
+
+    #[ORM\OneToMany(mappedBy: 'taxon', targetEntity: MeasurementOrFact::class)]
+    private Collection $measurementOrFacts;
 
     #[ORM\Column(name: 'scientificNameID', type: 'string', nullable: true)]
     private ?string $scientificNameID = null;
@@ -167,6 +178,13 @@ class Taxon
 
     #[ORM\Column(name: 'dynamicProperties', type: 'string', nullable: true)]
     private ?string $dynamicProperties = null;
+
+    public function __construct()
+    {
+        $this->occurrences = new ArrayCollection();
+        $this->identifications = new ArrayCollection();
+        $this->measurementOrFacts = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -731,6 +749,72 @@ class Taxon
     public function setDynamicProperties(string $dynamicProperties): static
     {
         $this->dynamicProperties = $dynamicProperties;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Occurrence>
+     */
+    public function getOccurrences(): Collection
+    {
+        return $this->occurrences;
+    }
+
+    public function addOccurrence(Occurrence $occurrence): static
+    {
+        if (!$this->occurrences->contains($occurrence)) {
+            $this->occurrences->add($occurrence);
+        }
+        return $this;
+    }
+
+    public function removeOccurrence(Occurrence $occurrence): static
+    {
+        $this->occurrences->removeElement($occurrence);
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Identification>
+     */
+    public function getIdentifications(): Collection
+    {
+        return $this->identifications;
+    }
+
+    public function addIdentification(Identification $identification): static
+    {
+        if (!$this->identifications->contains($identification)) {
+            $this->identifications->add($identification);
+        }
+        return $this;
+    }
+
+    public function removeIdentification(Identification $identification): static
+    {
+        $this->identifications->removeElement($identification);
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MeasurementOrFact>
+     */
+    public function getMeasurementOrFacts(): Collection
+    {
+        return $this->measurementOrFacts;
+    }
+
+    public function addMeasurementOrFact(MeasurementOrFact $measurementOrFact): static
+    {
+        if (!$this->measurementOrFacts->contains($measurementOrFact)) {
+            $this->measurementOrFacts->add($measurementOrFact);
+        }
+        return $this;
+    }
+
+    public function removeMeasurementOrFact(MeasurementOrFact $measurementOrFact): static
+    {
+        $this->measurementOrFacts->removeElement($measurementOrFact);
         return $this;
     }
 

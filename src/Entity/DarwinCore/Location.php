@@ -3,6 +3,8 @@
 namespace App\Entity\DarwinCore;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
@@ -17,6 +19,19 @@ class Location
     #[Assert\NotBlank]
     #[ORM\Column(name: 'locationID', type: 'string')]
     private string $locationID;
+
+    /**
+     * Reference to GeologicalContext
+     */
+    #[ORM\ManyToOne(targetEntity: GeologicalContext::class)]
+    #[ORM\JoinColumn(name: 'geologicalContextID', referencedColumnName: 'geologicalContextID', nullable: true)]
+    private ?GeologicalContext $geologicalcontext = null;
+
+    #[ORM\OneToMany(mappedBy: 'location', targetEntity: Event::class)]
+    private Collection $events;
+
+    #[ORM\OneToMany(mappedBy: 'location', targetEntity: Occurrence::class)]
+    private Collection $occurrences;
 
     #[ORM\Column(name: 'higherGeographyID', type: 'string', nullable: true)]
     private ?string $higherGeographyID = null;
@@ -179,6 +194,12 @@ class Location
 
     #[ORM\Column(name: 'dynamicProperties', type: 'string', nullable: true)]
     private ?string $dynamicProperties = null;
+
+    public function __construct()
+    {
+        $this->events = new ArrayCollection();
+        $this->occurrences = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -787,6 +808,61 @@ class Location
     public function setDynamicProperties(string $dynamicProperties): static
     {
         $this->dynamicProperties = $dynamicProperties;
+        return $this;
+    }
+
+    public function getGeologicalcontext(): ?GeologicalContext
+    {
+        return $this->geologicalcontext;
+    }
+
+    public function setGeologicalcontext(?GeologicalContext $geologicalcontext): static
+    {
+        $this->geologicalcontext = $geologicalcontext;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Event>
+     */
+    public function getEvents(): Collection
+    {
+        return $this->events;
+    }
+
+    public function addEvent(Event $event): static
+    {
+        if (!$this->events->contains($event)) {
+            $this->events->add($event);
+        }
+        return $this;
+    }
+
+    public function removeEvent(Event $event): static
+    {
+        $this->events->removeElement($event);
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Occurrence>
+     */
+    public function getOccurrences(): Collection
+    {
+        return $this->occurrences;
+    }
+
+    public function addOccurrence(Occurrence $occurrence): static
+    {
+        if (!$this->occurrences->contains($occurrence)) {
+            $this->occurrences->add($occurrence);
+        }
+        return $this;
+    }
+
+    public function removeOccurrence(Occurrence $occurrence): static
+    {
+        $this->occurrences->removeElement($occurrence);
         return $this;
     }
 

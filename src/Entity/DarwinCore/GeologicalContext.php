@@ -3,6 +3,8 @@
 namespace App\Entity\DarwinCore;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
@@ -17,6 +19,9 @@ class GeologicalContext
     #[Assert\NotBlank]
     #[ORM\Column(name: 'geologicalContextID', type: 'string')]
     private string $geologicalContextID;
+
+    #[ORM\OneToMany(mappedBy: 'geologicalContext', targetEntity: Location::class)]
+    private Collection $locations;
 
     #[ORM\Column(name: 'earliestEonOrLowestEonothem', type: 'string', nullable: true)]
     private ?string $earliestEonOrLowestEonothem = null;
@@ -101,6 +106,11 @@ class GeologicalContext
 
     #[ORM\Column(name: 'dynamicProperties', type: 'string', nullable: true)]
     private ?string $dynamicProperties = null;
+
+    public function __construct()
+    {
+        $this->locations = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -423,6 +433,28 @@ class GeologicalContext
     public function setDynamicProperties(string $dynamicProperties): static
     {
         $this->dynamicProperties = $dynamicProperties;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Location>
+     */
+    public function getLocations(): Collection
+    {
+        return $this->locations;
+    }
+
+    public function addLocation(Location $location): static
+    {
+        if (!$this->locations->contains($location)) {
+            $this->locations->add($location);
+        }
+        return $this;
+    }
+
+    public function removeLocation(Location $location): static
+    {
+        $this->locations->removeElement($location);
         return $this;
     }
 

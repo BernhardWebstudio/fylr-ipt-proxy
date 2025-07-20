@@ -3,6 +3,8 @@
 namespace App\Entity\DarwinCore;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
@@ -18,14 +20,16 @@ class ResourceRelationship
     #[ORM\Column(name: 'resourceRelationshipID', type: 'string')]
     private string $resourceRelationshipID;
 
-    #[ORM\Column(name: 'resourceID', type: 'string', nullable: true)]
-    private ?string $resourceID = null;
+    #[ORM\ManyToOne(targetEntity: Occurrence::class)]
+    #[ORM\JoinColumn(name: 'resourceID', referencedColumnName: 'occurrenceID', nullable: true)]
+    private ?Occurrence $occurrence = null;
+
+    #[ORM\ManyToOne(targetEntity: Occurrence::class)]
+    #[ORM\JoinColumn(name: 'relatedResourceID', referencedColumnName: 'occurrenceID', nullable: true)]
+    private ?Occurrence $occurrence = null;
 
     #[ORM\Column(name: 'relationshipOfResourceID', type: 'string', nullable: true)]
     private ?string $relationshipOfResourceID = null;
-
-    #[ORM\Column(name: 'relatedResourceID', type: 'string', nullable: true)]
-    private ?string $relatedResourceID = null;
 
     #[ORM\Column(name: 'relationshipOfResource', type: 'string', nullable: true)]
     private ?string $relationshipOfResource = null;
@@ -88,17 +92,6 @@ class ResourceRelationship
         return $this;
     }
 
-    public function getResourceID(): ?string
-    {
-        return $this->resourceID;
-    }
-
-    public function setResourceID(string $resourceID): static
-    {
-        $this->resourceID = $resourceID;
-        return $this;
-    }
-
     public function getRelationshipOfResourceID(): ?string
     {
         return $this->relationshipOfResourceID;
@@ -107,17 +100,6 @@ class ResourceRelationship
     public function setRelationshipOfResourceID(string $relationshipOfResourceID): static
     {
         $this->relationshipOfResourceID = $relationshipOfResourceID;
-        return $this;
-    }
-
-    public function getRelatedResourceID(): ?string
-    {
-        return $this->relatedResourceID;
-    }
-
-    public function setRelatedResourceID(string $relatedResourceID): static
-    {
-        $this->relatedResourceID = $relatedResourceID;
         return $this;
     }
 
@@ -283,6 +265,28 @@ class ResourceRelationship
     public function setDynamicProperties(string $dynamicProperties): static
     {
         $this->dynamicProperties = $dynamicProperties;
+        return $this;
+    }
+
+    public function getOccurrence(): ?Occurrence
+    {
+        return $this->occurrence;
+    }
+
+    public function setOccurrence(?Occurrence $occurrence): static
+    {
+        $this->occurrence = $occurrence;
+        return $this;
+    }
+
+    public function getOccurrence(): ?Occurrence
+    {
+        return $this->occurrence;
+    }
+
+    public function setOccurrence(?Occurrence $occurrence): static
+    {
+        $this->occurrence = $occurrence;
         return $this;
     }
 

@@ -3,6 +3,8 @@
 namespace App\Entity\DarwinCore;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
@@ -17,6 +19,48 @@ class Occurrence
     #[Assert\NotBlank]
     #[ORM\Column(name: 'occurrenceID', type: 'string')]
     private string $occurrenceID;
+
+    /**
+     * Reference to Organism
+     */
+    #[ORM\ManyToOne(targetEntity: Organism::class)]
+    #[ORM\JoinColumn(name: 'organismID', referencedColumnName: 'organismID', nullable: true)]
+    private ?Organism $organism = null;
+
+    /**
+     * Reference to MaterialEntity
+     */
+    #[ORM\ManyToOne(targetEntity: MaterialEntity::class)]
+    #[ORM\JoinColumn(name: 'materialEntityID', referencedColumnName: 'materialEntityID', nullable: true)]
+    private ?MaterialEntity $materialentity = null;
+
+    /**
+     * Reference to Event
+     */
+    #[ORM\ManyToOne(targetEntity: Event::class)]
+    #[ORM\JoinColumn(name: 'eventID', referencedColumnName: 'eventID', nullable: true)]
+    private ?Event $event = null;
+
+    /**
+     * Reference to Location
+     */
+    #[ORM\ManyToOne(targetEntity: Location::class)]
+    #[ORM\JoinColumn(name: 'locationID', referencedColumnName: 'locationID', nullable: true)]
+    private ?Location $location = null;
+
+    /**
+     * Reference to Identification
+     */
+    #[ORM\ManyToOne(targetEntity: Identification::class)]
+    #[ORM\JoinColumn(name: 'identificationID', referencedColumnName: 'identificationID', nullable: true)]
+    private ?Identification $identification = null;
+
+    /**
+     * Reference to Taxon
+     */
+    #[ORM\ManyToOne(targetEntity: Taxon::class)]
+    #[ORM\JoinColumn(name: 'taxonID', referencedColumnName: 'taxonID', nullable: true)]
+    private ?Taxon $taxon = null;
 
     #[ORM\Column(name: 'catalogNumber', type: 'string', nullable: true)]
     private ?string $catalogNumber = null;
@@ -521,6 +565,72 @@ class Occurrence
     public function setDynamicProperties(string $dynamicProperties): static
     {
         $this->dynamicProperties = $dynamicProperties;
+        return $this;
+    }
+
+    public function getOrganism(): ?Organism
+    {
+        return $this->organism;
+    }
+
+    public function setOrganism(?Organism $organism): static
+    {
+        $this->organism = $organism;
+        return $this;
+    }
+
+    public function getMaterialentity(): ?MaterialEntity
+    {
+        return $this->materialentity;
+    }
+
+    public function setMaterialentity(?MaterialEntity $materialentity): static
+    {
+        $this->materialentity = $materialentity;
+        return $this;
+    }
+
+    public function getEvent(): ?Event
+    {
+        return $this->event;
+    }
+
+    public function setEvent(?Event $event): static
+    {
+        $this->event = $event;
+        return $this;
+    }
+
+    public function getLocation(): ?Location
+    {
+        return $this->location;
+    }
+
+    public function setLocation(?Location $location): static
+    {
+        $this->location = $location;
+        return $this;
+    }
+
+    public function getIdentification(): ?Identification
+    {
+        return $this->identification;
+    }
+
+    public function setIdentification(?Identification $identification): static
+    {
+        $this->identification = $identification;
+        return $this;
+    }
+
+    public function getTaxon(): ?Taxon
+    {
+        return $this->taxon;
+    }
+
+    public function setTaxon(?Taxon $taxon): static
+    {
+        $this->taxon = $taxon;
         return $this;
     }
 

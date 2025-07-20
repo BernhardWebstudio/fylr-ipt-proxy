@@ -3,6 +3,8 @@
 namespace App\Entity\DarwinCore;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
@@ -17,6 +19,9 @@ class MaterialSample
     #[Assert\NotBlank]
     #[ORM\Column(name: 'materialSampleID', type: 'string')]
     private string $materialSampleID;
+
+    #[ORM\OneToMany(mappedBy: 'materialSample', targetEntity: MaterialEntity::class)]
+    private Collection $materialEntities;
 
     #[ORM\Column(name: 'institutionID', type: 'string', nullable: true)]
     private ?string $institutionID = null;
@@ -50,6 +55,11 @@ class MaterialSample
 
     #[ORM\Column(name: 'dynamicProperties', type: 'string', nullable: true)]
     private ?string $dynamicProperties = null;
+
+    public function __construct()
+    {
+        $this->materialEntities = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -185,6 +195,28 @@ class MaterialSample
     public function setDynamicProperties(string $dynamicProperties): static
     {
         $this->dynamicProperties = $dynamicProperties;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MaterialEntity>
+     */
+    public function getMaterialEntities(): Collection
+    {
+        return $this->materialEntities;
+    }
+
+    public function addMaterialEntity(MaterialEntity $materialEntitie): static
+    {
+        if (!$this->materialEntities->contains($materialEntitie)) {
+            $this->materialEntities->add($materialEntitie);
+        }
+        return $this;
+    }
+
+    public function removeMaterialEntity(MaterialEntity $materialEntitie): static
+    {
+        $this->materialEntities->removeElement($materialEntitie);
         return $this;
     }
 
