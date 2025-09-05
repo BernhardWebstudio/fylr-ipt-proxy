@@ -230,11 +230,12 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
         if (!empty($aufsammlungen)) {
             $aufsammlung = $aufsammlungen[0];
 
+            // Create location entity
+            $location = new Location();
+
             if (isset($aufsammlung["sammelort"])) {
                 $sammelort = $aufsammlung["sammelort"];
 
-                // Create location entity
-                $location = new Location();
                 $location->setLocationID($sammelort["_global_object_id"] ?? uniqid('loc_'));
 
                 // Extract country information
@@ -248,20 +249,32 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
                 if (isset($sammelort["_path"])) {
                     $pathElements = [];
                     foreach ($sammelort["_path"] as $pathItem) {
+                        $pathElement = null;
                         if (isset($pathItem["_standard"]["1"]["text"]["en-US"])) {
-                            $pathElements[] = $pathItem["_standard"]["1"]["text"]["en-US"];
+                            $pathElement = $pathItem["_standard"]["1"]["text"]["en-US"];
                         } elseif (isset($pathItem["_standard"]["1"]["text"]["de-DE"])) {
-                            $pathElements[] = $pathItem["_standard"]["1"]["text"]["de-DE"];
+                            $pathElement = $pathItem["_standard"]["1"]["text"]["de-DE"];
+                        }
+
+                        if ($pathElement) {
+                            if (str_contains($pathElement, '(Kontinent)')) {
+                                $location->setContinent(trim(str_replace('(Kontinent)', '', $pathElement)));
+                            } else if (str_contains($pathElement, '(Land)')) {
+                                $location->setCountry(trim(str_replace('(Land)', '', $pathElement)));
+                            } else if (str_contains($pathElement, '(Kanton/Provinz/Bundesland)')) {
+                                $location->setStateProvince(trim(str_replace('(Kanton/Provinz/Bundesland)', '', $pathElement)));
+                            } else {
+                                $pathElements[] = $pathElement;
+                            }
                         }
                     }
+
                     if (!empty($pathElements)) {
                         $location->setHigherGeography(implode(' | ', $pathElements));
                     }
                 }
 
                 $location->setLocality($aufsammlung["lokalitaet"]);
-
-                $occurrence->setLocation($location);
             }
 
             $location->setGeodeticDatum(
@@ -272,9 +285,14 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
                 $aufsammlung["fehlerradius"]
             );
 
+            $location->setDecimalLatitude($aufsammlung["breitengraddezimal"] ?? null);
+            $location->setDecimalLongitude($aufsammlung["langngraddzimal"] ?? null);
+
             $location->setVerbatimLocality(implode(" | ", array_filter(array_map(function ($coll) {
                 return $coll["lokalitaettrans"];
             }, $aufsammlungen))));
+
+            $occurrence->setLocation($location);
         }
     }
 
