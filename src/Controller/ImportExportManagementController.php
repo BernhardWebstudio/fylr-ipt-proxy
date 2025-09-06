@@ -3,13 +3,15 @@
 namespace App\Controller;
 
 use App\Entity\DarwinCore\Occurrence;
+use App\Entity\User;
+use App\Form\ExportSelectionType;
+use App\Service\DataExportService;
 use App\Service\EasydbApiService;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -20,7 +22,7 @@ final class ImportExportManagementController extends AbstractController
     public function index(
         #[AutowireIterator("app.easydb_dwc_mapping")] iterable $mappings
     ): Response {
-        $typesToSelectFrom = array_merge(...array_map(fn($mapping) => $mapping->supportsTypes(), $mappings));
+        $typesToSelectFrom = array_merge(...array_map(fn($mapping) => $mapping->supportsPools(), $mappings));
         // remove duplicates
         $typesToSelectFrom = array_unique($typesToSelectFrom);
 
@@ -44,13 +46,14 @@ final class ImportExportManagementController extends AbstractController
     #[Route('/import/{type}', name: 'app_import_management_type')]
     #[IsGranted('ROLE_USER')]
     public function importType(
+        Request $request,
         string $type,
         EasydbApiService $easydbApiService,
         #[AutowireIterator("app.easydb_dwc_mapping")] iterable $mappings
     ): Response {
         $mapping = null;
         foreach ($mappings as $map) {
-            if (in_array($type, $map->supportsTypes())) {
+            if (in_array($type, $map->supportsPools())) {
                 $mapping = $map;
                 break;
             }
@@ -64,20 +67,174 @@ final class ImportExportManagementController extends AbstractController
         // load EasyDB data for the given type,
         // create a form to select the EasyDB data to import
 
+        // Filter object types by user access
+        /** @var User $user */
+        $user = $this->getUser();
+        $userAccessibleTypes = $user->getAccessibleObjectTypes();
+        if (!empty($userAccessibleTypes)) {
+            $objectTypes = array_intersect($objectTypes, $userAccessibleTypes);
+        }
+
+        $objectTypeChoices = array_combine($objectTypes, $objectTypes);
+
+        // Get available tags from EasyDB
+        $tagChoices = [];
+        try {
+            if ($easydbApiService->hasValidSession()) {
+                $tagsData = $easydbApiService->fetchTags();
+                foreach ($tagsData as $tagGroup) {
+                    if (isset($tagGroup['_tags'])) {
+                        foreach ($tagGroup['_tags'] as $tagItem) {
+                            $tag = $tagItem['tag'];
+                            $displayName = $tag['displayname']['en-US'] ??
+                                $tag['displayname']['de-DE'] ??
+                                'Tag #' . $tag['_id'];
+                            $tagChoices[$displayName] = $tag['_id'];
+                        }
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            $this->addFlash('warning', 'Could not load tags: ' . $e->getMessage());
+        }
+
+        // Create form
+        $form = $this->createForm(ExportSelectionType::class, null, [
+            'tag_choices' => $tagChoices,
+            'object_type_choices' => $objectTypeChoices,
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+
+            // Search for entities based on form criteria
+            $entities = $easydbApiService->searchEntities(
+                $data['globalObjectId'],
+                $data['tagId'],
+                $data['objectType']
+            );
+
+            if (empty($entities)) {
+                $this->addFlash('warning', 'No entities found matching your criteria.');
+                return $this->redirectToRoute('app_export_management');
+            }
+        }
+
         // then, render the import form
         return $this->render('import_export_management/import_type.html.twig', [
             'type' => $type,
             'mapping' => $mapping,
-            'easydbData' => $easydbApiService->getDataForType($type)
+            'easydbData' => $easydbApiService->loadEntitiesForPool($type)
         ]);
     }
 
     #[Route('/export', name: 'app_export_management')]
     #[IsGranted('ROLE_USER')]
-    public function exportManagement(): Response
-    {
-        // Render the export management page
-        return $this->render('import_export_management/export.html.twig');
+    public function exportManagement(
+        Request $request,
+        EasydbApiService $easydbApiService,
+        DataExportService $dataExportService,
+        EntityManagerInterface $entityManager,
+        #[AutowireIterator("app.easydb_dwc_mapping")] iterable $mappings
+    ): Response {
+        // Get available object types from mappings
+        $objectTypes = array_merge(...array_map(fn($mapping) => $mapping->supportsPools(), $mappings));
+        $objectTypes = array_unique($objectTypes);
+
+        // Filter object types by user access
+        /** @var User $user */
+        $user = $this->getUser();
+        $userAccessibleTypes = $user->getAccessibleObjectTypes();
+        if (!empty($userAccessibleTypes)) {
+            $objectTypes = array_intersect($objectTypes, $userAccessibleTypes);
+        }
+
+        $objectTypeChoices = array_combine($objectTypes, $objectTypes);
+
+        // Get available tags from EasyDB
+        $tagChoices = [];
+        try {
+            if ($easydbApiService->hasValidSession()) {
+                $tagsData = $easydbApiService->fetchTags();
+                foreach ($tagsData as $tagGroup) {
+                    if (isset($tagGroup['_tags'])) {
+                        foreach ($tagGroup['_tags'] as $tagItem) {
+                            $tag = $tagItem['tag'];
+                            $displayName = $tag['displayname']['en-US'] ??
+                                $tag['displayname']['de-DE'] ??
+                                'Tag #' . $tag['_id'];
+                            $tagChoices[$displayName] = $tag['_id'];
+                        }
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            $this->addFlash('warning', 'Could not load tags: ' . $e->getMessage());
+        }
+
+        // Create form
+        $form = $this->createForm(ExportSelectionType::class, null, [
+            'tag_choices' => $tagChoices,
+            'object_type_choices' => $objectTypeChoices,
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+
+            try {
+                // Search for entities based on form criteria
+                $entities = $entityManager->getRepository(Occurrence::class)->searchEntities(
+                    $data['globalObjectId'],
+                    $data['tagId'],
+                    $data['objectType']
+                );
+
+                if (empty($entities)) {
+                    $this->addFlash('warning', 'No entities found matching your criteria.');
+                    return $this->redirectToRoute('app_export_management');
+                }
+
+                // For now, convert EasyDB entities to the expected format for DataExportService
+                // In a real implementation, you might want to create a mapping service
+                $format = $data['exportFormat'];
+
+                switch ($format) {
+                    case 'csv':
+                        $response = new Response();
+                        $response->headers->set('Content-Type', 'text/csv');
+                        $response->setContent($dataExportService->convertToCsv($entities));
+                        $response->headers->set('Content-Disposition', 'attachment; filename="export_' . date('Y-m-d_H-i-s') . '.csv"');
+                        return $response;
+                    case 'json':
+                        return new Response(json_encode($entities), 200, [
+                            'Content-Type' => 'application/json',
+                            'Content-Disposition' => 'attachment; filename="export_' . date('Y-m-d_H-i-s') . '.json"'
+                        ]);
+                    case 'xml':
+                        $response = new Response();
+                        $response->headers->set('Content-Type', 'application/xml');
+                        $response->setContent($dataExportService->convertToXml($entities));
+                        $response->headers->set('Content-Disposition', 'attachment; filename="export_' . date('Y-m-d_H-i-s') . '.xml"');
+                        return $response;
+                    default:
+                        $this->addFlash('error', 'Unsupported export format: ' . $format);
+                        return $this->redirectToRoute('app_export_management');
+                }
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Export failed: ' . $e->getMessage());
+            }
+        }
+
+        // Render the export management page with form
+        return $this->render('import_export_management/export.html.twig', [
+            'form' => $form->createView(),
+            'availableObjectTypes' => $objectTypeChoices,
+            'availableTags' => $tagChoices,
+        ]);
     }
 
     #[Route('/export/{type}/{format}', name: 'app_export_management_type')]
@@ -85,7 +242,8 @@ final class ImportExportManagementController extends AbstractController
     public function exportType(
         string $type,
         string $format,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        DataExportService $dataExportService
     ): Response {
         // export the database content of the given type in the specified format
         if (!in_array($format, ['csv', 'json', 'xml'])) {
@@ -105,202 +263,23 @@ final class ImportExportManagementController extends AbstractController
             case 'csv':
                 $response = new Response();
                 $response->headers->set('Content-Type', 'text/csv');
-                $response->setContent($this->convertToCsv($data));
+                $response->setContent($dataExportService->convertToCsv($data));
                 $response->headers->set('Content-Disposition', 'attachment; filename="export_' . $type . '.csv"');
                 return $response;
             case 'json':
-                return new Response(json_encode($data), 200, [
+                return new Response($dataExportService->convertToJson($data), 200, [
                     'Content-Type' => 'application/json',
                     'Content-Disposition' => 'attachment; filename="export_' . $type . '.json"'
                 ]);
             case 'xml':
                 $response = new Response();
                 $response->headers->set('Content-Type', 'application/xml');
-                $response->setContent($this->convertToXml($data));
+                $response->setContent($dataExportService->convertToXml($data));
                 $response->headers->set('Content-Disposition', 'attachment; filename="export_' . $type . '.xml"');
                 return $response;
             default:
                 $this->addFlash('error', 'Unsupported export format: ' . $format);
                 return $this->redirectToRoute('app_import_management');
         }
-
-        return new Response('Export completed successfully.', 200, [
-            'Content-Type' => 'text/plain'
-        ]);
-    }
-
-    /**
-     * Convert the occurrences to CSV.
-     *
-     * @param list<Occurrence> $data
-     * @return string
-     */
-    private function convertToCsv(array $data): string
-    {
-        if (empty($data)) {
-            return '';
-        }
-
-        $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        $output = fopen('php://temp', 'r+');
-
-        // Get all flattened properties from the first occurrence to create header
-        $flattenedProperties = $this->getFlattenedProperties($data[0], $propertyAccessor);
-        $headers = array_keys($flattenedProperties);
-
-        // Write header row
-        fputcsv($output, $headers);
-
-        // Write data rows
-        foreach ($data as $occurrence) {
-            $flattenedData = $this->getFlattenedProperties($occurrence, $propertyAccessor);
-            $row = [];
-            foreach ($headers as $header) {
-                $row[] = $flattenedData[$header] ?? '';
-            }
-            fputcsv($output, $row);
-        }
-
-        rewind($output);
-        $content = stream_get_contents($output);
-        fclose($output);
-
-        return $content;
-    }
-
-    /**
-     * Convert the occurrences to XML.
-     *
-     * @param list<Occurrence> $data
-     * @return string
-     */
-    private function convertToXml(array $data): string
-    {
-        $dom = new \DOMDocument('1.0', 'UTF-8');
-        $dom->formatOutput = true;
-
-        $root = $dom->createElement('occurrences');
-        $dom->appendChild($root);
-
-        $propertyAccessor = PropertyAccess::createPropertyAccessor();
-
-        foreach ($data as $occurrence) {
-            $occurrenceElement = $dom->createElement('occurrence');
-            $root->appendChild($occurrenceElement);
-
-            $this->addObjectToXmlElement($dom, $occurrenceElement, $occurrence, $propertyAccessor);
-        }
-
-        return $dom->saveXML();
-    }
-
-    /**
-     * Recursively add object properties to XML element
-     *
-     * @param \DOMDocument $dom
-     * @param \DOMElement $parentElement
-     * @param object $object
-     * @param \Symfony\Component\PropertyAccess\PropertyAccessorInterface $propertyAccessor
-     */
-    private function addObjectToXmlElement(\DOMDocument $dom, \DOMElement $parentElement, object $object, $propertyAccessor): void
-    {
-        $reflection = new \ReflectionClass($object);
-        $properties = array_map(fn($prop) => $prop->getName(), $reflection->getProperties());
-
-        foreach ($properties as $property) {
-            try {
-                $value = $propertyAccessor->getValue($object, $property);
-                $elementName = $this->sanitizeXmlElementName($property);
-
-                if ($value === null) {
-                    continue; // Skip null values
-                }
-
-                if (is_object($value)) {
-                    $element = $dom->createElement($elementName);
-                    $parentElement->appendChild($element);
-                    $this->addObjectToXmlElement($dom, $element, $value, $propertyAccessor);
-                } elseif (is_array($value)) {
-                    $element = $dom->createElement($elementName);
-                    $parentElement->appendChild($element);
-
-                    foreach ($value as $index => $item) {
-                        $itemElement = $dom->createElement('item');
-                        $element->appendChild($itemElement);
-
-                        if (is_object($item)) {
-                            $this->addObjectToXmlElement($dom, $itemElement, $item, $propertyAccessor);
-                        } else {
-                            $itemElement->textContent = (string) $item;
-                        }
-                    }
-                } else {
-                    $element = $dom->createElement($elementName);
-                    $element->textContent = (string) $value;
-                    $parentElement->appendChild($element);
-                }
-            } catch (\Exception $e) {
-                // Skip properties that are not accessible
-                continue;
-            }
-        }
-    }
-
-    /**
-     * Sanitize element name for XML compatibility
-     *
-     * @param string $name
-     * @return string
-     */
-    private function sanitizeXmlElementName(string $name): string
-    {
-        // Replace dots and invalid characters with underscores
-        $sanitized = preg_replace('/[^a-zA-Z0-9_-]/', '_', $name);
-
-        // Ensure it starts with a letter or underscore
-        if (!preg_match('/^[a-zA-Z_]/', $sanitized)) {
-            $sanitized = '_' . $sanitized;
-        }
-
-        return $sanitized;
-    }
-
-    /**
-     * Recursively flatten object properties using PropertyAccessor
-     *
-     * @param object $object
-     * @param \Symfony\Component\PropertyAccess\PropertyAccessorInterface $propertyAccessor
-     * @param string $prefix
-     * @return array<string, mixed>
-     */
-    private function getFlattenedProperties(object $object, $propertyAccessor, string $prefix = ''): array
-    {
-        $flattened = [];
-        $reflection = new \ReflectionClass($object);
-        $properties = array_map(fn($prop) => $prop->getName(), $reflection->getProperties());
-
-        foreach ($properties as $property) {
-            try {
-                $value = $propertyAccessor->getValue($object, $property);
-                $key = $prefix ? $prefix . '.' . $property : $property;
-
-                if (is_object($value)) {
-                    // Get the classname without namespace as prefix
-                    $className = (new \ReflectionClass($value))->getShortName();
-                    $nestedPrefix = $prefix ? $prefix . '.' . $className : $className;
-                    $nestedProperties = $this->getFlattenedProperties($value, $propertyAccessor, $nestedPrefix);
-                    $flattened = array_merge($flattened, $nestedProperties);
-                } elseif (is_array($value)) {
-                    $flattened[$key] = json_encode($value);
-                } else {
-                    $flattened[$key] = $value;
-                }
-            } catch (\Exception $e) {
-                $key = $prefix ? $prefix . '.' . $property : $property;
-                $flattened[$key] = ''; // Empty value if property is not accessible
-            }
-        }
-
-        return $flattened;
     }
 }

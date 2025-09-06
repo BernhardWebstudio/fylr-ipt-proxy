@@ -1,20 +1,116 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello ImportExportManagementController!{% endblock %}
+{% block title %}Export Management{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+<div class="container mt-4">
+    <h1>Export Management</h1>
+    <p class="lead">Export entities from the EasyDB to various formats.</p>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+    {% for flash_message in app.flashes('error') %}
+        <div class="alert alert-danger">{{ flash_message }}</div>
+    {% endfor %}
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/Users/timbernhard/Privat/Programming/OpenSource-Contributions/fylr-ipt-proxy/src/Controller/ImportExportManagementController.php</code></li>
-        <li>Your template at <code>/Users/timbernhard/Privat/Programming/OpenSource-Contributions/fylr-ipt-proxy/templates/import_export_management/index.html.twig</code></li>
-    </ul>
+    {% for flash_message in app.flashes('warning') %}
+        <div class="alert alert-warning">{{ flash_message }}</div>
+    {% endfor %}
+
+    {% for flash_message in app.flashes('success') %}
+        <div class="alert alert-success">{{ flash_message }}</div>
+    {% endfor %}
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Export Criteria</h3>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form) }}
+
+                    <div class="mb-3">
+                        {{ form_label(form.globalObjectId) }}
+                        {{ form_widget(form.globalObjectId) }}
+                        {{ form_help(form.globalObjectId) }}
+                        {{ form_errors(form.globalObjectId) }}
+                        <small class="form-text text-muted">
+                            Leave empty to export multiple entities based on other criteria.
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(form.tagId) }}
+                        {{ form_widget(form.tagId) }}
+                        {{ form_errors(form.tagId) }}
+                        <small class="form-text text-muted">
+                            Select a tag to export all entities with that tag.
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(form.objectType) }}
+                        {{ form_widget(form.objectType) }}
+                        {{ form_errors(form.objectType) }}
+                        <small class="form-text text-muted">
+                            Limit export to specific object type.
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(form.exportFormat) }}
+                        {{ form_widget(form.exportFormat) }}
+                        {{ form_errors(form.exportFormat) }}
+                    </div>
+
+                    <div class="d-grid">
+                        {{ form_widget(form.submit) }}
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Export Options</h4>
+                </div>
+                <div class="card-body">
+                    <h5>Search Criteria</h5>
+                    <p><strong>Global Object ID:</strong> Export a specific entity by its unique identifier.</p>
+                    <p><strong>Tag Filter:</strong> Export all entities tagged with a specific tag.</p>
+                    <p><strong>Object Type:</strong> Limit results to a specific type of object.</p>
+
+                    <h5>Export Formats</h5>
+                    <ul>
+                        <li><strong>CSV:</strong> Comma-separated values, suitable for spreadsheets</li>
+                        <li><strong>JSON:</strong> JavaScript Object Notation, good for programmatic access</li>
+                        <li><strong>XML:</strong> Extensible Markup Language, structured data format</li>
+                    </ul>
+
+                    {% if availableObjectTypes|length > 0 %}
+                    <h5>Available Object Types</h5>
+                    <ul>
+                        {% for type in availableObjectTypes %}
+                            <li>{{ type }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+
+                    {% if availableTags|length > 0 %}
+                    <details>
+                        <summary>Available Tags ({{ availableTags|length }})</summary>
+                        <ul class="mt-2 small">
+                            {% for tagName, tagId in availableTags %}
+                                <li>{{ tagName }} (ID: {{ tagId }})</li>
+                            {% endfor %}
+                        </ul>
+                    </details>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

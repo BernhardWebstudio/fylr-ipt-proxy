@@ -142,7 +142,123 @@ class EasydbApiService
 
         $this->sessionService->checkStatusCode($response);
         $content = $response->toArray();
+        return $content['objects'] ?? [];
+    }
+
+    /**
+     * Fetch all available tags from EasyDB
+     */
+    public function fetchTags(): array
+    {
+        if (!$this->initializeFromSession()) {
+            throw new \RuntimeException('No valid EasyDB session available');
+        }
+
+        $response = $this->httpClient->request('GET', $this->sessionService->getUrl("tags"), [
+            'headers' => [
+                'accept' => '*/*',
+                'cache-control' => 'no-cache',
+                'pragma' => 'no-cache',
+            ]
+        ]);
+
+        $this->sessionService->checkStatusCode($response);
+        $content = $response->toArray();
         return $content;
+    }
+
+    /**
+     * Search entities by tag ID and optionally by object type
+     */
+    public function searchByTag(int $tagId, ?string $objectType = null, int $offset = 0, int $limit = 100): array
+    {
+        if (!$this->initializeFromSession()) {
+            throw new \RuntimeException('No valid EasyDB session available');
+        }
+
+        $searchCriteria = [
+            'type' => 'in',
+            'bool' => 'must',
+            'fields' => ['_tags._id'],
+            'in' => [$tagId],
+        ];
+
+        $searchQuery = [
+            'type' => 'complex',
+            'search' => [$searchCriteria],
+            'bool' => 'must',
+        ];
+
+        // Add object type filter if specified
+        if ($objectType) {
+            $searchQuery['search'][] = [
+                'type' => 'in',
+                'bool' => 'must',
+                'fields' => ['_objecttype'],
+                'in' => [$objectType],
+            ];
+        }
+
+        $requestBody = [
+            'offset' => $offset,
+            'limit' => $limit,
+            'generate_rights' => false,
+            'search' => [
+                [
+                    'type' => 'complex',
+                    '__filter' => 'SearchInput',
+                    'search' => [$searchQuery],
+                ]
+            ],
+            'format' => 'standard',
+            'sort' => [
+                [
+                    'field' => '_system_object_id',
+                    'order' => 'DESC',
+                    '_level' => 0
+                ]
+            ]
+        ];
+
+        if ($objectType) {
+            $requestBody['objecttypes'] = [$objectType];
+        }
+
+        $response = $this->httpClient->request('POST', $this->sessionService->getUrl("search"), [
+            'json' => $requestBody
+        ]);
+
+        $this->sessionService->checkStatusCode($response);
+        $content = $response->toArray();
+        return $content['objects'] ?? [];
+    }
+
+    /**
+     * Search entities by multiple criteria (global object ID, tag, object type)
+     */
+    public function searchEntities(?string $globalObjectID = null, ?int $tagId = null, ?string $objectType = null, int $offset = 0, int $limit = 100): array
+    {
+        if (!$this->initializeFromSession()) {
+            throw new \RuntimeException('No valid EasyDB session available');
+        }
+
+        // If global object ID is provided, use existing method
+        if ($globalObjectID) {
+            return $this->loadEntityByGlobalObjectID($globalObjectID);
+        }
+
+        // If tag ID is provided, use tag search
+        if ($tagId) {
+            return $this->searchByTag($tagId, $objectType, $offset, $limit);
+        }
+
+        // If only object type is provided, use existing pool method
+        if ($objectType) {
+            return $this->loadEntitiesForPool($objectType, $offset, $limit);
+        }
+
+        // If no criteria provided, return empty array
+        return [];
     }
 
     /**
