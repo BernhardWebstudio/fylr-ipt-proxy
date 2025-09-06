@@ -17,14 +17,14 @@ class Event
     private ?int $id = null;
 
     #[Assert\NotBlank]
-    #[ORM\Column(name: 'eventID', type: 'string')]
+    #[ORM\Column(name: 'eventID', type: 'string', unique: true)]
     private string $eventID;
 
     /**
      * Reference to Location
      */
-    #[ORM\ManyToOne(targetEntity: Location::class)]
-    #[ORM\JoinColumn(name: 'locationID', referencedColumnName: 'locationID', nullable: true)]
+    #[ORM\ManyToOne(targetEntity: Location::class, inversedBy: 'events')]
+    #[ORM\JoinColumn(name: 'locationID', referencedColumnName: 'id', nullable: true)]
     private ?Location $location = null;
 
     #[ORM\OneToMany(mappedBy: 'event', targetEntity: Occurrence::class)]

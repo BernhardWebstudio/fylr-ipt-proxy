@@ -17,7 +17,7 @@ class Taxon
     private ?int $id = null;
 
     #[Assert\NotBlank]
-    #[ORM\Column(name: 'taxonID', type: 'string')]
+    #[ORM\Column(name: 'taxonID', type: 'string', unique: true)]
     private string $taxonID;
 
     #[ORM\OneToMany(mappedBy: 'taxon', targetEntity: Occurrence::class)]

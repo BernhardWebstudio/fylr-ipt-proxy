@@ -40,27 +40,27 @@ class DwcSchemeToEntityCommand extends Command
 
     private array $entityRelationships = [
         'Occurrence' => [
-            'taxonID' => ['target' => 'Taxon', 'type' => 'ManyToOne'],
-            'eventID' => ['target' => 'Event', 'type' => 'ManyToOne'],
-            'organismID' => ['target' => 'Organism', 'type' => 'ManyToOne'],
-            'materialEntityID' => ['target' => 'MaterialEntity', 'type' => 'ManyToOne'],
-            'locationID' => ['target' => 'Location', 'type' => 'ManyToOne'],
-            'identificationID' => ['target' => 'Identification', 'type' => 'ManyToOne'],
+            'taxonID' => ['target' => 'Taxon', 'type' => 'ManyToOne', 'mappedBy' => 'occurrences'],
+            'eventID' => ['target' => 'Event', 'type' => 'ManyToOne', 'mappedBy' => 'occurrences'],
+            'organismID' => ['target' => 'Organism', 'type' => 'ManyToOne', 'mappedBy' => 'occurrences'],
+            'materialEntityID' => ['target' => 'MaterialEntity', 'type' => 'ManyToOne', 'mappedBy' => 'occurrences'],
+            'locationID' => ['target' => 'Location', 'type' => 'ManyToOne', 'mappedBy' => 'occurrences'],
+            'identificationID' => ['target' => 'Identification', 'type' => 'ManyToOne', 'mappedBy' => 'occurrences'],
         ],
         'Event' => [
-            'locationID' => ['target' => 'Location', 'type' => 'ManyToOne'],
+            'locationID' => ['target' => 'Location', 'type' => 'ManyToOne', 'mappedBy' => 'events'],
             'occurrences' => ['target' => 'Occurrence', 'type' => 'OneToMany', 'mappedBy' => 'event'],
         ],
         'Identification' => [
-            'taxonID' => ['target' => 'Taxon', 'type' => 'ManyToOne'],
+            'taxonID' => ['target' => 'Taxon', 'type' => 'ManyToOne', 'mappedBy' => 'identifications'],
             'occurrences' => ['target' => 'Occurrence', 'type' => 'OneToMany', 'mappedBy' => 'identification'],
         ],
         'MaterialEntity' => [
-            'materialSampleID' => ['target' => 'MaterialSample', 'type' => 'ManyToOne'],
+            'materialSampleID' => ['target' => 'MaterialSample', 'type' => 'ManyToOne', 'mappedBy' => 'materialEntities'],
             'occurrences' => ['target' => 'Occurrence', 'type' => 'OneToMany', 'mappedBy' => 'materialEntity'],
         ],
         'Location' => [
-            'geologicalContextID' => ['target' => 'GeologicalContext', 'type' => 'ManyToOne'],
+            'geologicalContextID' => ['target' => 'GeologicalContext', 'type' => 'ManyToOne', 'mappedBy' => 'locations'],
             'events' => ['target' => 'Event', 'type' => 'OneToMany', 'mappedBy' => 'location'],
             'occurrences' => ['target' => 'Occurrence', 'type' => 'OneToMany', 'mappedBy' => 'location'],
         ],
@@ -81,7 +81,7 @@ class DwcSchemeToEntityCommand extends Command
         'MeasurementOrFact' => [
             'occurrenceID' => ['target' => 'Occurrence', 'type' => 'ManyToOne'],
             'eventID' => ['target' => 'Event', 'type' => 'ManyToOne'],
-            'taxonID' => ['target' => 'Taxon', 'type' => 'ManyToOne'],
+            'taxonID' => ['target' => 'Taxon', 'type' => 'ManyToOne', 'mappedBy' => 'measurementOrFacts'],
             'locationID' => ['target' => 'Location', 'type' => 'ManyToOne'],
         ],
         'ResourceRelationship' => [
@@ -550,6 +550,9 @@ class DwcSchemeToEntityCommand extends Command
 
         if (!$isIdentifier) {
             $code .= ", nullable: true";
+        } else {
+            // Add unique constraint for identifier fields as they will be referenced by foreign keys
+            $code .= ", unique: true";
         }
 
         $code .= ")]\n";
@@ -597,10 +600,14 @@ class DwcSchemeToEntityCommand extends Command
         $targetProperty = $relationship['targetProperty'] ?? $name;
         $description = $relationship['description'] ?? '';
 
-        // For foreign key relationships, use the target entity name as property name
-        $propertyName = $relationshipType === 'ManyToOne' && str_ends_with($name, 'ID')
-            ? strtolower($target)
-            : $this->snakeCaseToCamelCase($name);
+        // For foreign key relationships, generate unique property names
+        if ($relationshipType === 'ManyToOne' && str_ends_with($name, 'ID')) {
+            // Remove 'ID' suffix and convert to camelCase for property name
+            $baseName = substr($name, 0, -2);
+            $propertyName = $this->snakeCaseToCamelCase($baseName);
+        } else {
+            $propertyName = $this->snakeCaseToCamelCase($name);
+        }
 
         $code = "";
 
@@ -611,8 +618,13 @@ class DwcSchemeToEntityCommand extends Command
         }
 
         if ($relationshipType === 'ManyToOne') {
-            $code .= "    #[ORM\\ManyToOne(targetEntity: {$target}::class)]\n";
-            $code .= "    #[ORM\\JoinColumn(name: '{$name}', referencedColumnName: '{$targetProperty}', nullable: true)]\n";
+            // Get the inversedBy property name for bidirectional relationships
+            $inversedBy = $relationship['mappedBy'] ?? null;
+            $inversedByAttr = $inversedBy ? ", inversedBy: '{$inversedBy}'" : '';
+            
+            $code .= "    #[ORM\\ManyToOne(targetEntity: {$target}::class{$inversedByAttr})]\n";
+            // Foreign keys should reference the primary key 'id', not the identifier columns
+            $code .= "    #[ORM\\JoinColumn(name: '{$name}', referencedColumnName: 'id', nullable: true)]\n";
             $code .= "    private ?{$target} \${$propertyName} = null;\n\n";
         } elseif ($relationshipType === 'OneToMany') {
             $mappedBy = $relationship['mappedBy'] ?? $propertyName;
@@ -630,9 +642,13 @@ class DwcSchemeToEntityCommand extends Command
         $relationshipType = $relationship['relationshipType'];
 
         // Use consistent property naming
-        $propertyName = $relationshipType === 'ManyToOne' && str_ends_with($name, 'ID')
-            ? strtolower($target)
-            : $this->snakeCaseToCamelCase($name);
+        if ($relationshipType === 'ManyToOne' && str_ends_with($name, 'ID')) {
+            // Remove 'ID' suffix and convert to camelCase for property name
+            $baseName = substr($name, 0, -2);
+            $propertyName = $this->snakeCaseToCamelCase($baseName);
+        } else {
+            $propertyName = $this->snakeCaseToCamelCase($name);
+        }
         $pascalCase = ucfirst($propertyName);
 
         $code = "";

@@ -17,35 +17,35 @@ class MeasurementOrFact
     private ?int $id = null;
 
     #[Assert\NotBlank]
-    #[ORM\Column(name: 'measurementID', type: 'string')]
+    #[ORM\Column(name: 'measurementID', type: 'string', unique: true)]
     private string $measurementID;
 
     /**
      * Reference to Occurrence
      */
     #[ORM\ManyToOne(targetEntity: Occurrence::class)]
-    #[ORM\JoinColumn(name: 'occurrenceID', referencedColumnName: 'occurrenceID', nullable: true)]
+    #[ORM\JoinColumn(name: 'occurrenceID', referencedColumnName: 'id', nullable: true)]
     private ?Occurrence $occurrence = null;
 
     /**
      * Reference to Event
      */
     #[ORM\ManyToOne(targetEntity: Event::class)]
-    #[ORM\JoinColumn(name: 'eventID', referencedColumnName: 'eventID', nullable: true)]
+    #[ORM\JoinColumn(name: 'eventID', referencedColumnName: 'id', nullable: true)]
     private ?Event $event = null;
 
     /**
      * Reference to Location
      */
     #[ORM\ManyToOne(targetEntity: Location::class)]
-    #[ORM\JoinColumn(name: 'locationID', referencedColumnName: 'locationID', nullable: true)]
+    #[ORM\JoinColumn(name: 'locationID', referencedColumnName: 'id', nullable: true)]
     private ?Location $location = null;
 
     /**
      * Reference to Taxon
      */
-    #[ORM\ManyToOne(targetEntity: Taxon::class)]
-    #[ORM\JoinColumn(name: 'taxonID', referencedColumnName: 'taxonID', nullable: true)]
+    #[ORM\ManyToOne(targetEntity: Taxon::class, inversedBy: 'measurementOrFacts')]
+    #[ORM\JoinColumn(name: 'taxonID', referencedColumnName: 'id', nullable: true)]
     private ?Taxon $taxon = null;
 
     #[ORM\Column(name: 'institutionID', type: 'string', nullable: true)]

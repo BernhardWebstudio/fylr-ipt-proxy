@@ -17,7 +17,7 @@ class MaterialSample
     private ?int $id = null;
 
     #[Assert\NotBlank]
-    #[ORM\Column(name: 'materialSampleID', type: 'string')]
+    #[ORM\Column(name: 'materialSampleID', type: 'string', unique: true)]
     private string $materialSampleID;
 
     #[ORM\OneToMany(mappedBy: 'materialSample', targetEntity: MaterialEntity::class)]

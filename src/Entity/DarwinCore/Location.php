@@ -17,15 +17,15 @@ class Location
     private ?int $id = null;
 
     #[Assert\NotBlank]
-    #[ORM\Column(name: 'locationID', type: 'string')]
+    #[ORM\Column(name: 'locationID', type: 'string', unique: true)]
     private string $locationID;
 
     /**
      * Reference to GeologicalContext
      */
-    #[ORM\ManyToOne(targetEntity: GeologicalContext::class)]
-    #[ORM\JoinColumn(name: 'geologicalContextID', referencedColumnName: 'geologicalContextID', nullable: true)]
-    private ?GeologicalContext $geologicalcontext = null;
+    #[ORM\ManyToOne(targetEntity: GeologicalContext::class, inversedBy: 'locations')]
+    #[ORM\JoinColumn(name: 'geologicalContextID', referencedColumnName: 'id', nullable: true)]
+    private ?GeologicalContext $geologicalContext = null;
 
     #[ORM\OneToMany(mappedBy: 'location', targetEntity: Event::class)]
     private Collection $events;
@@ -811,14 +811,14 @@ class Location
         return $this;
     }
 
-    public function getGeologicalcontext(): ?GeologicalContext
+    public function getGeologicalContext(): ?GeologicalContext
     {
-        return $this->geologicalcontext;
+        return $this->geologicalContext;
     }
 
-    public function setGeologicalcontext(?GeologicalContext $geologicalcontext): static
+    public function setGeologicalContext(?GeologicalContext $geologicalContext): static
     {
-        $this->geologicalcontext = $geologicalcontext;
+        $this->geologicalContext = $geologicalContext;
         return $this;
     }
 

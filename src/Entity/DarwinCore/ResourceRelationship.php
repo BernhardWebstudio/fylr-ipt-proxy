@@ -17,16 +17,16 @@ class ResourceRelationship
     private ?int $id = null;
 
     #[Assert\NotBlank]
-    #[ORM\Column(name: 'resourceRelationshipID', type: 'string')]
+    #[ORM\Column(name: 'resourceRelationshipID', type: 'string', unique: true)]
     private string $resourceRelationshipID;
 
     #[ORM\ManyToOne(targetEntity: Occurrence::class)]
-    #[ORM\JoinColumn(name: 'resourceID', referencedColumnName: 'occurrenceID', nullable: true)]
-    private ?Occurrence $occurrence = null;
+    #[ORM\JoinColumn(name: 'resourceID', referencedColumnName: 'id', nullable: true)]
+    private ?Occurrence $resource = null;
 
     #[ORM\ManyToOne(targetEntity: Occurrence::class)]
-    #[ORM\JoinColumn(name: 'relatedResourceID', referencedColumnName: 'occurrenceID', nullable: true)]
-    private ?Occurrence $relatedOccurrence = null;
+    #[ORM\JoinColumn(name: 'relatedResourceID', referencedColumnName: 'id', nullable: true)]
+    private ?Occurrence $relatedResource = null;
 
     #[ORM\Column(name: 'relationshipOfResourceID', type: 'string', nullable: true)]
     private ?string $relationshipOfResourceID = null;
@@ -268,25 +268,26 @@ class ResourceRelationship
         return $this;
     }
 
-    public function getOccurrence(): ?Occurrence
+    public function getResource(): ?Occurrence
     {
-        return $this->occurrence;
+        return $this->resource;
     }
 
-    public function setOccurrence(?Occurrence $occurrence): static
+    public function setResource(?Occurrence $resource): static
     {
-        $this->occurrence = $occurrence;
+        $this->resource = $resource;
         return $this;
     }
 
-    public function getRelatedOccurrence(): ?Occurrence
+    public function getRelatedResource(): ?Occurrence
     {
-        return $this->relatedOccurrence;
+        return $this->relatedResource;
     }
 
-    public function setRelatedOccurrence(?Occurrence $relatedOccurrence): static
+    public function setRelatedResource(?Occurrence $relatedResource): static
     {
-        $this->relatedOccurrence = $relatedOccurrence;
+        $this->relatedResource = $relatedResource;
         return $this;
     }
+
 }

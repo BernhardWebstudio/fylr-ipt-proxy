@@ -19,6 +19,11 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
 
         // Create or get the occurrence entity
         $occurrence = $target->getOccurrence() ?? new Occurrence();
+        // attach an organism to the occurrence if not already present
+        if (!$occurrence->getOrganism()) {
+            $organism = new \App\Entity\DarwinCore\Organism();
+            $occurrence->setOrganism($organism);
+        }
 
         // Map basic occurrence information
         $this->mapBasicOccurrenceInfo($source, $occurrence);
@@ -68,80 +73,7 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
             $bestimmung = $bestimmungen[0]; // Take the first identification
 
             // Create taxon entity
-            $taxon = new Taxon();
-            $taxon->setTaxonID($bestimmung["_global_object_id"] ?? uniqid('taxon_'));
-
-            // Extract scientific name from taxonname or taxonnametrans
-            $scientificName = null;
-            if (isset($bestimmung["taxonname"]["_standard"]["1"]["text"]["en-US"])) {
-                $scientificName = $bestimmung["taxonname"]["_standard"]["1"]["text"]["en-US"];
-            } elseif (isset($bestimmung["taxonname"]["_standard"]["1"]["text"]["de-DE"])) {
-                $scientificName = $bestimmung["taxonname"]["_standard"]["1"]["text"]["de-DE"];
-            } elseif (isset($bestimmung["taxonnametrans"])) {
-                $scientificName = $bestimmung["taxonnametrans"];
-            }
-
-            if ($scientificName) {
-                $taxon->setScientificName($scientificName);
-
-                // Extract genus from scientific name or genus field
-                if (isset($bestimmung["genus"]["_standard"]["1"]["text"]["en-US"])) {
-                    $taxon->setGenus($bestimmung["genus"]["_standard"]["1"]["text"]["en-US"]);
-                } elseif (isset($bestimmung["genus"]["_standard"]["1"]["text"]["de-DE"])) {
-                    $taxon->setGenus($bestimmung["genus"]["_standard"]["1"]["text"]["de-DE"]);
-                } else {
-                    // Try to extract genus from scientific name
-                    $parts = explode(' ', $scientificName);
-                    if (count($parts) >= 1) {
-                        $taxon->setGenus($parts[0]);
-                    }
-                }
-
-                // Extract specific epithet from scientific name
-                $parts = explode(' ', $scientificName);
-                if (count($parts) >= 2) {
-                    $taxon->setSpecificEpithet($parts[1]);
-                }
-            }
-
-            // Set taxonomic authority if available
-            if (isset($bestimmung["fungarium"]["autor"]["_standard"]["1"]["text"]["en-US"])) {
-                $taxon->setScientificNameAuthorship($bestimmung["fungarium"]["autor"]["_standard"]["1"]["text"]["en-US"]);
-            } elseif (isset($bestimmung["fungarium"]["autor"]["_standard"]["1"]["text"]["de-DE"])) {
-                $taxon->setScientificNameAuthorship($bestimmung["fungarium"]["autor"]["_standard"]["1"]["text"]["de-DE"]);
-            } elseif (isset($bestimmung["taxonnametrans"])) {
-                $taxon->setScientificNameAuthorship($this->extractAuthorship($bestimmung["taxonnametrans"]));
-            }
-
-            // Set specific epithet
-            if (isset($bestimmung["art"]["_standard"]["1"]["text"]["en-US"])) {
-                $taxon->setSpecificEpithet($bestimmung["art"]["_standard"]["1"]["text"]["en-US"]);
-            } elseif (isset($bestimmung["art"]["_standard"]["1"]["text"]["de-DE"])) {
-                $taxon->setSpecificEpithet($bestimmung["art"]["_standard"]["1"]["text"]["de-DE"]);
-            } elseif (!$taxon->getSpecificEpithet()) {
-                $taxon->setSpecificEpithet($bestimmung["arttrans"] ?? null);
-            }
-
-            // set infraspecific epithet if available
-            if (isset($bestimmung["infraspezifischestaxon"]["_standard"]["1"]["text"]["en-US"])) {
-                $taxon->setInfraspecificEpithet($bestimmung["infraspezifischestaxon"]["_standard"]["1"]["text"]["en-US"]);
-            } elseif (isset($bestimmung["infraspezifischestaxon"]["_standard"]["1"]["text"]["de-DE"])) {
-                $taxon->setInfraspecificEpithet($bestimmung["infraspezifischestaxon"]["_standard"]["1"]["text"]["de-DE"]);
-            } elseif (!$taxon->getInfraspecificEpithet()) {
-                $taxon->setInfraspecificEpithet($bestimmung["infraspezifischestaxontrans"] ?? null);
-            }
-
-            // Set infraspecific rank
-            if (isset($bestimmung["infraspezifischerrang"]["_standard"]["1"]["text"]["en-US"])) {
-                $taxon->setTaxonRank($bestimmung["infraspezifischerrang"]["_standard"]["1"]["text"]["en-US"]);
-            } elseif (isset($bestimmung["infraspezifischerrang"]["_standard"]["1"]["text"]["de-DE"])) {
-                $taxon->setTaxonRank($bestimmung["infraspezifischerrang"]["_standard"]["1"]["text"]["de-DE"]);
-            } elseif (!$taxon->getTaxonRank()) {
-                $taxon->setTaxonRank($bestimmung["infraspezifischerrangtrans"] ?? null);
-            }
-
-            // Set kingdom (fungi for fungarium)
-            $taxon->setKingdom("Fungi");
+            $taxon = $this->parseTaxonFromIdentification($bestimmung);
 
             // Set type status if specimen is a type
             if (isset($bestimmung["typus"]) && $bestimmung["typus"] === true) {
@@ -156,9 +88,96 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
 
             if (count($bestimmungen) > 1) {
                 // TODO: add scientificNames of other bestimmungen as previous identification to organism
-
+                $previousIds = [];
+                for ($i = 1; $i < count($bestimmungen); $i++) {
+                    $prevBestimmung = $bestimmungen[$i];
+                    $prevTaxon = $this->parseTaxonFromIdentification($prevBestimmung);
+                    $previousIds[] = $prevTaxon->getScientificName();
+                }
+                $occurrence->getOrganism()->setPreviousIdentifications(implode(' | ', $previousIds));
             }
         }
+    }
+
+    private function parseTaxonFromIdentification(array $bestimmung): Taxon
+    {
+        // Create taxon entity
+        $taxon = new Taxon();
+        $taxon->setTaxonID($bestimmung["_global_object_id"] ?? uniqid('taxon_'));
+
+        // Extract scientific name from taxonname or taxonnametrans
+        $scientificName = null;
+        if (isset($bestimmung["taxonname"]["_standard"]["1"]["text"]["en-US"])) {
+            $scientificName = $bestimmung["taxonname"]["_standard"]["1"]["text"]["en-US"];
+        } elseif (isset($bestimmung["taxonname"]["_standard"]["1"]["text"]["de-DE"])) {
+            $scientificName = $bestimmung["taxonname"]["_standard"]["1"]["text"]["de-DE"];
+        } elseif (isset($bestimmung["taxonnametrans"])) {
+            $scientificName = $bestimmung["taxonnametrans"];
+        }
+
+        if ($scientificName) {
+            $taxon->setScientificName($scientificName);
+
+            // Extract genus from scientific name or genus field
+            if (isset($bestimmung["genus"]["_standard"]["1"]["text"]["en-US"])) {
+                $taxon->setGenus($bestimmung["genus"]["_standard"]["1"]["text"]["en-US"]);
+            } elseif (isset($bestimmung["genus"]["_standard"]["1"]["text"]["de-DE"])) {
+                $taxon->setGenus($bestimmung["genus"]["_standard"]["1"]["text"]["de-DE"]);
+            } else {
+                // Try to extract genus from scientific name
+                $parts = explode(' ', $scientificName);
+                if (count($parts) >= 1) {
+                    $taxon->setGenus($parts[0]);
+                }
+            }
+
+            // Extract specific epithet from scientific name
+            $parts = explode(' ', $scientificName);
+            if (count($parts) >= 2) {
+                $taxon->setSpecificEpithet($parts[1]);
+            }
+        }
+
+        // Set taxonomic authority if available
+        if (isset($bestimmung["fungarium"]["autor"]["_standard"]["1"]["text"]["en-US"])) {
+            $taxon->setScientificNameAuthorship($bestimmung["fungarium"]["autor"]["_standard"]["1"]["text"]["en-US"]);
+        } elseif (isset($bestimmung["fungarium"]["autor"]["_standard"]["1"]["text"]["de-DE"])) {
+            $taxon->setScientificNameAuthorship($bestimmung["fungarium"]["autor"]["_standard"]["1"]["text"]["de-DE"]);
+        } elseif (isset($bestimmung["taxonnametrans"])) {
+            $taxon->setScientificNameAuthorship($this->extractAuthorship($bestimmung["taxonnametrans"]));
+        }
+
+        // Set specific epithet
+        if (isset($bestimmung["art"]["_standard"]["1"]["text"]["en-US"])) {
+            $taxon->setSpecificEpithet($bestimmung["art"]["_standard"]["1"]["text"]["en-US"]);
+        } elseif (isset($bestimmung["art"]["_standard"]["1"]["text"]["de-DE"])) {
+            $taxon->setSpecificEpithet($bestimmung["art"]["_standard"]["1"]["text"]["de-DE"]);
+        } elseif (!$taxon->getSpecificEpithet()) {
+            $taxon->setSpecificEpithet($bestimmung["arttrans"] ?? null);
+        }
+
+        // set infraspecific epithet if available
+        if (isset($bestimmung["infraspezifischestaxon"]["_standard"]["1"]["text"]["en-US"])) {
+            $taxon->setInfraspecificEpithet($bestimmung["infraspezifischestaxon"]["_standard"]["1"]["text"]["en-US"]);
+        } elseif (isset($bestimmung["infraspezifischestaxon"]["_standard"]["1"]["text"]["de-DE"])) {
+            $taxon->setInfraspecificEpithet($bestimmung["infraspezifischestaxon"]["_standard"]["1"]["text"]["de-DE"]);
+        } elseif (!$taxon->getInfraspecificEpithet()) {
+            $taxon->setInfraspecificEpithet($bestimmung["infraspezifischestaxontrans"] ?? null);
+        }
+
+        // Set infraspecific rank
+        if (isset($bestimmung["infraspezifischerrang"]["_standard"]["1"]["text"]["en-US"])) {
+            $taxon->setTaxonRank($bestimmung["infraspezifischerrang"]["_standard"]["1"]["text"]["en-US"]);
+        } elseif (isset($bestimmung["infraspezifischerrang"]["_standard"]["1"]["text"]["de-DE"])) {
+            $taxon->setTaxonRank($bestimmung["infraspezifischerrang"]["_standard"]["1"]["text"]["de-DE"]);
+        } elseif (!$taxon->getTaxonRank()) {
+            $taxon->setTaxonRank($bestimmung["infraspezifischerrangtrans"] ?? null);
+        }
+
+        // Set kingdom (fungi for fungarium)
+        $taxon->setKingdom("Fungi");
+
+        return $taxon;
     }
 
     private function mapCollectionEventInfo(array $source, Occurrence $occurrence): void
@@ -177,14 +196,11 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
             if (isset($aufsammlung["sammeldatum"])) {
                 $dateInfo = $aufsammlung["sammeldatum"];
                 if (isset($dateInfo["value"])) {
-                    $event->setEventDate($dateInfo["value"]);
-
-                    // Try to extract year, month from the date
-                    if (preg_match('/(\d{4})/', $dateInfo["value"], $matches)) {
-                        $event->setYear($matches[1]);
-                    }
-                    if (preg_match('/(\d{4})-(\d{2})/', $dateInfo["value"], $matches)) {
-                        $event->setMonth($matches[2]);
+                    $parsedDate = $this->parseEventDate($dateInfo["value"]);
+                    if ($parsedDate) {
+                        $event->setEventDate($parsedDate['iso_date']);
+                        $event->setYear($parsedDate['year']);
+                        $event->setMonth($parsedDate['month']);
                     }
                 }
             }
@@ -303,6 +319,13 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
 
         // Set collection information
         $occurrence->setCollectionCode("ETHZ-ZT");
+
+        // same on the organism level
+        $organism = $occurrence->getOrganism();
+        if ($organism) {
+            $organism->setInstitutionCode("ETHZ");
+            $organism->setCollectionCode("ETHZ-ZT");
+        }
     }
 
     private function mapMedia(array $source, Occurrence $occurrence): void
@@ -328,6 +351,8 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
             }
         }
         $occurrence->setAssociatedMedia(implode(' | ', $mediaUrls));
+
+        $occurrence->setAssociatedReferences("https://www.nahima.ethz.ch/#/detail/" . $source["_system_object_id"]);
     }
 
     private function extractAuthorship(string $scientificName): string
@@ -353,5 +378,115 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
     {
         // Return the types this mapping supports
         return ['fungarium'];
+    }
+
+    private function parseEventDate(string $dateValue): ?array
+    {
+        $dateValue = trim($dateValue);
+
+        // Handle date ranges (e.g., "2023-05-15/2023-05-20" or "15.05.2023 - 20.05.2023")
+        if (preg_match('/(.+?)\s*[-\/]\s*(.+)/', $dateValue, $matches)) {
+            $startDate = $this->parseSingleDate($matches[1]);
+            $endDate = $this->parseSingleDate($matches[2]);
+
+            if ($startDate && $endDate) {
+                return [
+                    'iso_date' => $startDate['iso'] . '/' . $endDate['iso'],
+                    'year' => $startDate['year'],
+                    'month' => $startDate['month']
+                ];
+            }
+        }
+
+        // Handle single date
+        $singleDate = $this->parseSingleDate($dateValue);
+        if ($singleDate) {
+            return [
+                'iso_date' => $singleDate['iso'],
+                'year' => $singleDate['year'],
+                'month' => $singleDate['month']
+            ];
+        }
+
+        return null;
+    }
+
+    private function parseSingleDate(string $dateValue): ?array
+    {
+        $dateValue = trim($dateValue);
+
+        // ISO format: YYYY-MM-DD
+        if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $dateValue, $matches)) {
+            return [
+                'iso' => $dateValue,
+                'year' => $matches[1],
+                'month' => $matches[2]
+            ];
+        }
+
+        // European format: DD.MM.YYYY
+        if (preg_match('/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/', $dateValue, $matches)) {
+            $day = str_pad($matches[1], 2, '0', STR_PAD_LEFT);
+            $month = str_pad($matches[2], 2, '0', STR_PAD_LEFT);
+            $year = $matches[3];
+            return [
+                'iso' => "$year-$month-$day",
+                'year' => $year,
+                'month' => $month
+            ];
+        }
+
+        // American format: MM/DD/YYYY
+        if (preg_match('/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/', $dateValue, $matches)) {
+            $month = str_pad($matches[1], 2, '0', STR_PAD_LEFT);
+            $day = str_pad($matches[2], 2, '0', STR_PAD_LEFT);
+            $year = $matches[3];
+            return [
+                'iso' => "$year-$month-$day",
+                'year' => $year,
+                'month' => $month
+            ];
+        }
+
+        // Year and month only: YYYY-MM or MM.YYYY
+        if (preg_match('/^(\d{4})-(\d{2})$/', $dateValue, $matches)) {
+            return [
+                'iso' => $dateValue,
+                'year' => $matches[1],
+                'month' => $matches[2]
+            ];
+        }
+
+        if (preg_match('/^(\d{1,2})\.(\d{4})$/', $dateValue, $matches)) {
+            $month = str_pad($matches[1], 2, '0', STR_PAD_LEFT);
+            $year = $matches[2];
+            return [
+                'iso' => "$year-$month",
+                'year' => $year,
+                'month' => $month
+            ];
+        }
+
+        // Year only: YYYY
+        if (preg_match('/^(\d{4})$/', $dateValue, $matches)) {
+            return [
+                'iso' => $dateValue,
+                'year' => $matches[1],
+                'month' => null
+            ];
+        }
+
+        // Try to parse with DateTime for other formats
+        try {
+            $date = new \DateTime($dateValue);
+            return [
+                'iso' => $date->format('Y-m-d'),
+                'year' => $date->format('Y'),
+                'month' => $date->format('m')
+            ];
+        } catch (\Exception $e) {
+            // If all parsing fails, return null
+            return null;
+        }
     }
 }

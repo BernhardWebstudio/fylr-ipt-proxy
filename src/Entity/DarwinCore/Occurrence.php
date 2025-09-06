@@ -2,7 +2,6 @@
 
 namespace App\Entity\DarwinCore;
 
-use App\Entity\OccurrenceImport;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -18,50 +17,53 @@ class Occurrence
     private ?int $id = null;
 
     #[Assert\NotBlank]
-    #[ORM\Column(name: 'occurrenceID', type: 'string')]
+    #[ORM\Column(name: 'occurrenceID', type: 'string', unique: true)]
     private string $occurrenceID;
 
     /**
      * Reference to Organism
      */
-    #[ORM\ManyToOne(targetEntity: Organism::class)]
-    #[ORM\JoinColumn(name: 'organismID', referencedColumnName: 'organismID', nullable: true)]
+    #[ORM\ManyToOne(targetEntity: Organism::class, inversedBy: 'occurrences')]
+    #[ORM\JoinColumn(name: 'organismID', referencedColumnName: 'id', nullable: true)]
     private ?Organism $organism = null;
 
     /**
      * Reference to MaterialEntity
      */
-    #[ORM\ManyToOne(targetEntity: MaterialEntity::class)]
-    #[ORM\JoinColumn(name: 'materialEntityID', referencedColumnName: 'materialEntityID', nullable: true)]
-    private ?MaterialEntity $materialentity = null;
+    #[ORM\ManyToOne(targetEntity: MaterialEntity::class, inversedBy: 'occurrences')]
+    #[ORM\JoinColumn(name: 'materialEntityID', referencedColumnName: 'id', nullable: true)]
+    private ?MaterialEntity $materialEntity = null;
 
     /**
      * Reference to Event
      */
-    #[ORM\ManyToOne(targetEntity: Event::class)]
-    #[ORM\JoinColumn(name: 'eventID', referencedColumnName: 'eventID', nullable: true)]
+    #[ORM\ManyToOne(targetEntity: Event::class, inversedBy: 'occurrences')]
+    #[ORM\JoinColumn(name: 'eventID', referencedColumnName: 'id', nullable: true)]
     private ?Event $event = null;
 
     /**
      * Reference to Location
      */
-    #[ORM\ManyToOne(targetEntity: Location::class)]
-    #[ORM\JoinColumn(name: 'locationID', referencedColumnName: 'locationID', nullable: true)]
+    #[ORM\ManyToOne(targetEntity: Location::class, inversedBy: 'occurrences')]
+    #[ORM\JoinColumn(name: 'locationID', referencedColumnName: 'id', nullable: true)]
     private ?Location $location = null;
 
     /**
      * Reference to Identification
      */
-    #[ORM\ManyToOne(targetEntity: Identification::class)]
-    #[ORM\JoinColumn(name: 'identificationID', referencedColumnName: 'identificationID', nullable: true)]
+    #[ORM\ManyToOne(targetEntity: Identification::class, inversedBy: 'occurrences')]
+    #[ORM\JoinColumn(name: 'identificationID', referencedColumnName: 'id', nullable: true)]
     private ?Identification $identification = null;
 
     /**
      * Reference to Taxon
      */
-    #[ORM\ManyToOne(targetEntity: Taxon::class)]
-    #[ORM\JoinColumn(name: 'taxonID', referencedColumnName: 'taxonID', nullable: true)]
+    #[ORM\ManyToOne(targetEntity: Taxon::class, inversedBy: 'occurrences')]
+    #[ORM\JoinColumn(name: 'taxonID', referencedColumnName: 'id', nullable: true)]
     private ?Taxon $taxon = null;
+
+    #[ORM\OneToOne(mappedBy: 'occurrence')]
+    private ?\App\Entity\OccurrenceImport $import = null;
 
     #[ORM\Column(name: 'catalogNumber', type: 'string', nullable: true)]
     private ?string $catalogNumber = null;
@@ -167,9 +169,6 @@ class Occurrence
 
     #[ORM\Column(name: 'dynamicProperties', type: 'string', nullable: true)]
     private ?string $dynamicProperties = null;
-
-    #[ORM\OneToOne(mappedBy: 'occurrence', cascade: ['persist', 'remove'])]
-    private ?OccurrenceImport $import = null;
 
     public function getId(): ?int
     {
@@ -583,14 +582,14 @@ class Occurrence
         return $this;
     }
 
-    public function getMaterialentity(): ?MaterialEntity
+    public function getMaterialEntity(): ?MaterialEntity
     {
-        return $this->materialentity;
+        return $this->materialEntity;
     }
 
-    public function setMaterialentity(?MaterialEntity $materialentity): static
+    public function setMaterialEntity(?MaterialEntity $materialEntity): static
     {
-        $this->materialentity = $materialentity;
+        $this->materialEntity = $materialEntity;
         return $this;
     }
 
@@ -638,21 +637,14 @@ class Occurrence
         return $this;
     }
 
-    public function getImport(): ?OccurrenceImport
+    public function getImport(): ?\App\Entity\OccurrenceImport
     {
         return $this->import;
     }
 
-    public function setImport(OccurrenceImport $import): static
+    public function setImport(?\App\Entity\OccurrenceImport $import): static
     {
-        // set the owning side of the relation if necessary
-        if ($import->getOccurrence() !== $this) {
-            $import->setOccurrence($this);
-        }
-
         $this->import = $import;
-
         return $this;
     }
-
 }

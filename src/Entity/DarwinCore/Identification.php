@@ -17,14 +17,14 @@ class Identification
     private ?int $id = null;
 
     #[Assert\NotBlank]
-    #[ORM\Column(name: 'identificationID', type: 'string')]
+    #[ORM\Column(name: 'identificationID', type: 'string', unique: true)]
     private string $identificationID;
 
     /**
      * Reference to Taxon
      */
-    #[ORM\ManyToOne(targetEntity: Taxon::class)]
-    #[ORM\JoinColumn(name: 'taxonID', referencedColumnName: 'taxonID', nullable: true)]
+    #[ORM\ManyToOne(targetEntity: Taxon::class, inversedBy: 'identifications')]
+    #[ORM\JoinColumn(name: 'taxonID', referencedColumnName: 'id', nullable: true)]
     private ?Taxon $taxon = null;
 
     #[ORM\OneToMany(mappedBy: 'identification', targetEntity: Occurrence::class)]

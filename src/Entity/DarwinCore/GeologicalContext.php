@@ -17,7 +17,7 @@ class GeologicalContext
     private ?int $id = null;
 
     #[Assert\NotBlank]
-    #[ORM\Column(name: 'geologicalContextID', type: 'string')]
+    #[ORM\Column(name: 'geologicalContextID', type: 'string', unique: true)]
     private string $geologicalContextID;
 
     #[ORM\OneToMany(mappedBy: 'geologicalContext', targetEntity: Location::class)]

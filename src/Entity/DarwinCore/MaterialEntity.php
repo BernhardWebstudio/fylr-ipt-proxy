@@ -17,15 +17,15 @@ class MaterialEntity
     private ?int $id = null;
 
     #[Assert\NotBlank]
-    #[ORM\Column(name: 'materialEntityID', type: 'string')]
+    #[ORM\Column(name: 'materialEntityID', type: 'string', unique: true)]
     private string $materialEntityID;
 
     /**
      * Reference to MaterialSample
      */
-    #[ORM\ManyToOne(targetEntity: MaterialSample::class)]
-    #[ORM\JoinColumn(name: 'materialSampleID', referencedColumnName: 'materialSampleID', nullable: true)]
-    private ?MaterialSample $materialsample = null;
+    #[ORM\ManyToOne(targetEntity: MaterialSample::class, inversedBy: 'materialEntities')]
+    #[ORM\JoinColumn(name: 'materialSampleID', referencedColumnName: 'id', nullable: true)]
+    private ?MaterialSample $materialSample = null;
 
     #[ORM\OneToMany(mappedBy: 'materialEntity', targetEntity: Occurrence::class)]
     private Collection $occurrences;
@@ -275,14 +275,14 @@ class MaterialEntity
         return $this;
     }
 
-    public function getMaterialsample(): ?MaterialSample
+    public function getMaterialSample(): ?MaterialSample
     {
-        return $this->materialsample;
+        return $this->materialSample;
     }
 
-    public function setMaterialsample(?MaterialSample $materialsample): static
+    public function setMaterialSample(?MaterialSample $materialSample): static
     {
-        $this->materialsample = $materialsample;
+        $this->materialSample = $materialSample;
         return $this;
     }
 
