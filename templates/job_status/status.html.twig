@@ -11,7 +11,7 @@
                     <div class="card-header">
                         <h4 class="card-title">
                             Job Status - {{ job.type|title }}
-                            <span class="badge badge-{{ job.status == 'completed' ? 'success' : (job.status == 'failed' ? 'danger' : (job.status == 'running' ? 'warning' : 'secondary')) }}">
+                            <span class="badge badge-{{ job.status == 'completed' ? 'success' : (job.status == 'failed' ? 'danger' : (job.status == 'running' ? 'warning' : (job.status == 'cancelled' ? 'secondary' : 'secondary'))) }}">
                                 {{ job.status|title }}
                             </span>
                         </h4>
@@ -26,7 +26,7 @@
 
                                     <dt class="col-sm-4">Status:</dt>
                                     <dd class="col-sm-8">
-                                        <span class="badge badge-{{ job.status == 'completed' ? 'success' : (job.status == 'failed' ? 'danger' : (job.status == 'running' ? 'warning' : 'secondary')) }}">
+                                        <span class="badge badge-{{ job.status == 'completed' ? 'success' : (job.status == 'failed' ? 'danger' : (job.status == 'running' ? 'warning' : (job.status == 'cancelled' ? 'secondary' : 'secondary'))) }}">
                                             {{ job.status|title }}
                                         </span>
                                     </dd>
@@ -103,6 +103,18 @@
                                 <i class="fa fa-refresh"></i> Refresh
                             </button>
                             {% endif %}
+                            {% if job.canBeCancelled %}
+                            <form method="post" action="{{ path('app_job_cancel', {jobId: job.jobId}) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to cancel this job?');">
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="fa fa-ban"></i> Cancel Job
+                                </button>
+                            </form>
+                            {% endif %}
+                            <form method="post" action="{{ path('app_job_delete', {jobId: job.jobId}) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this job? This action cannot be undone.');">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fa fa-trash"></i> Delete Job
+                                </button>
+                            </form>
                             <a href="{{ path('app_jobs_list') }}" class="btn btn-secondary">
                                 <i class="fa fa-list"></i> All Jobs
                             </a>

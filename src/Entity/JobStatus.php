@@ -13,6 +13,7 @@ class JobStatus
     public const STATUS_RUNNING = 'running';
     public const STATUS_COMPLETED = 'completed';
     public const STATUS_FAILED = 'failed';
+    public const STATUS_CANCELLED = 'cancelled';
 
     public const TYPE_IMPORT = 'import';
     public const TYPE_EXPORT = 'export';
@@ -232,6 +233,16 @@ class JobStatus
     public function isPending(): bool
     {
         return $this->status === self::STATUS_PENDING;
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this->status === self::STATUS_CANCELLED;
+    }
+
+    public function canBeCancelled(): bool
+    {
+        return $this->status === self::STATUS_PENDING || $this->status === self::STATUS_RUNNING;
     }
 
     public function getProgressPercentage(): int

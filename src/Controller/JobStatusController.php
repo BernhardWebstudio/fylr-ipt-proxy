@@ -130,6 +130,68 @@ final class JobStatusController extends AbstractController
         ]);
     }
 
+    #[Route('/job/{jobId}/cancel', name: 'app_job_cancel', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function cancelJob(string $jobId): Response
+    {
+        $jobStatus = $this->jobStatusService->getJobStatus($jobId);
+
+        if (!$jobStatus) {
+            $this->addFlash('error', 'Job not found.');
+            return $this->redirectToRoute('app_jobs_list');
+        }
+
+        // Check if user has access to this job
+        /** @var User $user */
+        $user = $this->getUser();
+        if ($jobStatus->getUser()->getId() !== $user->getId()) {
+            $this->addFlash('error', 'Access denied.');
+            return $this->redirectToRoute('app_jobs_list');
+        }
+
+        if (!$jobStatus->canBeCancelled()) {
+            $this->addFlash('error', 'This job cannot be cancelled.');
+            return $this->redirectToRoute('app_job_status', ['jobId' => $jobId]);
+        }
+
+        if ($this->jobStatusService->cancelJob($jobId)) {
+            $this->addFlash('success', 'Job cancelled successfully.');
+        } else {
+            $this->addFlash('error', 'Failed to cancel job.');
+        }
+
+        return $this->redirectToRoute('app_job_status', ['jobId' => $jobId]);
+    }
+
+    #[Route('/job/{jobId}/delete', name: 'app_job_delete', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function deleteJob(string $jobId): Response
+    {
+        $jobStatus = $this->jobStatusService->getJobStatus($jobId);
+
+        if (!$jobStatus) {
+            $this->addFlash('error', 'Job not found.');
+            return $this->redirectToRoute('app_jobs_list');
+        }
+
+        // Check if user has access to this job
+        /** @var User $user */
+        $user = $this->getUser();
+        if ($jobStatus->getUser()->getId() !== $user->getId()) {
+            $this->addFlash('error', 'Access denied.');
+            return $this->redirectToRoute('app_jobs_list');
+        }
+
+        $projectDir = $this->getParameter('kernel.project_dir');
+        if ($this->jobStatusService->deleteJob($jobId, $projectDir)) {
+            $this->addFlash('success', 'Job deleted successfully.');
+        } else {
+            $this->addFlash('error', 'Failed to delete job.');
+        }
+
+        return $this->redirectToRoute('app_jobs_list');
+    }
+
     private function getContentTypeForFile(string $filename): string
     {
         $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));

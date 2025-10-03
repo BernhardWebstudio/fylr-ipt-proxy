@@ -200,4 +200,71 @@ class JobStatusService
 
         return $deletedCount;
     }
+
+    /**
+     * Cancel a running or pending job
+     */
+    public function cancelJob(string $jobId): bool
+    {
+        $jobStatus = $this->jobStatusRepository->findByJobId($jobId);
+
+        if (!$jobStatus) {
+            $this->logger->warning('Job not found for cancellation', ['jobId' => $jobId]);
+            return false;
+        }
+
+        if (!$jobStatus->canBeCancelled()) {
+            $this->logger->warning('Job cannot be cancelled', [
+                'jobId' => $jobId,
+                'status' => $jobStatus->getStatus()
+            ]);
+            return false;
+        }
+
+        $jobStatus->setStatus(JobStatus::STATUS_CANCELLED);
+        $jobStatus->setCompletedAt(new \DateTimeImmutable());
+
+        $this->entityManager->flush();
+
+        $this->logger->info('Job cancelled', ['jobId' => $jobId]);
+
+        return true;
+    }
+
+    /**
+     * Delete a job and its associated result file
+     */
+    public function deleteJob(string $jobId, string $projectDir): bool
+    {
+        $jobStatus = $this->jobStatusRepository->findByJobId($jobId);
+
+        if (!$jobStatus) {
+            $this->logger->warning('Job not found for deletion', ['jobId' => $jobId]);
+            return false;
+        }
+
+        // Delete result file if it exists
+        if ($jobStatus->getResultFilePath()) {
+            $filePath = $projectDir . '/' . $jobStatus->getResultFilePath();
+            if (file_exists($filePath)) {
+                try {
+                    unlink($filePath);
+                    $this->logger->info('Deleted job result file', ['filePath' => $filePath]);
+                } catch (\Exception $e) {
+                    $this->logger->error('Failed to delete job result file', [
+                        'filePath' => $filePath,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+        }
+
+        // Remove job from database
+        $this->entityManager->remove($jobStatus);
+        $this->entityManager->flush();
+
+        $this->logger->info('Job deleted', ['jobId' => $jobId]);
+
+        return true;
+    }
 }

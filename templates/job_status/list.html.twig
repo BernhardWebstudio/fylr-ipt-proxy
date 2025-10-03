@@ -44,7 +44,7 @@
                                             <span class="badge badge-info">{{ job.type|title }}</span>
                                         </td>
                                         <td>
-                                            <span class="badge badge-{{ job.status == 'completed' ? 'success' : (job.status == 'failed' ? 'danger' : (job.status == 'running' ? 'warning' : 'secondary')) }}">
+                                            <span class="badge badge-{{ job.status == 'completed' ? 'success' : (job.status == 'failed' ? 'danger' : (job.status == 'running' ? 'warning' : (job.status == 'cancelled' ? 'secondary' : 'secondary'))) }}">
                                                 {{ job.status|title }}
                                             </span>
                                         </td>
@@ -95,6 +95,18 @@
                                                     <i class="fa fa-download"></i>
                                                 </a>
                                                 {% endif %}
+                                                {% if job.canBeCancelled %}
+                                                <form method="post" action="{{ path('app_job_cancel', {jobId: job.jobId}) }}" style="display: inline;" onsubmit="return confirm('Cancel this job?');">
+                                                    <button type="submit" class="btn btn-outline-warning btn-sm" title="Cancel Job">
+                                                        <i class="fa fa-ban"></i>
+                                                    </button>
+                                                </form>
+                                                {% endif %}
+                                                <form method="post" action="{{ path('app_job_delete', {jobId: job.jobId}) }}" style="display: inline;" onsubmit="return confirm('Delete this job permanently?');">
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete Job">
+                                                        <i class="fa fa-trash"></i>
+                                                    </button>
+                                                </form>
                                             </div>
                                         </td>
                                     </tr>

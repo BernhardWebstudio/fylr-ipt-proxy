@@ -15,7 +15,9 @@ use App\Service\TableConfigurationService;
 use App\Entity\DarwinCore\Occurrence;
 use App\Form\ImportSelectionType;
 use Doctrine\ORM\EntityManagerInterface;
+use LogicException;
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -24,6 +26,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\Messenger\MessageBusInterface;
 
+/** @package App\Controller */
 final class ImportExportManagementController extends AbstractController
 {
     #[Route('/import', name: 'app_import_management')]
@@ -38,19 +41,12 @@ final class ImportExportManagementController extends AbstractController
         MessageBusInterface $messageBus,
         #[AutowireIterator("app.easydb_dwc_mapping")] iterable $mappings
     ): Response {
-        // Get available object types from mappings
-        $objectTypes = array_merge(...array_map(fn($mapping) => $mapping->supportsPools(), iterator_to_array($mappings)));
-        $objectTypes = array_unique($objectTypes);
-
-        // Filter object types by user access
-        /** @var User $user */
-        $user = $this->getUser();
-        $userAccessibleTypes = $user->getAccessibleObjectTypes();
-        if (!empty($userAccessibleTypes)) {
-            $objectTypes = array_intersect($objectTypes, $userAccessibleTypes->toArray());
+        try {
+            $objectTypeChoices = $this->loadAccessibleObjectTypes($mappings);
+        } catch (\RuntimeException $th) {
+            // redirect to object type sync if user has no object types
+            return $this->redirectToRoute('app_sync_roles');
         }
-
-        $objectTypeChoices = array_combine($objectTypes, $objectTypes);
 
         // Get available tags from EasyDB
         $tagChoices = [];
@@ -230,19 +226,12 @@ final class ImportExportManagementController extends AbstractController
         TableConfigurationService $tableConfigService,
         #[AutowireIterator("app.easydb_dwc_mapping")] iterable $mappings
     ): Response {
-        // Get available object types from mappings
-        $objectTypes = array_merge(...array_map(fn($mapping) => $mapping->supportsPools(), iterator_to_array($mappings)));
-        $objectTypes = array_unique($objectTypes);
-
-        // Filter object types by user access
-        /** @var User $user */
-        $user = $this->getUser();
-        $userAccessibleTypes = $user->getAccessibleObjectTypes();
-        if (!empty($userAccessibleTypes)) {
-            $objectTypes = array_intersect($objectTypes, $userAccessibleTypes->toArray());
+        try {
+            $objectTypeChoices = $this->loadAccessibleObjectTypes($mappings);
+        } catch (\Throwable $th) {
+            // redirect to object type sync if user has no object types
+            return $this->redirectToRoute('app_sync_roles');
         }
-
-        $objectTypeChoices = array_combine($objectTypes, $objectTypes);
 
         // Get available tags from EasyDB
         $tagChoices = [];
@@ -440,5 +429,34 @@ final class ImportExportManagementController extends AbstractController
                 $this->addFlash('error', 'Unsupported export format: ' . $format);
                 return $this->redirectToRoute('app_import_management');
         }
+    }
+
+    /**
+     * @param iterable $mappings
+     * @return array
+     * @throws LogicException
+     * @throws RuntimeException
+     */
+    private function loadAccessibleObjectTypes(iterable $mappings): array
+    {
+
+        // Get available object types from mappings
+        $objectTypes = array_merge(...array_map(fn($mapping) => $mapping->supportsPools(), iterator_to_array($mappings)));
+        $objectTypes = array_unique($objectTypes);
+
+        // Filter object types by user access
+        /** @var User $user */
+        $user = $this->getUser();
+        $userAccessibleTypes = $user->getAccessibleObjectTypes();
+        if (!empty($userAccessibleTypes)) {
+            $objectTypes = array_intersect($objectTypes, $userAccessibleTypes->toArray());
+        } else {
+            // redirect to object type sync if user has no object types
+            throw new \RuntimeException('User has no accessible object types. Please sync roles first.');
+        }
+
+        $objectTypeChoices = array_combine($objectTypes, $objectTypes);
+
+        return $objectTypeChoices;
     }
 }
