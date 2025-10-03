@@ -136,4 +136,118 @@ class TableConfigurationService
 
         return array_intersect_key($allColumns, array_flip($visibleColumnKeys));
     }
+
+    /**
+     * Get table column configuration for exported data from the database
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public function getExportTableColumns(): array
+    {
+        return [
+            'catalog_number' => [
+                'label' => 'Catalog Number',
+                'property' => 'occurrence.catalogNumber',
+                'sortable' => true,
+                'searchable' => true,
+                'class' => 'font-weight-bold',
+            ],
+            'scientific_name' => [
+                'label' => 'Scientific Name',
+                'property' => 'occurrence.taxon.scientificName',
+                'sortable' => true,
+                'searchable' => true,
+            ],
+            'genus' => [
+                'label' => 'Genus',
+                'property' => 'occurrence.taxon.genus',
+                'sortable' => true,
+                'searchable' => true,
+            ],
+            'specific_epithet' => [
+                'label' => 'Species',
+                'property' => 'occurrence.taxon.specificEpithet',
+                'sortable' => true,
+                'searchable' => true,
+            ],
+            'recorded_by' => [
+                'label' => 'Recorded By',
+                'property' => 'occurrence.recordedBy',
+                'sortable' => true,
+                'searchable' => true,
+            ],
+            'locality' => [
+                'label' => 'Locality',
+                'property' => 'occurrence.location.locality',
+                'sortable' => false,
+                'searchable' => true,
+            ],
+            'event_date' => [
+                'label' => 'Event Date',
+                'property' => 'occurrence.event.eventDate',
+                'sortable' => true,
+                'searchable' => false,
+            ],
+            'global_object_id' => [
+                'label' => 'Global Object ID',
+                'property' => 'globalObjectID',
+                'sortable' => true,
+                'searchable' => true,
+                'class' => 'font-monospace text-muted',
+            ],
+            'last_updated' => [
+                'label' => 'Last Updated',
+                'property' => 'lastUpdatedAt',
+                'sortable' => true,
+                'searchable' => false,
+                'class' => 'text-muted',
+            ],
+        ];
+    }
+
+    /**
+     * Get visible export columns
+     */
+    public function getVisibleExportColumns(?array $visibleColumnKeys = null): array
+    {
+        $allColumns = $this->getExportTableColumns();
+
+        if ($visibleColumnKeys === null) {
+            // Default visible columns
+            $visibleColumnKeys = ['catalog_number', 'scientific_name', 'genus', 'specific_epithet', 'recorded_by', 'locality', 'global_object_id'];
+        }
+
+        return array_intersect_key($allColumns, array_flip($visibleColumnKeys));
+    }
+
+    /**
+     * Extract value from OccurrenceImport entity using property path notation
+     */
+    public function extractEntityValue($entity, string $propertyPath): ?string
+    {
+        $parts = explode('.', $propertyPath);
+        $current = $entity;
+
+        foreach ($parts as $part) {
+            if ($current === null) {
+                return null;
+            }
+
+            // Convert property name to getter method
+            $getter = 'get' . ucfirst($part);
+
+            if (method_exists($current, $getter)) {
+                $current = $current->$getter();
+            } else {
+                return null;
+            }
+        }
+
+        // Handle DateTime objects
+        if ($current instanceof \DateTimeInterface) {
+            return $current->format('Y-m-d H:i:s');
+        }
+
+        return $current ? (string)$current : null;
+    }
 }

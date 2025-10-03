@@ -34,6 +34,8 @@ final class ImportExportManagementController extends AbstractController
         EntityManagerInterface $entityManager,
         TableConfigurationService $tableConfigService,
         LoggerInterface $logger,
+        JobStatusService $jobStatusService,
+        MessageBusInterface $messageBus,
         #[AutowireIterator("app.easydb_dwc_mapping")] iterable $mappings
     ): Response {
         // Get available object types from mappings
@@ -97,8 +99,6 @@ final class ImportExportManagementController extends AbstractController
             if ($isImportClicked) {
                 /** @var User $user */
                 $user = $this->getUser();
-                $jobStatusService = $this->container->get(JobStatusService::class);
-                $messageBus = $this->container->get(MessageBusInterface::class);
 
                 $jobId = $jobStatusService->generateJobId();
                 $criteria = [
@@ -227,6 +227,7 @@ final class ImportExportManagementController extends AbstractController
         EasydbApiService $easydbApiService,
         DataExportService $dataExportService,
         EntityManagerInterface $entityManager,
+        TableConfigurationService $tableConfigService,
         #[AutowireIterator("app.easydb_dwc_mapping")] iterable $mappings
     ): Response {
         // Get available object types from mappings
@@ -238,7 +239,7 @@ final class ImportExportManagementController extends AbstractController
         $user = $this->getUser();
         $userAccessibleTypes = $user->getAccessibleObjectTypes();
         if (!empty($userAccessibleTypes)) {
-            $objectTypes = array_intersect($objectTypes, $userAccessibleTypes);
+            $objectTypes = array_intersect($objectTypes, $userAccessibleTypes->toArray());
         }
 
         $objectTypeChoices = array_combine($objectTypes, $objectTypes);
@@ -264,8 +265,16 @@ final class ImportExportManagementController extends AbstractController
             $this->addFlash('warning', 'Could not load tags: ' . $e->getMessage());
         }
 
+        // Load data from query parameters to persist form values after redirect
+        $queryData = [
+            'globalObjectId' => $request->query->get('globalObjectId'),
+            'tagId' => $request->query->getInt('tagId') ?: null,
+            'objectType' => $request->query->get('objectType'),
+            'exportFormat' => $request->query->get('exportFormat', 'csv'),
+        ];
+
         // Create form
-        $form = $this->createForm(ExportSelectionType::class, null, [
+        $form = $this->createForm(ExportSelectionType::class, $queryData, [
             'tag_choices' => $tagChoices,
             'object_type_choices' => $objectTypeChoices,
         ]);
@@ -274,6 +283,10 @@ final class ImportExportManagementController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
+
+            // Check which button was clicked
+            $isExportClicked = $request->request->has('export_selection') &&
+                array_key_exists('export', $request->request->all('export_selection'));
 
             try {
                 // Search for entities based on form criteria
@@ -288,35 +301,83 @@ final class ImportExportManagementController extends AbstractController
                     return $this->redirectToRoute('app_export_management');
                 }
 
-                // For now, convert EasyDB entities to the expected format for DataExportService
-                // In a real implementation, you might want to create a mapping service
-                $format = $data['exportFormat'];
+                // If Export button was clicked, perform the export
+                if ($isExportClicked) {
+                    $format = $data['exportFormat'];
 
-                switch ($format) {
-                    case 'csv':
-                        $response = new Response();
-                        $response->headers->set('Content-Type', 'text/csv');
-                        $response->setContent($dataExportService->convertToCsv($entities));
-                        $response->headers->set('Content-Disposition', 'attachment; filename="export_' . date('Y-m-d_H-i-s') . '.csv"');
-                        return $response;
-                    case 'json':
-                        return new Response(json_encode($entities), 200, [
-                            'Content-Type' => 'application/json',
-                            'Content-Disposition' => 'attachment; filename="export_' . date('Y-m-d_H-i-s') . '.json"'
-                        ]);
-                    case 'xml':
-                        $response = new Response();
-                        $response->headers->set('Content-Type', 'application/xml');
-                        $response->setContent($dataExportService->convertToXml($entities));
-                        $response->headers->set('Content-Disposition', 'attachment; filename="export_' . date('Y-m-d_H-i-s') . '.xml"');
-                        return $response;
-                    default:
-                        $this->addFlash('error', 'Unsupported export format: ' . $format);
-                        return $this->redirectToRoute('app_export_management');
+                    switch ($format) {
+                        case 'csv':
+                            $response = new Response();
+                            $response->headers->set('Content-Type', 'text/csv');
+                            $response->setContent($dataExportService->convertToCsv($entities));
+                            $response->headers->set('Content-Disposition', 'attachment; filename="export_' . date('Y-m-d_H-i-s') . '.csv"');
+                            return $response;
+                        case 'json':
+                            return new Response(json_encode($entities), 200, [
+                                'Content-Type' => 'application/json',
+                                'Content-Disposition' => 'attachment; filename="export_' . date('Y-m-d_H-i-s') . '.json"'
+                            ]);
+                        case 'xml':
+                            $response = new Response();
+                            $response->headers->set('Content-Type', 'application/xml');
+                            $response->setContent($dataExportService->convertToXml($entities));
+                            $response->headers->set('Content-Disposition', 'attachment; filename="export_' . date('Y-m-d_H-i-s') . '.xml"');
+                            return $response;
+                        default:
+                            $this->addFlash('error', 'Unsupported export format: ' . $format);
+                            return $this->redirectToRoute('app_export_management');
+                    }
                 }
+
+                // If Preview button was clicked, redirect to same page with query parameters
+                $queryParams = array_filter([
+                    'globalObjectId' => $data['globalObjectId'] ?? null,
+                    'tagId' => $data['tagId'] ?? null,
+                    'objectType' => $data['objectType'] ?? null,
+                    'exportFormat' => $data['exportFormat'] ?? 'csv',
+                    'page' => 0,
+                    'submitted' => 1,
+                ]);
+                return $this->redirectToRoute('app_export_management', $queryParams);
             } catch (\Exception $e) {
                 $this->addFlash('error', 'Export failed: ' . $e->getMessage());
             }
+        }
+
+        // Handle preview display
+        $nEntriesPerPage = 100;
+        $hasSearchCriteria = ($queryData['tagId'] ?? false) || ($queryData['objectType'] ?? false) || ($queryData['globalObjectId'] ?? false);
+        $isSubmitted = $request->query->getBoolean('submitted', false);
+
+        $previewEntities = [];
+        $totalCount = 0;
+
+        if ($hasSearchCriteria && $isSubmitted) {
+            $currentPage = $request->query->getInt('page', 0);
+            $offset = $currentPage * $nEntriesPerPage;
+
+            // Get entities for preview
+            $previewEntities = $entityManager->getRepository(OccurrenceImport::class)->searchEntities(
+                $queryData['globalObjectId'],
+                $queryData['tagId'],
+                $queryData['objectType'],
+                $nEntriesPerPage + 1, // Get one extra to check if there are more
+                $offset
+            );
+
+            // Check if there are more results
+            $hasMore = count($previewEntities) > $nEntriesPerPage;
+            if ($hasMore) {
+                array_pop($previewEntities); // Remove the extra entity
+            }
+
+            // Add flash message if no results found
+            if (empty($previewEntities)) {
+                $this->addFlash('warning', 'No entities found matching your criteria. Please adjust your filters and try again.');
+            }
+        } else {
+            $hasMore = false;
+            $currentPage = 0;
         }
 
         // Render the export management page with form
@@ -324,6 +385,14 @@ final class ImportExportManagementController extends AbstractController
             'form' => $form->createView(),
             'availableObjectTypes' => $objectTypeChoices,
             'availableTags' => $tagChoices,
+            'previewEntities' => $previewEntities,
+            'currentPage' => $currentPage ?? 0,
+            'nEntriesPerPage' => $nEntriesPerPage,
+            'hasMore' => $hasMore ?? false,
+            'tableColumns' => $tableConfigService->getVisibleExportColumns(),
+            'tableConfigService' => $tableConfigService,
+            'isSubmitted' => $isSubmitted,
+            'hasSearchCriteria' => $hasSearchCriteria,
         ]);
     }
 

@@ -16,7 +16,7 @@ class OccurrenceImportRepository extends ServiceEntityRepository
         parent::__construct($registry, OccurrenceImport::class);
     }
 
-    public function searchEntities(?string $globalObjectId, ?string $tagId, ?string $objectType, ?int $limit, ?int $offset): array
+    public function searchEntities(?string $globalObjectId, ?string $tagId, ?string $objectType, ?int $limit = null, ?int $offset = null): array
     {
         $qb = $this->createQueryBuilder('oi')
             ->innerJoin('oi.occurrence', 'o')

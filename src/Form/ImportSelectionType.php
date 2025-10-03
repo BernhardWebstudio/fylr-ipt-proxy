@@ -34,7 +34,7 @@ class ImportSelectionType extends AbstractType
             ])
             ->add('objectType', ChoiceType::class, [
                 'label' => 'Object Type',
-                'required' => false,
+                'required' => true,
                 'placeholder' => 'Select object type',
                 'choices' => $options['object_type_choices'],
                 'attr' => [
