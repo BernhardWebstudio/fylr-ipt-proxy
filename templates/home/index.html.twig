@@ -5,12 +5,31 @@
 
 {% block body %}
 	<div class="example-wrapper">
-		<h1>Hello!</h1>
+		<h1>Hello{% if app.user %}, {{ app.user.userIdentifier }}{% endif %}!</h1>
 
 		<p>This is a small web-app with a darwin-core database, storing data from easydb5 and/or fylr to export via IPT to GBIF.</p>
 
-		<p>Please log in to access the application.</p>
+		{% if app.user %}
+			<p>You are logged in. Use the menu to manage your data imports and exports.</p>
 
-		<a href="{{ path('app_login') }}" class="btn btn-primary">Log in</a>
+			<div class="btn-group" role="group">
+				<a href="{{ path('app_import_management') }}" class="btn btn-primary">
+					<i class="fa fa-download" aria-hidden="true"></i>
+					Import Data
+				</a>
+				<a href="{{ path('app_export_management') }}" class="btn btn-primary">
+					<i class="fa fa-upload" aria-hidden="true"></i>
+					Export Data
+				</a>
+				<a href="{{ path('app_jobs_list') }}" class="btn">
+					<i class="fa fa-tasks" aria-hidden="true"></i>
+					Job History
+				</a>
+			</div>
+		{% else %}
+			<p>Please log in to access the application.</p>
+
+			<a href="{{ path('app_login') }}" class="btn btn-primary">Log in</a>
+		{% endif %}
 	</div>
 {% endblock %}

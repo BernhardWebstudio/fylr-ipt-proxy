@@ -14,14 +14,16 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
-use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\CsrfTokenBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
+use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 
 /**
  * Custom authenticator for EasyDB authentication
  * @see https://symfony.com/doc/current/security/custom_authenticator.html
  */
-class EasydbAuthenticator extends AbstractAuthenticator
+class EasydbAuthenticator extends AbstractAuthenticator implements AuthenticationEntryPointInterface
 {
     public function __construct(
         private EasydbSessionService $easydbSession,
@@ -60,7 +62,7 @@ class EasydbAuthenticator extends AbstractAuthenticator
             throw new CustomUserMessageAuthenticationException('Username and password are required');
         }
 
-        return $this->authenticateWithCredentials($username, $password);
+        return $this->authenticateWithCredentials($username, $password, $request);
     }
 
     private function authenticateWithToken(string $token): Passport
@@ -71,11 +73,10 @@ class EasydbAuthenticator extends AbstractAuthenticator
             // This is a simplified approach - in production you might want to store token mappings
             $userIdentifier = $this->validateTokenWithEasydb($token);
 
-            return new Passport(
+            return new SelfValidatingPassport(
                 new UserBadge($userIdentifier, function ($userIdentifier) {
                     return $this->loadOrCreateUser($userIdentifier);
-                }),
-                new PasswordCredentials('') // Empty password for token auth
+                })
             );
         } catch (\Exception $e) {
             $this->logger->error('Token authentication failed', ['error' => $e->getMessage()]);
@@ -83,7 +84,7 @@ class EasydbAuthenticator extends AbstractAuthenticator
         }
     }
 
-    private function authenticateWithCredentials(string $username, string $password): Passport
+    private function authenticateWithCredentials(string $username, string $password, Request $request): Passport
     {
         try {
             // Start EasyDB session
@@ -94,12 +95,20 @@ class EasydbAuthenticator extends AbstractAuthenticator
 
             $this->logger->info('EasyDB authentication successful', ['username' => $username]);
 
-            return new Passport(
+            // Use SelfValidatingPassport since we already validated with EasyDB
+            $passport = new SelfValidatingPassport(
                 new UserBadge($username, function ($userIdentifier) use ($sessionData) {
                     return $this->loadOrCreateUser($userIdentifier, $sessionData);
-                }),
-                new PasswordCredentials($password)
+                })
             );
+
+            // Add CSRF token validation for form-based authentication
+            $csrfToken = $request->request->get('_csrf_token');
+            if ($csrfToken) {
+                $passport->addBadge(new CsrfTokenBadge('authenticate', $csrfToken));
+            }
+
+            return $passport;
         } catch (\Exception $e) {
             $this->logger->error('EasyDB authentication failed', [
                 'username' => $username,
@@ -154,8 +163,14 @@ class EasydbAuthenticator extends AbstractAuthenticator
             'firewall' => $firewallName
         ]);
 
-        // on success, let the request continue
-        return null;
+        // Return null for API requests (let them continue)
+        if ($request->headers->has('X-AUTH-TOKEN')) {
+            return null;
+        }
+
+        // For form-based login, redirect to home page
+        // This is required for Turbo to work properly (it expects a redirect response)
+        return new \Symfony\Component\HttpFoundation\RedirectResponse('/home');
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
@@ -184,14 +199,12 @@ class EasydbAuthenticator extends AbstractAuthenticator
         return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
     }
 
-    // public function start(Request $request, ?AuthenticationException $authException = null): Response
-    // {
-    //     /*
-    //      * If you would like this class to control what happens when an anonymous user accesses a
-    //      * protected page (e.g. redirect to /login), uncomment this method and make this class
-    //      * implement Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface.
-    //      *
-    //      * For more details, see https://symfony.com/doc/current/security/experimental_authenticators.html#configuring-the-authentication-entry-point
-    //      */
-    // }
+    public function start(Request $request, ?AuthenticationException $authException = null): Response
+    {
+        // Redirect to login page for unauthenticated users
+        return new JsonResponse([
+            'message' => 'Authentication required',
+            'login_url' => '/login'
+        ], Response::HTTP_UNAUTHORIZED);
+    }
 }

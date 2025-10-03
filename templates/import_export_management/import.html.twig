@@ -1,0 +1,339 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Import Data from EasyDB
+{% endblock %}
+
+{% block stylesheets %}
+	<style>
+		.table-responsive-stack tr > td:before {
+			content: attr(data-label) ": ";
+			font-weight: bold;
+			display: none;
+		}
+
+		@media(max-width: 768px) {
+			.table-responsive-stack table,
+			.table-responsive-stack thead,
+			.table-responsive-stack tbody,
+			.table-responsive-stack th,
+			.table-responsive-stack td,
+			.table-responsive-stack tr {
+				display: block;
+			}
+
+			.table-responsive-stack thead tr {
+				position: absolute;
+				top: -9999px;
+				left: -9999px;
+			}
+
+			.table-responsive-stack tr {
+				border: 1px solid #ccc;
+				margin-bottom: 10px;
+				padding: 10px;
+				border-radius: 6px;
+			}
+
+			.table-responsive-stack td {
+				border: none;
+				position: relative;
+				padding-left: 50%;
+			}
+
+			.table-responsive-stack tr > td:before {
+				display: block;
+				position: absolute;
+				left: 6px;
+				width: 45%;
+				padding-right: 10px;
+				white-space: nowrap;
+			}
+		}
+
+		.form-row-inline {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 1rem;
+			align-items: start;
+		}
+
+		.form-row-inline .form-group {
+			flex: 1;
+			min-width: 200px;
+		}
+
+		.form-row-inline .btn {
+			margin-top: 0;
+		}
+
+		@media(max-width: 768px) {
+			.form-row-inline {
+				flex-direction: column;
+				gap: 0.5rem;
+			}
+
+			.form-row-inline .form-group {
+				min-width: 100%;
+			}
+		}
+	</style>
+{% endblock %}
+
+{% block body %}
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-12">
+				<div class="content">
+					<h1 class="content-title">
+						<i class="fa fa-download" aria-hidden="true"></i>
+						Import Data from EasyDB
+					</h1>
+
+					<p class="text-muted">
+						Select criteria to preview and import specimen data from EasyDB.
+												                        Use filters to narrow down your selection before importing.
+					</p>
+
+					<!-- Import Form -->
+					<div class="card">
+						<div class="card-header">
+							<h5 class="card-title">
+								<i class="fa fa-filter" aria-hidden="true"></i>
+								Filter & Import Options
+							</h5>
+						</div>
+						<div class="card-body">
+							{{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true}}) }}
+
+							<div class="form-row-inline">
+								<div class="form-group">
+									{{ form_label(form.globalObjectId) }}
+									{{ form_widget(form.globalObjectId, {'attr': {'class': 'form-control'}}) }}
+									{% if form.globalObjectId.vars.help %}
+										<small class="form-text text-muted">{{ form.globalObjectId.vars.help }}</small>
+									{% endif %}
+									{{ form_errors(form.globalObjectId) }}
+								</div>
+
+								<div class="form-group">
+									{{ form_label(form.tagId) }}
+									{{ form_widget(form.tagId, {'attr': {'class': 'form-control'}}) }}
+									{{ form_errors(form.tagId) }}
+								</div>
+
+								<div class="form-group">
+									{{ form_label(form.objectType) }}
+									{{ form_widget(form.objectType, {'attr': {'class': 'form-control'}}) }}
+									{{ form_errors(form.objectType) }}
+								</div>
+
+								<div class="btn-group" role="group" aria-label="Actions">
+									<label>Actions</label><br />
+									{{ form_widget(form.preview, {'attr': {'class': 'btn btn-primary'}}) }}
+									{{ form_widget(form.import, {'attr': {'class': 'btn btn-success'}}) }}
+								</div>
+							</div>
+
+							{{ form_end(form) }}
+						</div>
+					</div>
+
+					<!-- Results Table -->
+					{# Handle case where data is wrapped in 'data' key #}
+					{% if easydbData.data is defined and easydbData.objects is not defined %}
+						{% set easydbData = easydbData.data %}
+					{% endif %}
+					{% if easydbData and easydbData.objects is defined and easydbData.objects|length > 0 %}
+						<div class="card mt-4">
+							<div class="card-header d-flex justify-content-between align-items-center">
+								<h5 class="card-title mb-0">
+									<i class="fa fa-table" aria-hidden="true"></i>
+									Preview Results
+									<span class="badge badge-primary ml-2">{{ easydbData.objects|length }}
+										items</span>
+								</h5>
+								<div class="text-muted">
+									Page
+									{{ currentPage + 1 }}
+									{% if hasMore %}
+										<span class="text-muted">• More available</span>
+									{% endif %}
+								</div>
+							</div>
+							<div class="card-body p-0">
+								<div class="table-responsive table-responsive-stack">
+									<table class="table table-hover table-striped mb-0">
+										<thead class="thead-light">
+											<tr>
+												{% for columnKey, column in tableColumns %}
+													<th scope="col" class="{{ column.class ?? '' }}">
+														{{ column.label }}
+														{% if column.sortable %}
+															<i class="fa fa-sort text-muted" aria-hidden="true"></i>
+														{% endif %}
+													</th>
+												{% endfor %}
+												<th scope="col" width="120">Actions</th>
+											</tr>
+										</thead>
+										<tbody>
+											{% for object in easydbData.objects %}
+												<tr>
+													{% for columnKey, column in tableColumns %}
+														{% set value = tableConfigService.extractValue(object, column.path, column.fallback_path ?? null) %}
+														<td data-label="{{ column.label }}" class="{{ column.class ?? '' }}">
+															{% if value %}
+																{% if columnKey == 'global_object_id' %}
+																	<small>{{ value }}</small>
+																{% else %}
+																	{{ value }}
+																{% endif %}
+															{% else %}
+																<span class="text-muted">—</span>
+															{% endif %}
+														</td>
+													{% endfor %}
+													<td data-label="Actions">
+														{% set globalObjectId = tableConfigService.extractValue(object, '_global_object_id') %}
+														{% set objectType = object._objecttype ?? 'fungarium' %}
+														{% if globalObjectId %}
+															<div class="btn-group btn-group-sm" role="group">
+																<a href="#" class="btn btn-outline-primary btn-sm" title="View Details" data-toggle="tooltip">
+																	<i class="fa fa-eye" aria-hidden="true"></i>
+																</a>
+																<form method="post" action="{{ path('app_import_management_one', {type: objectType, globalObjectId: globalObjectId}) }}" style="display: inline;">
+																	<button type="submit" class="btn btn-outline-success btn-sm" title="Import This Item" data-toggle="tooltip" onclick="return confirm('Import this specimen?')">
+																		<i class="fa fa-download" aria-hidden="true"></i>
+																	</button>
+																</form>
+															</div>
+														{% endif %}
+													</td>
+												</tr>
+											{% endfor %}
+										</tbody>
+									</table>
+								</div>
+							</div>
+
+							<!-- Pagination -->
+							{% if currentPage > 0 or hasMore %}
+								<div class="card-footer">
+									<nav aria-label="Table pagination">
+										<div class="d-flex justify-content-between align-items-center">
+											<div class="text-muted">
+												Showing
+												{{ (currentPage * nEntriesPerPage) + 1 }}
+												-
+												{{ (currentPage * nEntriesPerPage) + easydbData.objects|length }}
+												of
+												{% if hasMore %}many
+												{% else %}
+													{{ (currentPage * nEntriesPerPage) + easydbData.objects|length }}
+												{% endif %}
+												items
+											</div>
+											<div class="btn-group" role="group">
+												{% if currentPage > 0 %}
+													<a href="{{ path('app_import_management', app.request.query.all|merge({page: currentPage - 1})) }}" class="btn btn-outline-primary">
+														<i class="fa fa-chevron-left" aria-hidden="true"></i>
+														Previous
+													</a>
+												{% endif %}
+												{% if hasMore %}
+													<a href="{{ path('app_import_management', app.request.query.all|merge({page: currentPage + 1})) }}" class="btn btn-outline-primary">
+														Next
+														<i class="fa fa-chevron-right" aria-hidden="true"></i>
+													</a>
+												{% endif %}
+											</div>
+										</div>
+									</nav>
+								</div>
+							{% endif %}
+						</div>
+					{% elseif form.vars.submitted or (isSubmitted and hasSearchCriteria) %}
+						<div class="card mt-4">
+							<div class="card-body text-center">
+								<div class="my-4">
+									<i class="fa fa-search fa-3x text-muted" aria-hidden="true"></i>
+									<h5 class="mt-3">No Results Found</h5>
+									<p class="text-muted">
+										No specimens found matching your search criteria.
+                                        Try adjusting your filters or check your connection to EasyDB.
+									</p>
+									<div class="mt-3">
+										<strong>Current filters:</strong>
+										<ul class="list-unstyled mt-2 text-left" style="max-width: 400px; margin: 0 auto;">
+											{% if app.request.query.get('globalObjectId') %}
+												<li>
+													<i class="fa fa-filter" aria-hidden="true"></i>
+													Global Object ID:
+													{{ app.request.query.get('globalObjectId') }}</li>
+											{% endif %}
+											{% if app.request.query.get('tagId') %}
+												<li>
+													<i class="fa fa-tag" aria-hidden="true"></i>
+													Tag ID:
+													{{ app.request.query.get('tagId') }}</li>
+											{% endif %}
+											{% if app.request.query.get('objectType') %}
+												<li>
+													<i class="fa fa-cube" aria-hidden="true"></i>
+													Object Type:
+													{{ app.request.query.get('objectType') }}</li>
+											{% endif %}
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+					{% else %}
+						<div class="card mt-4">
+							<div class="card-body text-center">
+								<div class="my-4">
+									<i class="fa fa-filter fa-3x text-muted" aria-hidden="true"></i>
+									<h5 class="mt-3">Ready to Import</h5>
+									<p class="text-muted">
+										Use the filters above to search for specimens in EasyDB, then preview and import them into your collection.
+									</p>
+								</div>
+							</div>
+						</div>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+
+{% block body_javascripts %}
+	<script>
+		// Initialize tooltips
+document.addEventListener('DOMContentLoaded', function () {
+if (typeof halfmoon !== 'undefined') { // Enable tooltips if Halfmoon supports them
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-toggle="tooltip"]'));
+tooltipTriggerList.map(function (tooltipTriggerEl) {
+tooltipTriggerEl.setAttribute('title', tooltipTriggerEl.getAttribute('title'));
+});
+}
+});
+
+// Form validation feedback
+(function () {
+'use strict';
+window.addEventListener('load', function () {
+var forms = document.getElementsByClassName('needs-validation');
+var validation = Array.prototype.filter.call(forms, function (form) {
+form.addEventListener('submit', function (event) {
+if (form.checkValidity() === false) {
+event.preventDefault();
+event.stopPropagation();
+}
+form.classList.add('was-validated');
+}, false);
+});
+}, false);
+})();
+	</script>
+{% endblock %}

@@ -22,6 +22,22 @@ services:
       - host.docker.internal:host-gateway
     tty: true
 
+  # Message consumer for development
+  messenger_consumer:
+    build:
+      context: .
+      target: frankenphp_dev
+    volumes:
+      - ./:/app
+      - ./var/log:/app/var/log
+      - ./var/export:/app/var/export
+    environment:
+      APP_ENV: "${APP_ENV:-dev}"
+      XDEBUG_MODE: "${XDEBUG_MODE:-off}"
+    extra_hosts:
+      # Ensure that host.docker.internal is correctly defined on Linux
+      - host.docker.internal:host-gateway
+
 ###> symfony/mercure-bundle ###
 ###< symfony/mercure-bundle ###
 

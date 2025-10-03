@@ -156,9 +156,24 @@ class EasydbApiService
 
         $response = $this->httpClient->request('GET', $this->sessionService->getUrl("tags"), [
             'headers' => [
-                'accept' => '*/*',
-                'cache-control' => 'no-cache',
-                'pragma' => 'no-cache',
+                'accept' => 'application/json',
+            ]
+        ]);
+
+        $this->sessionService->checkStatusCode($response);
+        $content = $response->toArray();
+        return $content;
+    }
+
+    public function fetchObjectTypes(): array
+    {
+        if (!$this->initializeFromSession()) {
+            throw new \RuntimeException('No valid EasyDB session available');
+        }
+
+        $response = $this->httpClient->request('GET', $this->sessionService->getUrl("objecttypes"), [
+            'headers' => [
+                'accept' => 'application/json',
             ]
         ]);
 
@@ -170,7 +185,7 @@ class EasydbApiService
     /**
      * Search entities by tag ID and optionally by object type
      */
-    public function searchByTag(int $tagId, ?string $objectType = null, int $offset = 0, int $limit = 100): array
+    public function searchByTag(?int $tagId = null, ?string $objectType = null, int $offset = 0, int $limit = 100): array
     {
         if (!$this->initializeFromSession()) {
             throw new \RuntimeException('No valid EasyDB session available');
@@ -185,7 +200,7 @@ class EasydbApiService
 
         $searchQuery = [
             'type' => 'complex',
-            'search' => [$searchCriteria],
+            'search' => $tagId ? [$searchCriteria] : [],
             'bool' => 'must',
         ];
 

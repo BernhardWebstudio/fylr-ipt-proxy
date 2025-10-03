@@ -32,6 +32,23 @@ services:
         published: ${HTTP3_PORT:-443}
         protocol: udp
 
+  # Message queue consumer for processing async jobs
+  messenger_consumer:
+    image: ${IMAGES_PREFIX:-}app-php
+    restart: unless-stopped
+    command: ["php", "bin/console", "messenger:consume", "async", "--limit=100", "--memory-limit=128M", "--time-limit=3600"]
+    environment:
+      # Run "composer require symfony/orm-pack" to install and configure Doctrine ORM
+      DATABASE_URL: postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-!EX2sW3HREKmm6aHU!}@database:5432/${POSTGRES_DB:-app}?serverVersion=${POSTGRES_VERSION:-15}&charset=${POSTGRES_CHARSET:-utf8}
+      # The two next lines can be removed after initial installation
+      SYMFONY_VERSION: ${SYMFONY_VERSION:-}
+      STABILITY: ${STABILITY:-stable}
+    depends_on:
+      - database
+    volumes:
+      - ./var/log:/app/var/log
+      - ./var/export:/app/var/export
+
 # Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
 ###> symfony/mercure-bundle ###
 ###< symfony/mercure-bundle ###

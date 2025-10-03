@@ -16,6 +16,40 @@ class OccurrenceImportRepository extends ServiceEntityRepository
         parent::__construct($registry, OccurrenceImport::class);
     }
 
+    public function searchEntities(?string $globalObjectId, ?string $tagId, ?string $objectType, ?int $limit, ?int $offset): array
+    {
+        $qb = $this->createQueryBuilder('oi')
+            ->innerJoin('oi.occurrence', 'o')
+            ->addSelect('o');
+
+        if ($globalObjectId) {
+            $qb->andWhere('oi.globalObjectID = :globalObjectId')
+                ->setParameter('globalObjectId', $globalObjectId);
+        }
+
+        if ($tagId) {
+            $qb->andWhere('o.tagId = :tagId')
+                ->setParameter('tagId', $tagId);
+        }
+
+        if ($objectType) {
+            $qb->andWhere('o.objectType = :objectType')
+                ->setParameter('objectType', $objectType);
+        }
+
+        if ($limit !== null) {
+            $qb->setMaxResults($limit);
+        }
+
+        if ($offset !== null) {
+            $qb->setFirstResult($offset);
+        }
+
+        $qb->orderBy('oi.id', 'DESC');
+
+        return $qb->getQuery()->getResult();
+    }
+
     //    /**
     //     * @return OccurrenceImport[] Returns an array of OccurrenceImport objects
     //     */

@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -24,6 +26,17 @@ class User implements UserInterface
      */
     #[ORM\Column]
     private array $roles = [];
+
+    /**
+     * @var Collection<int, EasydbObjectType>
+     */
+    #[ORM\ManyToMany(targetEntity: EasydbObjectType::class)]
+    private Collection $accessibleObjectTypes;
+
+    public function __construct()
+    {
+        $this->accessibleObjectTypes = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -80,7 +93,7 @@ class User implements UserInterface
     public function __serialize(): array
     {
         $data = (array) $this;
-        $data["\0".self::class."\0password"] = hash('crc32c', $this->password);
+        // $data["\0".self::class."\0password"] = hash('crc32c', $this->password);
 
         return $data;
     }
@@ -89,5 +102,29 @@ class User implements UserInterface
     public function eraseCredentials(): void
     {
         // @deprecated, to be removed when upgrading to Symfony 8
+    }
+
+    /**
+     * @return Collection<int, EasydbObjectType>
+     */
+    public function getAccessibleObjectTypes(): Collection
+    {
+        return $this->accessibleObjectTypes;
+    }
+
+    public function addAccessibleObjectType(EasydbObjectType $accessibleObjectType): static
+    {
+        if (!$this->accessibleObjectTypes->contains($accessibleObjectType)) {
+            $this->accessibleObjectTypes->add($accessibleObjectType);
+        }
+
+        return $this;
+    }
+
+    public function removeAccessibleObjectType(EasydbObjectType $accessibleObjectType): static
+    {
+        $this->accessibleObjectTypes->removeElement($accessibleObjectType);
+
+        return $this;
     }
 }
