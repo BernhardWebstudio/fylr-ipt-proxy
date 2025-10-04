@@ -103,6 +103,16 @@ final class ImportExportManagementController extends AbstractController
                     'objectType' => $data['objectType'] ?? null,
                 ];
 
+                // Get EasyDB credentials from session
+                $session = $request->getSession();
+                $easydbToken = $session->get('easydb_token');
+                $easydbSessionContent = $session->get('easydb_session_content');
+
+                if (!$easydbToken || !$easydbSessionContent) {
+                    $this->addFlash('error', 'No valid EasyDB session available. Please log in again.');
+                    return $this->redirectToRoute('app_import_management');
+                }
+
                 // Create job status record
                 $jobStatusService->createJob($jobId, 'import', $user, $criteria);
 
@@ -111,7 +121,9 @@ final class ImportExportManagementController extends AbstractController
                     $jobId,
                     $data['objectType'] ?? null,
                     $criteria,
-                    $user->getId()
+                    $user->getId(),
+                    $easydbToken,
+                    $easydbSessionContent
                 );
                 $messageBus->dispatch($importMessage);
 
@@ -205,6 +217,7 @@ final class ImportExportManagementController extends AbstractController
             $entityManager->flush();
 
             $logger->info('Successfully imported single entity', ['globalObjectId' => $globalObjectId, 'type' => $type]);
+            $this->addFlash('success', 'Import of Specimen with ID ' . $globalObjectId . ' was successful');
             return new Response('Import successful', 200);
         } catch (\Exception $e) {
             $logger->error('Failed to import single entity', [
@@ -341,7 +354,7 @@ final class ImportExportManagementController extends AbstractController
         $previewEntities = [];
         $totalCount = 0;
 
-        if ($hasSearchCriteria && $isSubmitted) {
+        if ($isSubmitted) {
             $currentPage = $request->query->getInt('page', 0);
             $offset = $currentPage * $nEntriesPerPage;
 
@@ -439,7 +452,6 @@ final class ImportExportManagementController extends AbstractController
      */
     private function loadAccessibleObjectTypes(iterable $mappings): array
     {
-
         // Get available object types from mappings
         $objectTypes = array_merge(...array_map(fn($mapping) => $mapping->supportsPools(), iterator_to_array($mappings)));
         $objectTypes = array_unique($objectTypes);
@@ -449,7 +461,7 @@ final class ImportExportManagementController extends AbstractController
         $user = $this->getUser();
         $userAccessibleTypes = $user->getAccessibleObjectTypes();
         if (!empty($userAccessibleTypes)) {
-            $objectTypes = array_intersect($objectTypes, $userAccessibleTypes->toArray());
+            $objectTypes = array_intersect($objectTypes, $userAccessibleTypes->map(fn($type) => $type->getName())->toArray());
         } else {
             // redirect to object type sync if user has no object types
             throw new \RuntimeException('User has no accessible object types. Please sync roles first.');

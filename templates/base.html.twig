@@ -35,7 +35,7 @@
 				<h5 class="sidebar-title">Navigation</h5>
 				<ul class="sidebar-menu sidebar-nav">
 					<li>
-						<a href="{{ path('app_home') }}" class="sidebar-link">
+						<a href="{{ path('app_home') }}" class="sidebar-link nav-link {{ app.request.attributes.get('_route') == 'app_home' ? 'active' : '' }}">
 							<i class="fa fa-home" aria-hidden="true"></i>
 							Home
 						</a>
@@ -48,21 +48,21 @@
 						</li>
 
 						<li class="nav-item">
-							<a href="{{ path('app_import_management') }}" class="sidebar-link nav-link">
+							<a href="{{ path('app_import_management') }}" class="sidebar-link nav-link {{ app.request.attributes.get('_route') starts with 'app_import' ? 'active' : '' }}">
 								<i class="fa fa-download" aria-hidden="true"></i>
 								Import Data
 							</a>
 						</li>
 
 						<li class="nav-item">
-							<a href="{{ path('app_export_management') }}" class="sidebar-link nav-link">
+							<a href="{{ path('app_export_management') }}" class="sidebar-link nav-link {{ app.request.attributes.get('_route') starts with 'app_export' ? 'active' : '' }}">
 								<i class="fa fa-upload" aria-hidden="true"></i>
 								Export Data
 							</a>
 						</li>
 
 						<li class="nav-item">
-							<a href="{{ path('app_jobs_list') }}" class="sidebar-link nav-link">
+							<a href="{{ path('app_jobs_list') }}" class="sidebar-link nav-link {{ app.request.attributes.get('_route') starts with 'app_job' ? 'active' : '' }}">
 								<i class="fa fa-tasks" aria-hidden="true"></i>
 								Job History
 							</a>
@@ -87,11 +87,13 @@
 					</button>
 				</div>
 
-				<a href="{{ path('app_home') }}" class="navbar-brand">
-					<strong>fylr IPT Proxy</strong>
-				</a>
+				<div class="navbar-content ms-auto">
+					<a href="{{ path('app_home') }}" class="navbar-brand">
+						<strong>fylr IPT Proxy</strong>
+					</a>
+				</div>
 
-				<div class="navbar-content ml-auto">
+				<div class="navbar-content ms-auto">
 					<div class="btn-group" role="group" aria-label="User actions">
 						{% if app.user %}
 							<div class="dropdown btn-group">
@@ -136,9 +138,7 @@
 					{% for message in messages %}
 						<div class="alert alert-{{ label == 'error' ? 'danger' : label }} alert-dismissible" role="alert">
 							{{ message }}
-							<button class="btn btn-close" type="button" data-dismiss="alert" aria-label="Close">
-								<span aria-hidden="true">&times;</span>
-							</button>
+							<button class="btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
 						</div>
 					{% endfor %}
 				{% endfor %}

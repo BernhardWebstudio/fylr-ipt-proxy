@@ -11,6 +11,8 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  */
 class EasydbApiService
 {
+    private bool $isInitialized = false;
+
     public function __construct(
         private HttpClientInterface $httpClient,
         private EasydbSessionService $sessionService,
@@ -23,6 +25,11 @@ class EasydbApiService
      */
     public function initializeFromSession(): bool
     {
+        // Skip if already initialized
+        if ($this->isInitialized) {
+            return true;
+        }
+
         $session = $this->requestStack->getSession();
 
         if (!$session) {
@@ -37,20 +44,8 @@ class EasydbApiService
         }
 
         try {
-            // Restore session state
-            $reflection = new \ReflectionClass($this->sessionService);
-
-            $tokenProperty = $reflection->getProperty('token');
-            $tokenProperty->setAccessible(true);
-            $tokenProperty->setValue($this->sessionService, $token);
-
-            $contentProperty = $reflection->getProperty('sessionContent');
-            $contentProperty->setAccessible(true);
-            $contentProperty->setValue($this->sessionService, $sessionContent);
-
-            // Verify session is still valid
-            $this->sessionService->retrieveCurrentSession();
-
+            $this->restoreSessionState($token, $sessionContent);
+            $this->isInitialized = true;
             return true;
         } catch (\Exception $e) {
             $this->logger->warning('Failed to restore EasyDB session', [
@@ -66,13 +61,83 @@ class EasydbApiService
     }
 
     /**
+     * Initialize EasyDB session from explicit credentials (for use in async contexts like message handlers)
+     */
+    public function initializeFromCredentials(?string $token, ?array $sessionContent): bool
+    {
+        // Skip if already initialized
+        if ($this->isInitialized) {
+            return true;
+        }
+
+        if (!$token || !$sessionContent) {
+            return false;
+        }
+
+        try {
+            $this->restoreSessionState($token, $sessionContent);
+            $this->isInitialized = true;
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->warning('Failed to restore EasyDB session from credentials', [
+                'error' => $e->getMessage()
+            ]);
+
+            return false;
+        }
+    }
+
+    /**
+     * Ensure the service is initialized, attempting to initialize from HTTP session if needed
+     */
+    private function ensureInitialized(): void
+    {
+        if ($this->isInitialized) {
+            return;
+        }
+
+        // Try to initialize from HTTP session (for web requests)
+        if ($this->initializeFromSession()) {
+            return;
+        }
+
+        // If we couldn't initialize, throw exception
+        throw new \RuntimeException('No valid EasyDB session available. The service must be initialized with credentials.');
+    }
+
+    /**
+     * Restore session state to the EasydbSessionService
+     */
+    private function restoreSessionState(string $token, array $sessionContent): void
+    {
+        $reflection = new \ReflectionClass($this->sessionService);
+
+        $tokenProperty = $reflection->getProperty('token');
+        $tokenProperty->setAccessible(true);
+        $tokenProperty->setValue($this->sessionService, $token);
+
+        $contentProperty = $reflection->getProperty('sessionContent');
+        $contentProperty->setAccessible(true);
+        $contentProperty->setValue($this->sessionService, $sessionContent);
+
+        // Verify session is still valid
+        $this->sessionService->retrieveCurrentSession();
+    }
+
+    /**
+     * Reset the initialization state (useful for testing or when switching contexts)
+     */
+    public function reset(): void
+    {
+        $this->isInitialized = false;
+    }
+
+    /**
      * Perform a search query against EasyDB
      */
     public function search(array $query): array
     {
-        if (!$this->initializeFromSession()) {
-            throw new \RuntimeException('No valid EasyDB session available');
-        }
+        $this->ensureInitialized();
 
         // This would implement the actual search logic
         // For now, returning a placeholder
@@ -87,9 +152,7 @@ class EasydbApiService
      */
     public function loadEntityByGlobalObjectID(string $globalObjectID): ?array
     {
-        if (!$this->initializeFromSession()) {
-            throw new \RuntimeException('No valid EasyDB session available');
-        }
+        $this->ensureInitialized();
 
         $response = $this->httpClient->request('POST', $this->sessionService->getUrl("search"), [
             'json' => [
@@ -114,9 +177,7 @@ class EasydbApiService
      */
     public function loadEntitiesForPool(string $poolType, int $offset = 0, int $limit = 100): array
     {
-        if (!$this->initializeFromSession()) {
-            throw new \RuntimeException('No valid EasyDB session available');
-        }
+        $this->ensureInitialized();
 
         $response = $this->httpClient->request('POST', $this->sessionService->getUrl("search"), [
             'json' => [
@@ -150,9 +211,7 @@ class EasydbApiService
      */
     public function fetchTags(): array
     {
-        if (!$this->initializeFromSession()) {
-            throw new \RuntimeException('No valid EasyDB session available');
-        }
+        $this->ensureInitialized();
 
         $response = $this->httpClient->request('GET', $this->sessionService->getUrl("tags"), [
             'headers' => [
@@ -167,11 +226,9 @@ class EasydbApiService
 
     public function fetchObjectTypes(): array
     {
-        if (!$this->initializeFromSession()) {
-            throw new \RuntimeException('No valid EasyDB session available');
-        }
+        $this->ensureInitialized();
 
-        $response = $this->httpClient->request('GET', $this->sessionService->getUrl("objecttypes"), [
+        $response = $this->httpClient->request('GET', $this->sessionService->getUrl("objecttype?format=short"), [
             'headers' => [
                 'accept' => 'application/json',
             ]
@@ -187,9 +244,7 @@ class EasydbApiService
      */
     public function searchByTag(?int $tagId = null, ?string $objectType = null, int $offset = 0, int $limit = 100): array
     {
-        if (!$this->initializeFromSession()) {
-            throw new \RuntimeException('No valid EasyDB session available');
-        }
+        $this->ensureInitialized();
 
         $searchCriteria = [
             'type' => 'in',
@@ -253,9 +308,7 @@ class EasydbApiService
      */
     public function searchEntities(?string $globalObjectID = null, ?int $tagId = null, ?string $objectType = null, int $offset = 0, int $limit = 100): array
     {
-        if (!$this->initializeFromSession()) {
-            throw new \RuntimeException('No valid EasyDB session available');
-        }
+        $this->ensureInitialized();
 
         // If global object ID is provided, use existing method
         if ($globalObjectID) {
@@ -281,6 +334,14 @@ class EasydbApiService
      */
     public function hasValidSession(): bool
     {
-        return $this->initializeFromSession();
+        return $this->isInitialized || $this->initializeFromSession();
+    }
+
+    /**
+     * Check if the service is already initialized
+     */
+    public function isInitialized(): bool
+    {
+        return $this->isInitialized;
     }
 }

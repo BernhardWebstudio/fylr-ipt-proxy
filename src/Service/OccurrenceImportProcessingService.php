@@ -37,7 +37,7 @@ class OccurrenceImportProcessingService
         $globalObjectId = $entityData['_global_object_id'] ?? null;
 
         if (!$globalObjectId) {
-            $this->logger->warning('Entity without global object ID, skipping');
+            $this->logger->warning('Entity without global object ID, skipping', ['entityData' => $entityData]);
             throw new \InvalidArgumentException('Entity must have a global object ID');
         }
 
@@ -73,11 +73,11 @@ class OccurrenceImportProcessingService
         // Only update if the remote data is newer
         if ($lastModified > $existingImport->getRemoteLastUpdatedAt()) {
             $mapping->mapOccurrence($entityData, $existingImport);
-            
+
             if ($user) {
                 $existingImport->setManualImportTrigger($user);
             }
-            
+
             $this->logger->debug('Updated existing import', ['globalObjectId' => $globalObjectId]);
         } else {
             $this->logger->debug('Skipping entity - no changes', ['globalObjectId' => $globalObjectId]);
@@ -100,7 +100,7 @@ class OccurrenceImportProcessingService
         ?User $user
     ): OccurrenceImport {
         $import = new OccurrenceImport();
-        
+
         if ($user) {
             $import->setManualImportTrigger($user);
         }
@@ -108,7 +108,7 @@ class OccurrenceImportProcessingService
         $mapping->mapOccurrence($entityData, $import);
 
         $this->entityManager->persist($import);
-        
+
         $globalObjectId = $entityData['_global_object_id'];
         $this->logger->debug('Created new import', ['globalObjectId' => $globalObjectId]);
 

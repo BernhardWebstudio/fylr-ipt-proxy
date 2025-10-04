@@ -195,7 +195,7 @@ final class JobStatusController extends AbstractController
     private function getContentTypeForFile(string $filename): string
     {
         $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-        
+
         return match ($extension) {
             'csv' => 'text/csv',
             'json' => 'application/json',

@@ -5,9 +5,9 @@
 
 {% block stylesheets %}
 	<style>
-		.table-responsive-stack tr > td:before {
-			content: attr(data-label) ": ";
-			font-weight: bold;
+		.table-responsive-stack <h5 class="card-title mb-0" > <i class="fa fa-table" aria-hidden="true" > </i > Preview Results <span class="badge bg-primary ms-2" >{{easydbData.objects|length}}items</span> </h5>d:before {
+			<table class="table table-hover table-striped mb-0"> <thead class="table-light"> <tr> content: attr(data-label) ": ";
+			<div class="btn-group btn-group-sm" role="group"> <a href="#" class="btn btn-outline-primary btn-sm" title="View Details" data-bs-toggle="tooltip"> <i class="fa fa-eye" aria-hidden="true"></i> </a> <form method="post" action="{{ path('app_import_management_one', {type: objectType, globalObjectId: globalObjectId}) }}" style="display: inline;"> <button type="submit" class="btn btn-outline-success btn-sm" title="Import This Item" data-bs-toggle="tooltip" onclick="return confirm('Import this specimen?')"> <i class="fa fa-download" aria-hidden="true"></i> </button> </form> </div>eight: bold;
 			display: none;
 		}
 
@@ -91,7 +91,7 @@
 
 					<p class="text-muted">
 						Select criteria to preview and import specimen data from EasyDB.
-												                        Use filters to narrow down your selection before importing.
+																		                        Use filters to narrow down your selection before importing.
 					</p>
 
 					<!-- Import Form -->
@@ -127,10 +127,12 @@
 									{{ form_errors(form.objectType) }}
 								</div>
 
-								<div class="btn-group" role="group" aria-label="Actions">
+								<div class="form-group">
 									<label>Actions</label><br />
-									{{ form_widget(form.preview, {'attr': {'class': 'btn btn-primary'}}) }}
-									{{ form_widget(form.import, {'attr': {'class': 'btn btn-success'}}) }}
+									<div class="btn-group" role="group" aria-label="Actions">
+										{{ form_widget(form.preview, {'attr': {'class': 'btn btn-primary'}}) }}
+										{{ form_widget(form.import, {'attr': {'class': 'btn btn-success'}}) }}
+									</div>
 								</div>
 							</div>
 
@@ -198,11 +200,11 @@
 														{% set objectType = object._objecttype ?? 'fungarium' %}
 														{% if globalObjectId %}
 															<div class="btn-group btn-group-sm" role="group">
-																<a href="#" class="btn btn-outline-primary btn-sm" title="View Details" data-toggle="tooltip">
+																<a href="https://www.nahima.ethz.ch/#/detail/{{ object._uuid }}" class="btn btn-outline-primary btn-sm" title="View Details" data-toggle="tooltip" target="_blank" rel="noopener">
 																	<i class="fa fa-eye" aria-hidden="true"></i>
 																</a>
 																<form method="post" action="{{ path('app_import_management_one', {type: objectType, globalObjectId: globalObjectId}) }}" style="display: inline;">
-																	<button type="submit" class="btn btn-outline-success btn-sm" title="Import This Item" data-toggle="tooltip" onclick="return confirm('Import this specimen?')">
+																	<button type="submit" class="btn btn-outline-success btn-sm" title="Import This Item" data-toggle="tooltip">
 																		<i class="fa fa-download" aria-hidden="true"></i>
 																	</button>
 																</form>
@@ -260,7 +262,7 @@
 									<h5 class="mt-3">No Results Found</h5>
 									<p class="text-muted">
 										No specimens found matching your search criteria.
-                                        Try adjusting your filters or check your connection to EasyDB.
+										                                        Try adjusting your filters or check your connection to EasyDB.
 									</p>
 									<div class="mt-3">
 										<strong>Current filters:</strong>
@@ -311,12 +313,10 @@
 	<script>
 		// Initialize tooltips
 document.addEventListener('DOMContentLoaded', function () {
-if (typeof halfmoon !== 'undefined') { // Enable tooltips if Halfmoon supports them
-var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-toggle="tooltip"]'));
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
 tooltipTriggerList.map(function (tooltipTriggerEl) {
-tooltipTriggerEl.setAttribute('title', tooltipTriggerEl.getAttribute('title'));
+return new bootstrap.Tooltip(tooltipTriggerEl);
 });
-}
 });
 
 // Form validation feedback

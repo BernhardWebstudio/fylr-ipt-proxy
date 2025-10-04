@@ -27,7 +27,7 @@ class ExportSelectionType extends AbstractType
             ->add('tagId', ChoiceType::class, [
                 'label' => 'Filter by Tag',
                 'required' => false,
-                'placeholder' => 'Select a tag (optional)',
+                'placeholder' => 'Select a tag',
                 'choices' => $options['tag_choices'],
                 'attr' => [
                     'class' => 'form-control'
@@ -36,7 +36,7 @@ class ExportSelectionType extends AbstractType
             ->add('objectType', ChoiceType::class, [
                 'label' => 'Object Type',
                 'required' => false,
-                'placeholder' => 'Select object type (optional)',
+                'placeholder' => 'Select object type',
                 'choices' => $options['object_type_choices'],
                 'attr' => [
                     'class' => 'form-control'

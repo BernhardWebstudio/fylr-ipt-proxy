@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Service\EasydbApiService;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -43,14 +44,27 @@ class SecurityController extends AbstractController
     public function syncRoles(
         EntityManagerInterface $entityManager,
         EasydbApiService $easydbApiService,
+        LoggerInterface $logger
     ): Response {
         $user = $this->getUser();
 
         // load object types accessible to the user from EasyDB, and set them in the User entity
         assert($user instanceof \App\Entity\User);
         $objectTypes = $easydbApiService->fetchObjectTypes();
+        if (array_key_exists('objectTypes', $objectTypes)) {
+            $objectTypes = $objectTypes['objectTypes'];
+        }
+
+        $logger->info('Synchronizing user roles from EasyDB', [
+            'username' => $user->getUsername(),
+            'objectTypes' => $objectTypes,
+        ]);
 
         foreach ($objectTypes as $objType) {
+            if (array_key_exists('objecttype', $objType)) {
+                $objType = $objType['objecttype'];
+            }
+            assert(is_array($objType) && array_key_exists('_id', $objType) && array_key_exists('name', $objType));
             $objTypeId = $objType['_id'];
             $objTypeName = $objType['name'];
 

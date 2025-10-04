@@ -12,6 +12,8 @@ final class ImportDataMessage
         private string $type,
         private array $criteria,
         private int $userId,
+        private ?string $easydbToken = null,
+        private ?array $easydbSessionContent = null,
         private int $page = 1,
         private int $pageSize = 100
     ) {}
@@ -34,6 +36,16 @@ final class ImportDataMessage
     public function getUserId(): int
     {
         return $this->userId;
+    }
+
+    public function getEasydbToken(): ?string
+    {
+        return $this->easydbToken;
+    }
+
+    public function getEasydbSessionContent(): ?array
+    {
+        return $this->easydbSessionContent;
     }
 
     public function getPage(): int

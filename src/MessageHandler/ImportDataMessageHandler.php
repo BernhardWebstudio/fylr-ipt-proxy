@@ -39,6 +39,8 @@ final class ImportDataMessageHandler
         $userId = $message->getUserId();
         $page = $message->getPage();
         $pageSize = $message->getPageSize();
+        $easydbToken = $message->getEasydbToken();
+        $easydbSessionContent = $message->getEasydbSessionContent();
 
         $this->logger->info('Starting import job', [
             'jobId' => $jobId,
@@ -48,6 +50,9 @@ final class ImportDataMessageHandler
         ]);
 
         try {
+            // Initialize EasyDB API service with credentials from the message
+            $this->easydbApiService->initializeFromCredentials($easydbToken, $easydbSessionContent);
+
             // Update job status to running
             $this->jobStatusService->updateJobStatus($jobId, 'running');
 
@@ -68,6 +73,12 @@ final class ImportDataMessageHandler
 
             // Search for entities from EasyDB using the criteria
             $entities = $this->searchEasydbEntities($criteria, $offset, $pageSize);
+            if (array_key_exists('data', $entities)) {
+                $entities = $entities['data'];
+            }
+            if (array_key_exists('entities', $entities)) {
+                $entities = $entities['entities'];
+            }
 
             if (empty($entities)) {
                 $this->logger->info('No entities found for import', ['jobId' => $jobId, 'page' => $page]);
@@ -129,6 +140,8 @@ final class ImportDataMessageHandler
                         $type,
                         $criteria,
                         $userId,
+                        $easydbToken,
+                        $easydbSessionContent,
                         $page + 1,
                         $pageSize
                     );
@@ -138,12 +151,10 @@ final class ImportDataMessageHandler
                     // This was the last page
                     $this->jobStatusService->updateJobStatus($jobId, 'completed');
                 }
-
             } catch (\Exception $e) {
                 $this->entityManager->rollback();
                 throw $e;
             }
-
         } catch (\Exception $e) {
             $this->logger->error('Import job failed', [
                 'jobId' => $jobId,

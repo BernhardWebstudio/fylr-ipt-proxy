@@ -11,7 +11,7 @@
                     <div class="card-header">
                         <h4 class="card-title">
                             Job Status - {{ job.type|title }}
-                            <span class="badge badge-{{ job.status == 'completed' ? 'success' : (job.status == 'failed' ? 'danger' : (job.status == 'running' ? 'warning' : (job.status == 'cancelled' ? 'secondary' : 'secondary'))) }}">
+                            <span class="badge bg-{{ job.status == 'completed' ? 'success' : (job.status == 'failed' ? 'danger' : (job.status == 'running' ? 'warning' : (job.status == 'cancelled' ? 'secondary' : 'secondary'))) }}">
                                 {{ job.status|title }}
                             </span>
                         </h4>
@@ -26,7 +26,7 @@
 
                                     <dt class="col-sm-4">Status:</dt>
                                     <dd class="col-sm-8">
-                                        <span class="badge badge-{{ job.status == 'completed' ? 'success' : (job.status == 'failed' ? 'danger' : (job.status == 'running' ? 'warning' : (job.status == 'cancelled' ? 'secondary' : 'secondary'))) }}">
+                                        <span class="badge bg-{{ job.status == 'completed' ? 'success' : (job.status == 'failed' ? 'danger' : (job.status == 'running' ? 'warning' : (job.status == 'cancelled' ? 'secondary' : 'secondary'))) }}">
                                             {{ job.status|title }}
                                         </span>
                                     </dd>
