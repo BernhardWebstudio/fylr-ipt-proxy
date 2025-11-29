@@ -206,7 +206,7 @@ class Location
         return $this->id;
     }
 
-    public function getLocationID(): ?string
+    public function getLocationID(): string
     {
         return $this->locationID;
     }
@@ -222,7 +222,7 @@ class Location
         return $this->higherGeographyID;
     }
 
-    public function setHigherGeographyID(string $higherGeographyID): static
+    public function setHigherGeographyID(?string $higherGeographyID): static
     {
         $this->higherGeographyID = $higherGeographyID;
         return $this;
@@ -233,7 +233,7 @@ class Location
         return $this->higherGeography;
     }
 
-    public function setHigherGeography(string $higherGeography): static
+    public function setHigherGeography(?string $higherGeography): static
     {
         $this->higherGeography = $higherGeography;
         return $this;
@@ -244,7 +244,7 @@ class Location
         return $this->continent;
     }
 
-    public function setContinent(string $continent): static
+    public function setContinent(?string $continent): static
     {
         $this->continent = $continent;
         return $this;
@@ -255,7 +255,7 @@ class Location
         return $this->waterBody;
     }
 
-    public function setWaterBody(string $waterBody): static
+    public function setWaterBody(?string $waterBody): static
     {
         $this->waterBody = $waterBody;
         return $this;
@@ -266,7 +266,7 @@ class Location
         return $this->islandGroup;
     }
 
-    public function setIslandGroup(string $islandGroup): static
+    public function setIslandGroup(?string $islandGroup): static
     {
         $this->islandGroup = $islandGroup;
         return $this;
@@ -277,7 +277,7 @@ class Location
         return $this->island;
     }
 
-    public function setIsland(string $island): static
+    public function setIsland(?string $island): static
     {
         $this->island = $island;
         return $this;
@@ -288,7 +288,7 @@ class Location
         return $this->country;
     }
 
-    public function setCountry(string $country): static
+    public function setCountry(?string $country): static
     {
         $this->country = $country;
         return $this;
@@ -299,7 +299,7 @@ class Location
         return $this->countryCode;
     }
 
-    public function setCountryCode(string $countryCode): static
+    public function setCountryCode(?string $countryCode): static
     {
         $this->countryCode = $countryCode;
         return $this;
@@ -310,7 +310,7 @@ class Location
         return $this->stateProvince;
     }
 
-    public function setStateProvince(string $stateProvince): static
+    public function setStateProvince(?string $stateProvince): static
     {
         $this->stateProvince = $stateProvince;
         return $this;
@@ -321,7 +321,7 @@ class Location
         return $this->county;
     }
 
-    public function setCounty(string $county): static
+    public function setCounty(?string $county): static
     {
         $this->county = $county;
         return $this;
@@ -332,7 +332,7 @@ class Location
         return $this->municipality;
     }
 
-    public function setMunicipality(string $municipality): static
+    public function setMunicipality(?string $municipality): static
     {
         $this->municipality = $municipality;
         return $this;
@@ -343,7 +343,7 @@ class Location
         return $this->locality;
     }
 
-    public function setLocality(string $locality): static
+    public function setLocality(?string $locality): static
     {
         $this->locality = $locality;
         return $this;
@@ -354,7 +354,7 @@ class Location
         return $this->verbatimLocality;
     }
 
-    public function setVerbatimLocality(string $verbatimLocality): static
+    public function setVerbatimLocality(?string $verbatimLocality): static
     {
         $this->verbatimLocality = $verbatimLocality;
         return $this;
@@ -365,7 +365,7 @@ class Location
         return $this->minimumElevationInMeters;
     }
 
-    public function setMinimumElevationInMeters(float $minimumElevationInMeters): static
+    public function setMinimumElevationInMeters(?float $minimumElevationInMeters): static
     {
         $this->minimumElevationInMeters = $minimumElevationInMeters;
         return $this;
@@ -376,7 +376,7 @@ class Location
         return $this->maximumElevationInMeters;
     }
 
-    public function setMaximumElevationInMeters(float $maximumElevationInMeters): static
+    public function setMaximumElevationInMeters(?float $maximumElevationInMeters): static
     {
         $this->maximumElevationInMeters = $maximumElevationInMeters;
         return $this;
@@ -387,7 +387,7 @@ class Location
         return $this->verbatimElevation;
     }
 
-    public function setVerbatimElevation(string $verbatimElevation): static
+    public function setVerbatimElevation(?string $verbatimElevation): static
     {
         $this->verbatimElevation = $verbatimElevation;
         return $this;
@@ -398,7 +398,7 @@ class Location
         return $this->verticalDatum;
     }
 
-    public function setVerticalDatum(string $verticalDatum): static
+    public function setVerticalDatum(?string $verticalDatum): static
     {
         $this->verticalDatum = $verticalDatum;
         return $this;
@@ -409,7 +409,7 @@ class Location
         return $this->minimumDepthInMeters;
     }
 
-    public function setMinimumDepthInMeters(float $minimumDepthInMeters): static
+    public function setMinimumDepthInMeters(?float $minimumDepthInMeters): static
     {
         $this->minimumDepthInMeters = $minimumDepthInMeters;
         return $this;
@@ -420,7 +420,7 @@ class Location
         return $this->maximumDepthInMeters;
     }
 
-    public function setMaximumDepthInMeters(float $maximumDepthInMeters): static
+    public function setMaximumDepthInMeters(?float $maximumDepthInMeters): static
     {
         $this->maximumDepthInMeters = $maximumDepthInMeters;
         return $this;
@@ -431,7 +431,7 @@ class Location
         return $this->verbatimDepth;
     }
 
-    public function setVerbatimDepth(string $verbatimDepth): static
+    public function setVerbatimDepth(?string $verbatimDepth): static
     {
         $this->verbatimDepth = $verbatimDepth;
         return $this;
@@ -442,7 +442,7 @@ class Location
         return $this->minimumDistanceAboveSurfaceInMeters;
     }
 
-    public function setMinimumDistanceAboveSurfaceInMeters(float $minimumDistanceAboveSurfaceInMeters): static
+    public function setMinimumDistanceAboveSurfaceInMeters(?float $minimumDistanceAboveSurfaceInMeters): static
     {
         $this->minimumDistanceAboveSurfaceInMeters = $minimumDistanceAboveSurfaceInMeters;
         return $this;
@@ -453,7 +453,7 @@ class Location
         return $this->maximumDistanceAboveSurfaceInMeters;
     }
 
-    public function setMaximumDistanceAboveSurfaceInMeters(float $maximumDistanceAboveSurfaceInMeters): static
+    public function setMaximumDistanceAboveSurfaceInMeters(?float $maximumDistanceAboveSurfaceInMeters): static
     {
         $this->maximumDistanceAboveSurfaceInMeters = $maximumDistanceAboveSurfaceInMeters;
         return $this;
@@ -464,7 +464,7 @@ class Location
         return $this->locationAccordingTo;
     }
 
-    public function setLocationAccordingTo(string $locationAccordingTo): static
+    public function setLocationAccordingTo(?string $locationAccordingTo): static
     {
         $this->locationAccordingTo = $locationAccordingTo;
         return $this;
@@ -475,7 +475,7 @@ class Location
         return $this->locationRemarks;
     }
 
-    public function setLocationRemarks(string $locationRemarks): static
+    public function setLocationRemarks(?string $locationRemarks): static
     {
         $this->locationRemarks = $locationRemarks;
         return $this;
@@ -486,7 +486,7 @@ class Location
         return $this->decimalLatitude;
     }
 
-    public function setDecimalLatitude(float $decimalLatitude): static
+    public function setDecimalLatitude(?float $decimalLatitude): static
     {
         $this->decimalLatitude = $decimalLatitude;
         return $this;
@@ -497,7 +497,7 @@ class Location
         return $this->decimalLongitude;
     }
 
-    public function setDecimalLongitude(float $decimalLongitude): static
+    public function setDecimalLongitude(?float $decimalLongitude): static
     {
         $this->decimalLongitude = $decimalLongitude;
         return $this;
@@ -508,7 +508,7 @@ class Location
         return $this->geodeticDatum;
     }
 
-    public function setGeodeticDatum(string $geodeticDatum): static
+    public function setGeodeticDatum(?string $geodeticDatum): static
     {
         $this->geodeticDatum = $geodeticDatum;
         return $this;
@@ -519,7 +519,7 @@ class Location
         return $this->coordinateUncertaintyInMeters;
     }
 
-    public function setCoordinateUncertaintyInMeters(float $coordinateUncertaintyInMeters): static
+    public function setCoordinateUncertaintyInMeters(?float $coordinateUncertaintyInMeters): static
     {
         $this->coordinateUncertaintyInMeters = $coordinateUncertaintyInMeters;
         return $this;
@@ -530,7 +530,7 @@ class Location
         return $this->coordinatePrecision;
     }
 
-    public function setCoordinatePrecision(string $coordinatePrecision): static
+    public function setCoordinatePrecision(?string $coordinatePrecision): static
     {
         $this->coordinatePrecision = $coordinatePrecision;
         return $this;
@@ -541,7 +541,7 @@ class Location
         return $this->pointRadiusSpatialFit;
     }
 
-    public function setPointRadiusSpatialFit(string $pointRadiusSpatialFit): static
+    public function setPointRadiusSpatialFit(?string $pointRadiusSpatialFit): static
     {
         $this->pointRadiusSpatialFit = $pointRadiusSpatialFit;
         return $this;
@@ -552,7 +552,7 @@ class Location
         return $this->verbatimCoordinates;
     }
 
-    public function setVerbatimCoordinates(string $verbatimCoordinates): static
+    public function setVerbatimCoordinates(?string $verbatimCoordinates): static
     {
         $this->verbatimCoordinates = $verbatimCoordinates;
         return $this;
@@ -563,7 +563,7 @@ class Location
         return $this->verbatimLatitude;
     }
 
-    public function setVerbatimLatitude(string $verbatimLatitude): static
+    public function setVerbatimLatitude(?string $verbatimLatitude): static
     {
         $this->verbatimLatitude = $verbatimLatitude;
         return $this;
@@ -574,7 +574,7 @@ class Location
         return $this->verbatimLongitude;
     }
 
-    public function setVerbatimLongitude(string $verbatimLongitude): static
+    public function setVerbatimLongitude(?string $verbatimLongitude): static
     {
         $this->verbatimLongitude = $verbatimLongitude;
         return $this;
@@ -585,7 +585,7 @@ class Location
         return $this->verbatimCoordinateSystem;
     }
 
-    public function setVerbatimCoordinateSystem(string $verbatimCoordinateSystem): static
+    public function setVerbatimCoordinateSystem(?string $verbatimCoordinateSystem): static
     {
         $this->verbatimCoordinateSystem = $verbatimCoordinateSystem;
         return $this;
@@ -596,7 +596,7 @@ class Location
         return $this->verbatimSRS;
     }
 
-    public function setVerbatimSRS(string $verbatimSRS): static
+    public function setVerbatimSRS(?string $verbatimSRS): static
     {
         $this->verbatimSRS = $verbatimSRS;
         return $this;
@@ -607,7 +607,7 @@ class Location
         return $this->footprintWKT;
     }
 
-    public function setFootprintWKT(string $footprintWKT): static
+    public function setFootprintWKT(?string $footprintWKT): static
     {
         $this->footprintWKT = $footprintWKT;
         return $this;
@@ -618,7 +618,7 @@ class Location
         return $this->footprintSRS;
     }
 
-    public function setFootprintSRS(string $footprintSRS): static
+    public function setFootprintSRS(?string $footprintSRS): static
     {
         $this->footprintSRS = $footprintSRS;
         return $this;
@@ -629,7 +629,7 @@ class Location
         return $this->footprintSpatialFit;
     }
 
-    public function setFootprintSpatialFit(string $footprintSpatialFit): static
+    public function setFootprintSpatialFit(?string $footprintSpatialFit): static
     {
         $this->footprintSpatialFit = $footprintSpatialFit;
         return $this;
@@ -640,7 +640,7 @@ class Location
         return $this->georeferencedBy;
     }
 
-    public function setGeoreferencedBy(string $georeferencedBy): static
+    public function setGeoreferencedBy(?string $georeferencedBy): static
     {
         $this->georeferencedBy = $georeferencedBy;
         return $this;
@@ -651,7 +651,7 @@ class Location
         return $this->georeferencedDate;
     }
 
-    public function setGeoreferencedDate(string $georeferencedDate): static
+    public function setGeoreferencedDate(?string $georeferencedDate): static
     {
         $this->georeferencedDate = $georeferencedDate;
         return $this;
@@ -662,7 +662,7 @@ class Location
         return $this->georeferenceProtocol;
     }
 
-    public function setGeoreferenceProtocol(string $georeferenceProtocol): static
+    public function setGeoreferenceProtocol(?string $georeferenceProtocol): static
     {
         $this->georeferenceProtocol = $georeferenceProtocol;
         return $this;
@@ -673,7 +673,7 @@ class Location
         return $this->georeferenceSources;
     }
 
-    public function setGeoreferenceSources(string $georeferenceSources): static
+    public function setGeoreferenceSources(?string $georeferenceSources): static
     {
         $this->georeferenceSources = $georeferenceSources;
         return $this;
@@ -684,7 +684,7 @@ class Location
         return $this->georeferenceRemarks;
     }
 
-    public function setGeoreferenceRemarks(string $georeferenceRemarks): static
+    public function setGeoreferenceRemarks(?string $georeferenceRemarks): static
     {
         $this->georeferenceRemarks = $georeferenceRemarks;
         return $this;
@@ -695,7 +695,7 @@ class Location
         return $this->institutionID;
     }
 
-    public function setInstitutionID(string $institutionID): static
+    public function setInstitutionID(?string $institutionID): static
     {
         $this->institutionID = $institutionID;
         return $this;
@@ -706,7 +706,7 @@ class Location
         return $this->collectionID;
     }
 
-    public function setCollectionID(string $collectionID): static
+    public function setCollectionID(?string $collectionID): static
     {
         $this->collectionID = $collectionID;
         return $this;
@@ -717,7 +717,7 @@ class Location
         return $this->datasetID;
     }
 
-    public function setDatasetID(string $datasetID): static
+    public function setDatasetID(?string $datasetID): static
     {
         $this->datasetID = $datasetID;
         return $this;
@@ -728,7 +728,7 @@ class Location
         return $this->institutionCode;
     }
 
-    public function setInstitutionCode(string $institutionCode): static
+    public function setInstitutionCode(?string $institutionCode): static
     {
         $this->institutionCode = $institutionCode;
         return $this;
@@ -739,7 +739,7 @@ class Location
         return $this->collectionCode;
     }
 
-    public function setCollectionCode(string $collectionCode): static
+    public function setCollectionCode(?string $collectionCode): static
     {
         $this->collectionCode = $collectionCode;
         return $this;
@@ -750,7 +750,7 @@ class Location
         return $this->datasetName;
     }
 
-    public function setDatasetName(string $datasetName): static
+    public function setDatasetName(?string $datasetName): static
     {
         $this->datasetName = $datasetName;
         return $this;
@@ -761,7 +761,7 @@ class Location
         return $this->ownerInstitutionCode;
     }
 
-    public function setOwnerInstitutionCode(string $ownerInstitutionCode): static
+    public function setOwnerInstitutionCode(?string $ownerInstitutionCode): static
     {
         $this->ownerInstitutionCode = $ownerInstitutionCode;
         return $this;
@@ -772,7 +772,7 @@ class Location
         return $this->basisOfRecord;
     }
 
-    public function setBasisOfRecord(string $basisOfRecord): static
+    public function setBasisOfRecord(?string $basisOfRecord): static
     {
         $this->basisOfRecord = $basisOfRecord;
         return $this;
@@ -783,7 +783,7 @@ class Location
         return $this->informationWithheld;
     }
 
-    public function setInformationWithheld(string $informationWithheld): static
+    public function setInformationWithheld(?string $informationWithheld): static
     {
         $this->informationWithheld = $informationWithheld;
         return $this;
@@ -794,7 +794,7 @@ class Location
         return $this->dataGeneralizations;
     }
 
-    public function setDataGeneralizations(string $dataGeneralizations): static
+    public function setDataGeneralizations(?string $dataGeneralizations): static
     {
         $this->dataGeneralizations = $dataGeneralizations;
         return $this;
@@ -805,7 +805,7 @@ class Location
         return $this->dynamicProperties;
     }
 
-    public function setDynamicProperties(string $dynamicProperties): static
+    public function setDynamicProperties(?string $dynamicProperties): static
     {
         $this->dynamicProperties = $dynamicProperties;
         return $this;

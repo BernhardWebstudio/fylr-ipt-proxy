@@ -100,7 +100,7 @@ class Identification
         return $this->id;
     }
 
-    public function getIdentificationID(): ?string
+    public function getIdentificationID(): string
     {
         return $this->identificationID;
     }
@@ -116,7 +116,7 @@ class Identification
         return $this->verbatimIdentification;
     }
 
-    public function setVerbatimIdentification(string $verbatimIdentification): static
+    public function setVerbatimIdentification(?string $verbatimIdentification): static
     {
         $this->verbatimIdentification = $verbatimIdentification;
         return $this;
@@ -127,7 +127,7 @@ class Identification
         return $this->identificationQualifier;
     }
 
-    public function setIdentificationQualifier(string $identificationQualifier): static
+    public function setIdentificationQualifier(?string $identificationQualifier): static
     {
         $this->identificationQualifier = $identificationQualifier;
         return $this;
@@ -138,7 +138,7 @@ class Identification
         return $this->typeStatus;
     }
 
-    public function setTypeStatus(string $typeStatus): static
+    public function setTypeStatus(?string $typeStatus): static
     {
         $this->typeStatus = $typeStatus;
         return $this;
@@ -149,7 +149,7 @@ class Identification
         return $this->identifiedBy;
     }
 
-    public function setIdentifiedBy(string $identifiedBy): static
+    public function setIdentifiedBy(?string $identifiedBy): static
     {
         $this->identifiedBy = $identifiedBy;
         return $this;
@@ -160,7 +160,7 @@ class Identification
         return $this->identifiedByID;
     }
 
-    public function setIdentifiedByID(string $identifiedByID): static
+    public function setIdentifiedByID(?string $identifiedByID): static
     {
         $this->identifiedByID = $identifiedByID;
         return $this;
@@ -171,7 +171,7 @@ class Identification
         return $this->dateIdentified;
     }
 
-    public function setDateIdentified(string $dateIdentified): static
+    public function setDateIdentified(?string $dateIdentified): static
     {
         $this->dateIdentified = $dateIdentified;
         return $this;
@@ -182,7 +182,7 @@ class Identification
         return $this->identificationReferences;
     }
 
-    public function setIdentificationReferences(string $identificationReferences): static
+    public function setIdentificationReferences(?string $identificationReferences): static
     {
         $this->identificationReferences = $identificationReferences;
         return $this;
@@ -193,7 +193,7 @@ class Identification
         return $this->identificationVerificationStatus;
     }
 
-    public function setIdentificationVerificationStatus(string $identificationVerificationStatus): static
+    public function setIdentificationVerificationStatus(?string $identificationVerificationStatus): static
     {
         $this->identificationVerificationStatus = $identificationVerificationStatus;
         return $this;
@@ -204,7 +204,7 @@ class Identification
         return $this->identificationRemarks;
     }
 
-    public function setIdentificationRemarks(string $identificationRemarks): static
+    public function setIdentificationRemarks(?string $identificationRemarks): static
     {
         $this->identificationRemarks = $identificationRemarks;
         return $this;
@@ -215,7 +215,7 @@ class Identification
         return $this->institutionID;
     }
 
-    public function setInstitutionID(string $institutionID): static
+    public function setInstitutionID(?string $institutionID): static
     {
         $this->institutionID = $institutionID;
         return $this;
@@ -226,7 +226,7 @@ class Identification
         return $this->collectionID;
     }
 
-    public function setCollectionID(string $collectionID): static
+    public function setCollectionID(?string $collectionID): static
     {
         $this->collectionID = $collectionID;
         return $this;
@@ -237,7 +237,7 @@ class Identification
         return $this->datasetID;
     }
 
-    public function setDatasetID(string $datasetID): static
+    public function setDatasetID(?string $datasetID): static
     {
         $this->datasetID = $datasetID;
         return $this;
@@ -248,7 +248,7 @@ class Identification
         return $this->institutionCode;
     }
 
-    public function setInstitutionCode(string $institutionCode): static
+    public function setInstitutionCode(?string $institutionCode): static
     {
         $this->institutionCode = $institutionCode;
         return $this;
@@ -259,7 +259,7 @@ class Identification
         return $this->collectionCode;
     }
 
-    public function setCollectionCode(string $collectionCode): static
+    public function setCollectionCode(?string $collectionCode): static
     {
         $this->collectionCode = $collectionCode;
         return $this;
@@ -270,7 +270,7 @@ class Identification
         return $this->datasetName;
     }
 
-    public function setDatasetName(string $datasetName): static
+    public function setDatasetName(?string $datasetName): static
     {
         $this->datasetName = $datasetName;
         return $this;
@@ -281,7 +281,7 @@ class Identification
         return $this->ownerInstitutionCode;
     }
 
-    public function setOwnerInstitutionCode(string $ownerInstitutionCode): static
+    public function setOwnerInstitutionCode(?string $ownerInstitutionCode): static
     {
         $this->ownerInstitutionCode = $ownerInstitutionCode;
         return $this;
@@ -292,7 +292,7 @@ class Identification
         return $this->basisOfRecord;
     }
 
-    public function setBasisOfRecord(string $basisOfRecord): static
+    public function setBasisOfRecord(?string $basisOfRecord): static
     {
         $this->basisOfRecord = $basisOfRecord;
         return $this;
@@ -303,7 +303,7 @@ class Identification
         return $this->informationWithheld;
     }
 
-    public function setInformationWithheld(string $informationWithheld): static
+    public function setInformationWithheld(?string $informationWithheld): static
     {
         $this->informationWithheld = $informationWithheld;
         return $this;
@@ -314,7 +314,7 @@ class Identification
         return $this->dataGeneralizations;
     }
 
-    public function setDataGeneralizations(string $dataGeneralizations): static
+    public function setDataGeneralizations(?string $dataGeneralizations): static
     {
         $this->dataGeneralizations = $dataGeneralizations;
         return $this;
@@ -325,7 +325,7 @@ class Identification
         return $this->dynamicProperties;
     }
 
-    public function setDynamicProperties(string $dynamicProperties): static
+    public function setDynamicProperties(?string $dynamicProperties): static
     {
         $this->dynamicProperties = $dynamicProperties;
         return $this;

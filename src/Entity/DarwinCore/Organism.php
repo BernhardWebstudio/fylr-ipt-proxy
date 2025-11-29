@@ -81,7 +81,7 @@ class Organism
         return $this->id;
     }
 
-    public function getOrganismID(): ?string
+    public function getOrganismID(): string
     {
         return $this->organismID;
     }
@@ -97,7 +97,7 @@ class Organism
         return $this->organismName;
     }
 
-    public function setOrganismName(string $organismName): static
+    public function setOrganismName(?string $organismName): static
     {
         $this->organismName = $organismName;
         return $this;
@@ -108,7 +108,7 @@ class Organism
         return $this->organismScope;
     }
 
-    public function setOrganismScope(string $organismScope): static
+    public function setOrganismScope(?string $organismScope): static
     {
         $this->organismScope = $organismScope;
         return $this;
@@ -119,7 +119,7 @@ class Organism
         return $this->associatedOrganisms;
     }
 
-    public function setAssociatedOrganisms(string $associatedOrganisms): static
+    public function setAssociatedOrganisms(?string $associatedOrganisms): static
     {
         $this->associatedOrganisms = $associatedOrganisms;
         return $this;
@@ -130,7 +130,7 @@ class Organism
         return $this->previousIdentifications;
     }
 
-    public function setPreviousIdentifications(string $previousIdentifications): static
+    public function setPreviousIdentifications(?string $previousIdentifications): static
     {
         $this->previousIdentifications = $previousIdentifications;
         return $this;
@@ -141,7 +141,7 @@ class Organism
         return $this->organismRemarks;
     }
 
-    public function setOrganismRemarks(string $organismRemarks): static
+    public function setOrganismRemarks(?string $organismRemarks): static
     {
         $this->organismRemarks = $organismRemarks;
         return $this;
@@ -152,7 +152,7 @@ class Organism
         return $this->institutionID;
     }
 
-    public function setInstitutionID(string $institutionID): static
+    public function setInstitutionID(?string $institutionID): static
     {
         $this->institutionID = $institutionID;
         return $this;
@@ -163,7 +163,7 @@ class Organism
         return $this->collectionID;
     }
 
-    public function setCollectionID(string $collectionID): static
+    public function setCollectionID(?string $collectionID): static
     {
         $this->collectionID = $collectionID;
         return $this;
@@ -174,7 +174,7 @@ class Organism
         return $this->datasetID;
     }
 
-    public function setDatasetID(string $datasetID): static
+    public function setDatasetID(?string $datasetID): static
     {
         $this->datasetID = $datasetID;
         return $this;
@@ -185,7 +185,7 @@ class Organism
         return $this->institutionCode;
     }
 
-    public function setInstitutionCode(string $institutionCode): static
+    public function setInstitutionCode(?string $institutionCode): static
     {
         $this->institutionCode = $institutionCode;
         return $this;
@@ -196,7 +196,7 @@ class Organism
         return $this->collectionCode;
     }
 
-    public function setCollectionCode(string $collectionCode): static
+    public function setCollectionCode(?string $collectionCode): static
     {
         $this->collectionCode = $collectionCode;
         return $this;
@@ -207,7 +207,7 @@ class Organism
         return $this->datasetName;
     }
 
-    public function setDatasetName(string $datasetName): static
+    public function setDatasetName(?string $datasetName): static
     {
         $this->datasetName = $datasetName;
         return $this;
@@ -218,7 +218,7 @@ class Organism
         return $this->ownerInstitutionCode;
     }
 
-    public function setOwnerInstitutionCode(string $ownerInstitutionCode): static
+    public function setOwnerInstitutionCode(?string $ownerInstitutionCode): static
     {
         $this->ownerInstitutionCode = $ownerInstitutionCode;
         return $this;
@@ -229,7 +229,7 @@ class Organism
         return $this->basisOfRecord;
     }
 
-    public function setBasisOfRecord(string $basisOfRecord): static
+    public function setBasisOfRecord(?string $basisOfRecord): static
     {
         $this->basisOfRecord = $basisOfRecord;
         return $this;
@@ -240,7 +240,7 @@ class Organism
         return $this->informationWithheld;
     }
 
-    public function setInformationWithheld(string $informationWithheld): static
+    public function setInformationWithheld(?string $informationWithheld): static
     {
         $this->informationWithheld = $informationWithheld;
         return $this;
@@ -251,7 +251,7 @@ class Organism
         return $this->dataGeneralizations;
     }
 
-    public function setDataGeneralizations(string $dataGeneralizations): static
+    public function setDataGeneralizations(?string $dataGeneralizations): static
     {
         $this->dataGeneralizations = $dataGeneralizations;
         return $this;
@@ -262,7 +262,7 @@ class Organism
         return $this->dynamicProperties;
     }
 
-    public function setDynamicProperties(string $dynamicProperties): static
+    public function setDynamicProperties(?string $dynamicProperties): static
     {
         $this->dynamicProperties = $dynamicProperties;
         return $this;

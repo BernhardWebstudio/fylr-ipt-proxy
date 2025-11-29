@@ -66,7 +66,7 @@ class MaterialSample
         return $this->id;
     }
 
-    public function getMaterialSampleID(): ?string
+    public function getMaterialSampleID(): string
     {
         return $this->materialSampleID;
     }
@@ -82,7 +82,7 @@ class MaterialSample
         return $this->institutionID;
     }
 
-    public function setInstitutionID(string $institutionID): static
+    public function setInstitutionID(?string $institutionID): static
     {
         $this->institutionID = $institutionID;
         return $this;
@@ -93,7 +93,7 @@ class MaterialSample
         return $this->collectionID;
     }
 
-    public function setCollectionID(string $collectionID): static
+    public function setCollectionID(?string $collectionID): static
     {
         $this->collectionID = $collectionID;
         return $this;
@@ -104,7 +104,7 @@ class MaterialSample
         return $this->datasetID;
     }
 
-    public function setDatasetID(string $datasetID): static
+    public function setDatasetID(?string $datasetID): static
     {
         $this->datasetID = $datasetID;
         return $this;
@@ -115,7 +115,7 @@ class MaterialSample
         return $this->institutionCode;
     }
 
-    public function setInstitutionCode(string $institutionCode): static
+    public function setInstitutionCode(?string $institutionCode): static
     {
         $this->institutionCode = $institutionCode;
         return $this;
@@ -126,7 +126,7 @@ class MaterialSample
         return $this->collectionCode;
     }
 
-    public function setCollectionCode(string $collectionCode): static
+    public function setCollectionCode(?string $collectionCode): static
     {
         $this->collectionCode = $collectionCode;
         return $this;
@@ -137,7 +137,7 @@ class MaterialSample
         return $this->datasetName;
     }
 
-    public function setDatasetName(string $datasetName): static
+    public function setDatasetName(?string $datasetName): static
     {
         $this->datasetName = $datasetName;
         return $this;
@@ -148,7 +148,7 @@ class MaterialSample
         return $this->ownerInstitutionCode;
     }
 
-    public function setOwnerInstitutionCode(string $ownerInstitutionCode): static
+    public function setOwnerInstitutionCode(?string $ownerInstitutionCode): static
     {
         $this->ownerInstitutionCode = $ownerInstitutionCode;
         return $this;
@@ -159,7 +159,7 @@ class MaterialSample
         return $this->basisOfRecord;
     }
 
-    public function setBasisOfRecord(string $basisOfRecord): static
+    public function setBasisOfRecord(?string $basisOfRecord): static
     {
         $this->basisOfRecord = $basisOfRecord;
         return $this;
@@ -170,7 +170,7 @@ class MaterialSample
         return $this->informationWithheld;
     }
 
-    public function setInformationWithheld(string $informationWithheld): static
+    public function setInformationWithheld(?string $informationWithheld): static
     {
         $this->informationWithheld = $informationWithheld;
         return $this;
@@ -181,7 +181,7 @@ class MaterialSample
         return $this->dataGeneralizations;
     }
 
-    public function setDataGeneralizations(string $dataGeneralizations): static
+    public function setDataGeneralizations(?string $dataGeneralizations): static
     {
         $this->dataGeneralizations = $dataGeneralizations;
         return $this;
@@ -192,7 +192,7 @@ class MaterialSample
         return $this->dynamicProperties;
     }
 
-    public function setDynamicProperties(string $dynamicProperties): static
+    public function setDynamicProperties(?string $dynamicProperties): static
     {
         $this->dynamicProperties = $dynamicProperties;
         return $this;

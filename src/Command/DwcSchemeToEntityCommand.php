@@ -234,7 +234,8 @@ class DwcSchemeToEntityCommand extends Command
                 $entities[$entityName]['identifiers'][] = [
                     'name' => $name,
                     'type' => $type,
-                    'description' => $this->extractDocumentation($element)
+                    'description' => $this->extractDocumentation($element),
+                    'nullable' => false
                 ];
             }
         }
@@ -258,7 +259,8 @@ class DwcSchemeToEntityCommand extends Command
             $term = [
                 'name' => $name,
                 'type' => $type,
-                'description' => $this->extractDocumentation($element)
+                'description' => $this->extractDocumentation($element),
+                'nullable' => true
             ];
 
             // Add to all entities as these are common
@@ -313,7 +315,8 @@ class DwcSchemeToEntityCommand extends Command
                     $entities[$entityName]['properties'][] = [
                         'name' => $name,
                         'type' => $type,
-                        'description' => $this->extractDocumentation($element)
+                        'description' => $this->extractDocumentation($element),
+                        'nullable' => true
                     ];
                 }
             }
@@ -573,17 +576,17 @@ class DwcSchemeToEntityCommand extends Command
     {
         $name = $property['name'];
         $type = $property['type'];
+        $nullable = $property['nullable'] ?? true;
         $camelCase = $this->snakeCaseToCamelCase($name);
         $pascalCase = ucfirst($camelCase);
-        $phpType = $this->getPhpType($type, true);
-        $returnType = $this->getPhpType($type, false);
+        $phpType = $this->getPhpType($type, $nullable);
 
         $code = "    public function get$pascalCase(): $phpType\n";
         $code .= "    {\n";
         $code .= "        return \$this->$camelCase;\n";
         $code .= "    }\n\n";
 
-        $code .= "    public function set$pascalCase($returnType \$$camelCase): static\n";
+        $code .= "    public function set$pascalCase($phpType \$$camelCase): static\n";
         $code .= "    {\n";
         $code .= "        \$this->$camelCase = \$$camelCase;\n";
         $code .= "        return \$this;\n";
@@ -621,7 +624,7 @@ class DwcSchemeToEntityCommand extends Command
             // Get the inversedBy property name for bidirectional relationships
             $inversedBy = $relationship['mappedBy'] ?? null;
             $inversedByAttr = $inversedBy ? ", inversedBy: '{$inversedBy}'" : '';
-            
+
             $code .= "    #[ORM\\ManyToOne(targetEntity: {$target}::class{$inversedByAttr})]\n";
             // Foreign keys should reference the primary key 'id', not the identifier columns
             $code .= "    #[ORM\\JoinColumn(name: '{$name}', referencedColumnName: 'id', nullable: true)]\n";

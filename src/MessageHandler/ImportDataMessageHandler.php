@@ -73,11 +73,18 @@ final class ImportDataMessageHandler
 
             // Search for entities from EasyDB using the criteria
             $entities = $this->searchEasydbEntities($criteria, $offset, $pageSize);
-            if (array_key_exists('data', $entities)) {
-                $entities = $entities['data'];
-            }
-            if (array_key_exists('entities', $entities)) {
-                $entities = $entities['entities'];
+            $this->logger->debug('Fetched entities from EasyDB', [
+                'jobId' => $jobId,
+                'page' => $page,
+                'fetchedCount' => is_array($entities) ? count($entities) : 0,
+                'criteria' => $criteria,
+                'results' => $entities
+            ]);
+            $keysToCheck = ['data', 'entities', 'objects'];
+            foreach ($keysToCheck as $key) {
+                if (array_key_exists($key, $entities)) {
+                    $entities = $entities[$key];
+                }
             }
 
             if (empty($entities)) {

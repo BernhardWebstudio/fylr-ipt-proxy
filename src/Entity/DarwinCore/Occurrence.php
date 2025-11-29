@@ -62,9 +62,6 @@ class Occurrence
     #[ORM\JoinColumn(name: 'taxonID', referencedColumnName: 'id', nullable: true)]
     private ?Taxon $taxon = null;
 
-    #[ORM\OneToOne(mappedBy: 'occurrence')]
-    private ?\App\Entity\OccurrenceImport $import = null;
-
     #[ORM\Column(name: 'catalogNumber', type: 'string', nullable: true)]
     private ?string $catalogNumber = null;
 
@@ -175,7 +172,7 @@ class Occurrence
         return $this->id;
     }
 
-    public function getOccurrenceID(): ?string
+    public function getOccurrenceID(): string
     {
         return $this->occurrenceID;
     }
@@ -191,7 +188,7 @@ class Occurrence
         return $this->catalogNumber;
     }
 
-    public function setCatalogNumber(string $catalogNumber): static
+    public function setCatalogNumber(?string $catalogNumber): static
     {
         $this->catalogNumber = $catalogNumber;
         return $this;
@@ -202,7 +199,7 @@ class Occurrence
         return $this->recordNumber;
     }
 
-    public function setRecordNumber(string $recordNumber): static
+    public function setRecordNumber(?string $recordNumber): static
     {
         $this->recordNumber = $recordNumber;
         return $this;
@@ -213,7 +210,7 @@ class Occurrence
         return $this->recordedBy;
     }
 
-    public function setRecordedBy(string $recordedBy): static
+    public function setRecordedBy(?string $recordedBy): static
     {
         $this->recordedBy = $recordedBy;
         return $this;
@@ -224,7 +221,7 @@ class Occurrence
         return $this->recordedByID;
     }
 
-    public function setRecordedByID(string $recordedByID): static
+    public function setRecordedByID(?string $recordedByID): static
     {
         $this->recordedByID = $recordedByID;
         return $this;
@@ -235,7 +232,7 @@ class Occurrence
         return $this->individualCount;
     }
 
-    public function setIndividualCount(int $individualCount): static
+    public function setIndividualCount(?int $individualCount): static
     {
         $this->individualCount = $individualCount;
         return $this;
@@ -246,7 +243,7 @@ class Occurrence
         return $this->organismQuantity;
     }
 
-    public function setOrganismQuantity(string $organismQuantity): static
+    public function setOrganismQuantity(?string $organismQuantity): static
     {
         $this->organismQuantity = $organismQuantity;
         return $this;
@@ -257,7 +254,7 @@ class Occurrence
         return $this->organismQuantityType;
     }
 
-    public function setOrganismQuantityType(string $organismQuantityType): static
+    public function setOrganismQuantityType(?string $organismQuantityType): static
     {
         $this->organismQuantityType = $organismQuantityType;
         return $this;
@@ -268,7 +265,7 @@ class Occurrence
         return $this->sex;
     }
 
-    public function setSex(string $sex): static
+    public function setSex(?string $sex): static
     {
         $this->sex = $sex;
         return $this;
@@ -279,7 +276,7 @@ class Occurrence
         return $this->lifeStage;
     }
 
-    public function setLifeStage(string $lifeStage): static
+    public function setLifeStage(?string $lifeStage): static
     {
         $this->lifeStage = $lifeStage;
         return $this;
@@ -290,7 +287,7 @@ class Occurrence
         return $this->reproductiveCondition;
     }
 
-    public function setReproductiveCondition(string $reproductiveCondition): static
+    public function setReproductiveCondition(?string $reproductiveCondition): static
     {
         $this->reproductiveCondition = $reproductiveCondition;
         return $this;
@@ -301,7 +298,7 @@ class Occurrence
         return $this->caste;
     }
 
-    public function setCaste(string $caste): static
+    public function setCaste(?string $caste): static
     {
         $this->caste = $caste;
         return $this;
@@ -312,7 +309,7 @@ class Occurrence
         return $this->behavior;
     }
 
-    public function setBehavior(string $behavior): static
+    public function setBehavior(?string $behavior): static
     {
         $this->behavior = $behavior;
         return $this;
@@ -323,7 +320,7 @@ class Occurrence
         return $this->vitality;
     }
 
-    public function setVitality(string $vitality): static
+    public function setVitality(?string $vitality): static
     {
         $this->vitality = $vitality;
         return $this;
@@ -334,7 +331,7 @@ class Occurrence
         return $this->establishmentMeans;
     }
 
-    public function setEstablishmentMeans(string $establishmentMeans): static
+    public function setEstablishmentMeans(?string $establishmentMeans): static
     {
         $this->establishmentMeans = $establishmentMeans;
         return $this;
@@ -345,7 +342,7 @@ class Occurrence
         return $this->degreeOfEstablishment;
     }
 
-    public function setDegreeOfEstablishment(string $degreeOfEstablishment): static
+    public function setDegreeOfEstablishment(?string $degreeOfEstablishment): static
     {
         $this->degreeOfEstablishment = $degreeOfEstablishment;
         return $this;
@@ -356,7 +353,7 @@ class Occurrence
         return $this->pathway;
     }
 
-    public function setPathway(string $pathway): static
+    public function setPathway(?string $pathway): static
     {
         $this->pathway = $pathway;
         return $this;
@@ -367,7 +364,7 @@ class Occurrence
         return $this->georeferenceVerificationStatus;
     }
 
-    public function setGeoreferenceVerificationStatus(string $georeferenceVerificationStatus): static
+    public function setGeoreferenceVerificationStatus(?string $georeferenceVerificationStatus): static
     {
         $this->georeferenceVerificationStatus = $georeferenceVerificationStatus;
         return $this;
@@ -378,7 +375,7 @@ class Occurrence
         return $this->occurrenceStatus;
     }
 
-    public function setOccurrenceStatus(string $occurrenceStatus): static
+    public function setOccurrenceStatus(?string $occurrenceStatus): static
     {
         $this->occurrenceStatus = $occurrenceStatus;
         return $this;
@@ -389,7 +386,7 @@ class Occurrence
         return $this->associatedMedia;
     }
 
-    public function setAssociatedMedia(string $associatedMedia): static
+    public function setAssociatedMedia(?string $associatedMedia): static
     {
         $this->associatedMedia = $associatedMedia;
         return $this;
@@ -400,7 +397,7 @@ class Occurrence
         return $this->associatedOccurrences;
     }
 
-    public function setAssociatedOccurrences(string $associatedOccurrences): static
+    public function setAssociatedOccurrences(?string $associatedOccurrences): static
     {
         $this->associatedOccurrences = $associatedOccurrences;
         return $this;
@@ -411,7 +408,7 @@ class Occurrence
         return $this->associatedReferences;
     }
 
-    public function setAssociatedReferences(string $associatedReferences): static
+    public function setAssociatedReferences(?string $associatedReferences): static
     {
         $this->associatedReferences = $associatedReferences;
         return $this;
@@ -422,7 +419,7 @@ class Occurrence
         return $this->associatedTaxa;
     }
 
-    public function setAssociatedTaxa(string $associatedTaxa): static
+    public function setAssociatedTaxa(?string $associatedTaxa): static
     {
         $this->associatedTaxa = $associatedTaxa;
         return $this;
@@ -433,7 +430,7 @@ class Occurrence
         return $this->otherCatalogNumbers;
     }
 
-    public function setOtherCatalogNumbers(string $otherCatalogNumbers): static
+    public function setOtherCatalogNumbers(?string $otherCatalogNumbers): static
     {
         $this->otherCatalogNumbers = $otherCatalogNumbers;
         return $this;
@@ -444,7 +441,7 @@ class Occurrence
         return $this->occurrenceRemarks;
     }
 
-    public function setOccurrenceRemarks(string $occurrenceRemarks): static
+    public function setOccurrenceRemarks(?string $occurrenceRemarks): static
     {
         $this->occurrenceRemarks = $occurrenceRemarks;
         return $this;
@@ -455,7 +452,7 @@ class Occurrence
         return $this->institutionID;
     }
 
-    public function setInstitutionID(string $institutionID): static
+    public function setInstitutionID(?string $institutionID): static
     {
         $this->institutionID = $institutionID;
         return $this;
@@ -466,7 +463,7 @@ class Occurrence
         return $this->collectionID;
     }
 
-    public function setCollectionID(string $collectionID): static
+    public function setCollectionID(?string $collectionID): static
     {
         $this->collectionID = $collectionID;
         return $this;
@@ -477,7 +474,7 @@ class Occurrence
         return $this->datasetID;
     }
 
-    public function setDatasetID(string $datasetID): static
+    public function setDatasetID(?string $datasetID): static
     {
         $this->datasetID = $datasetID;
         return $this;
@@ -488,7 +485,7 @@ class Occurrence
         return $this->institutionCode;
     }
 
-    public function setInstitutionCode(string $institutionCode): static
+    public function setInstitutionCode(?string $institutionCode): static
     {
         $this->institutionCode = $institutionCode;
         return $this;
@@ -499,7 +496,7 @@ class Occurrence
         return $this->collectionCode;
     }
 
-    public function setCollectionCode(string $collectionCode): static
+    public function setCollectionCode(?string $collectionCode): static
     {
         $this->collectionCode = $collectionCode;
         return $this;
@@ -510,7 +507,7 @@ class Occurrence
         return $this->datasetName;
     }
 
-    public function setDatasetName(string $datasetName): static
+    public function setDatasetName(?string $datasetName): static
     {
         $this->datasetName = $datasetName;
         return $this;
@@ -521,7 +518,7 @@ class Occurrence
         return $this->ownerInstitutionCode;
     }
 
-    public function setOwnerInstitutionCode(string $ownerInstitutionCode): static
+    public function setOwnerInstitutionCode(?string $ownerInstitutionCode): static
     {
         $this->ownerInstitutionCode = $ownerInstitutionCode;
         return $this;
@@ -532,7 +529,7 @@ class Occurrence
         return $this->basisOfRecord;
     }
 
-    public function setBasisOfRecord(string $basisOfRecord): static
+    public function setBasisOfRecord(?string $basisOfRecord): static
     {
         $this->basisOfRecord = $basisOfRecord;
         return $this;
@@ -543,7 +540,7 @@ class Occurrence
         return $this->informationWithheld;
     }
 
-    public function setInformationWithheld(string $informationWithheld): static
+    public function setInformationWithheld(?string $informationWithheld): static
     {
         $this->informationWithheld = $informationWithheld;
         return $this;
@@ -554,7 +551,7 @@ class Occurrence
         return $this->dataGeneralizations;
     }
 
-    public function setDataGeneralizations(string $dataGeneralizations): static
+    public function setDataGeneralizations(?string $dataGeneralizations): static
     {
         $this->dataGeneralizations = $dataGeneralizations;
         return $this;
@@ -565,7 +562,7 @@ class Occurrence
         return $this->dynamicProperties;
     }
 
-    public function setDynamicProperties(string $dynamicProperties): static
+    public function setDynamicProperties(?string $dynamicProperties): static
     {
         $this->dynamicProperties = $dynamicProperties;
         return $this;
@@ -637,14 +634,4 @@ class Occurrence
         return $this;
     }
 
-    public function getImport(): ?\App\Entity\OccurrenceImport
-    {
-        return $this->import;
-    }
-
-    public function setImport(?\App\Entity\OccurrenceImport $import): static
-    {
-        $this->import = $import;
-        return $this;
-    }
 }

@@ -127,7 +127,7 @@ class Event
         return $this->id;
     }
 
-    public function getEventID(): ?string
+    public function getEventID(): string
     {
         return $this->eventID;
     }
@@ -143,7 +143,7 @@ class Event
         return $this->parentEventID;
     }
 
-    public function setParentEventID(string $parentEventID): static
+    public function setParentEventID(?string $parentEventID): static
     {
         $this->parentEventID = $parentEventID;
         return $this;
@@ -154,7 +154,7 @@ class Event
         return $this->eventType;
     }
 
-    public function setEventType(string $eventType): static
+    public function setEventType(?string $eventType): static
     {
         $this->eventType = $eventType;
         return $this;
@@ -165,7 +165,7 @@ class Event
         return $this->fieldNumber;
     }
 
-    public function setFieldNumber(string $fieldNumber): static
+    public function setFieldNumber(?string $fieldNumber): static
     {
         $this->fieldNumber = $fieldNumber;
         return $this;
@@ -176,7 +176,7 @@ class Event
         return $this->eventDate;
     }
 
-    public function setEventDate(string $eventDate): static
+    public function setEventDate(?string $eventDate): static
     {
         $this->eventDate = $eventDate;
         return $this;
@@ -187,7 +187,7 @@ class Event
         return $this->eventTime;
     }
 
-    public function setEventTime(\DateTime $eventTime): static
+    public function setEventTime(?\DateTime $eventTime): static
     {
         $this->eventTime = $eventTime;
         return $this;
@@ -198,7 +198,7 @@ class Event
         return $this->startDayOfYear;
     }
 
-    public function setStartDayOfYear(int $startDayOfYear): static
+    public function setStartDayOfYear(?int $startDayOfYear): static
     {
         $this->startDayOfYear = $startDayOfYear;
         return $this;
@@ -209,7 +209,7 @@ class Event
         return $this->endDayOfYear;
     }
 
-    public function setEndDayOfYear(int $endDayOfYear): static
+    public function setEndDayOfYear(?int $endDayOfYear): static
     {
         $this->endDayOfYear = $endDayOfYear;
         return $this;
@@ -220,7 +220,7 @@ class Event
         return $this->year;
     }
 
-    public function setYear(string $year): static
+    public function setYear(?string $year): static
     {
         $this->year = $year;
         return $this;
@@ -231,7 +231,7 @@ class Event
         return $this->month;
     }
 
-    public function setMonth(string $month): static
+    public function setMonth(?string $month): static
     {
         $this->month = $month;
         return $this;
@@ -242,7 +242,7 @@ class Event
         return $this->day;
     }
 
-    public function setDay(string $day): static
+    public function setDay(?string $day): static
     {
         $this->day = $day;
         return $this;
@@ -253,7 +253,7 @@ class Event
         return $this->verbatimEventDate;
     }
 
-    public function setVerbatimEventDate(string $verbatimEventDate): static
+    public function setVerbatimEventDate(?string $verbatimEventDate): static
     {
         $this->verbatimEventDate = $verbatimEventDate;
         return $this;
@@ -264,7 +264,7 @@ class Event
         return $this->habitat;
     }
 
-    public function setHabitat(string $habitat): static
+    public function setHabitat(?string $habitat): static
     {
         $this->habitat = $habitat;
         return $this;
@@ -275,7 +275,7 @@ class Event
         return $this->samplingProtocol;
     }
 
-    public function setSamplingProtocol(string $samplingProtocol): static
+    public function setSamplingProtocol(?string $samplingProtocol): static
     {
         $this->samplingProtocol = $samplingProtocol;
         return $this;
@@ -286,7 +286,7 @@ class Event
         return $this->sampleSizeValue;
     }
 
-    public function setSampleSizeValue(string $sampleSizeValue): static
+    public function setSampleSizeValue(?string $sampleSizeValue): static
     {
         $this->sampleSizeValue = $sampleSizeValue;
         return $this;
@@ -297,7 +297,7 @@ class Event
         return $this->sampleSizeUnit;
     }
 
-    public function setSampleSizeUnit(string $sampleSizeUnit): static
+    public function setSampleSizeUnit(?string $sampleSizeUnit): static
     {
         $this->sampleSizeUnit = $sampleSizeUnit;
         return $this;
@@ -308,7 +308,7 @@ class Event
         return $this->samplingEffort;
     }
 
-    public function setSamplingEffort(string $samplingEffort): static
+    public function setSamplingEffort(?string $samplingEffort): static
     {
         $this->samplingEffort = $samplingEffort;
         return $this;
@@ -319,7 +319,7 @@ class Event
         return $this->fieldNotes;
     }
 
-    public function setFieldNotes(string $fieldNotes): static
+    public function setFieldNotes(?string $fieldNotes): static
     {
         $this->fieldNotes = $fieldNotes;
         return $this;
@@ -330,7 +330,7 @@ class Event
         return $this->eventRemarks;
     }
 
-    public function setEventRemarks(string $eventRemarks): static
+    public function setEventRemarks(?string $eventRemarks): static
     {
         $this->eventRemarks = $eventRemarks;
         return $this;
@@ -341,7 +341,7 @@ class Event
         return $this->institutionID;
     }
 
-    public function setInstitutionID(string $institutionID): static
+    public function setInstitutionID(?string $institutionID): static
     {
         $this->institutionID = $institutionID;
         return $this;
@@ -352,7 +352,7 @@ class Event
         return $this->collectionID;
     }
 
-    public function setCollectionID(string $collectionID): static
+    public function setCollectionID(?string $collectionID): static
     {
         $this->collectionID = $collectionID;
         return $this;
@@ -363,7 +363,7 @@ class Event
         return $this->datasetID;
     }
 
-    public function setDatasetID(string $datasetID): static
+    public function setDatasetID(?string $datasetID): static
     {
         $this->datasetID = $datasetID;
         return $this;
@@ -374,7 +374,7 @@ class Event
         return $this->institutionCode;
     }
 
-    public function setInstitutionCode(string $institutionCode): static
+    public function setInstitutionCode(?string $institutionCode): static
     {
         $this->institutionCode = $institutionCode;
         return $this;
@@ -385,7 +385,7 @@ class Event
         return $this->collectionCode;
     }
 
-    public function setCollectionCode(string $collectionCode): static
+    public function setCollectionCode(?string $collectionCode): static
     {
         $this->collectionCode = $collectionCode;
         return $this;
@@ -396,7 +396,7 @@ class Event
         return $this->datasetName;
     }
 
-    public function setDatasetName(string $datasetName): static
+    public function setDatasetName(?string $datasetName): static
     {
         $this->datasetName = $datasetName;
         return $this;
@@ -407,7 +407,7 @@ class Event
         return $this->ownerInstitutionCode;
     }
 
-    public function setOwnerInstitutionCode(string $ownerInstitutionCode): static
+    public function setOwnerInstitutionCode(?string $ownerInstitutionCode): static
     {
         $this->ownerInstitutionCode = $ownerInstitutionCode;
         return $this;
@@ -418,7 +418,7 @@ class Event
         return $this->basisOfRecord;
     }
 
-    public function setBasisOfRecord(string $basisOfRecord): static
+    public function setBasisOfRecord(?string $basisOfRecord): static
     {
         $this->basisOfRecord = $basisOfRecord;
         return $this;
@@ -429,7 +429,7 @@ class Event
         return $this->informationWithheld;
     }
 
-    public function setInformationWithheld(string $informationWithheld): static
+    public function setInformationWithheld(?string $informationWithheld): static
     {
         $this->informationWithheld = $informationWithheld;
         return $this;
@@ -440,7 +440,7 @@ class Event
         return $this->dataGeneralizations;
     }
 
-    public function setDataGeneralizations(string $dataGeneralizations): static
+    public function setDataGeneralizations(?string $dataGeneralizations): static
     {
         $this->dataGeneralizations = $dataGeneralizations;
         return $this;
@@ -451,7 +451,7 @@ class Event
         return $this->dynamicProperties;
     }
 
-    public function setDynamicProperties(string $dynamicProperties): static
+    public function setDynamicProperties(?string $dynamicProperties): static
     {
         $this->dynamicProperties = $dynamicProperties;
         return $this;

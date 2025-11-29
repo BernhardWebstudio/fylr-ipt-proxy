@@ -191,7 +191,7 @@ class Taxon
         return $this->id;
     }
 
-    public function getTaxonID(): ?string
+    public function getTaxonID(): string
     {
         return $this->taxonID;
     }
@@ -207,7 +207,7 @@ class Taxon
         return $this->scientificNameID;
     }
 
-    public function setScientificNameID(string $scientificNameID): static
+    public function setScientificNameID(?string $scientificNameID): static
     {
         $this->scientificNameID = $scientificNameID;
         return $this;
@@ -218,7 +218,7 @@ class Taxon
         return $this->acceptedNameUsageID;
     }
 
-    public function setAcceptedNameUsageID(string $acceptedNameUsageID): static
+    public function setAcceptedNameUsageID(?string $acceptedNameUsageID): static
     {
         $this->acceptedNameUsageID = $acceptedNameUsageID;
         return $this;
@@ -229,7 +229,7 @@ class Taxon
         return $this->parentNameUsageID;
     }
 
-    public function setParentNameUsageID(string $parentNameUsageID): static
+    public function setParentNameUsageID(?string $parentNameUsageID): static
     {
         $this->parentNameUsageID = $parentNameUsageID;
         return $this;
@@ -240,7 +240,7 @@ class Taxon
         return $this->originalNameUsageID;
     }
 
-    public function setOriginalNameUsageID(string $originalNameUsageID): static
+    public function setOriginalNameUsageID(?string $originalNameUsageID): static
     {
         $this->originalNameUsageID = $originalNameUsageID;
         return $this;
@@ -251,7 +251,7 @@ class Taxon
         return $this->nameAccordingToID;
     }
 
-    public function setNameAccordingToID(string $nameAccordingToID): static
+    public function setNameAccordingToID(?string $nameAccordingToID): static
     {
         $this->nameAccordingToID = $nameAccordingToID;
         return $this;
@@ -262,7 +262,7 @@ class Taxon
         return $this->namePublishedInID;
     }
 
-    public function setNamePublishedInID(string $namePublishedInID): static
+    public function setNamePublishedInID(?string $namePublishedInID): static
     {
         $this->namePublishedInID = $namePublishedInID;
         return $this;
@@ -273,7 +273,7 @@ class Taxon
         return $this->taxonConceptID;
     }
 
-    public function setTaxonConceptID(string $taxonConceptID): static
+    public function setTaxonConceptID(?string $taxonConceptID): static
     {
         $this->taxonConceptID = $taxonConceptID;
         return $this;
@@ -284,7 +284,7 @@ class Taxon
         return $this->scientificName;
     }
 
-    public function setScientificName(string $scientificName): static
+    public function setScientificName(?string $scientificName): static
     {
         $this->scientificName = $scientificName;
         return $this;
@@ -295,7 +295,7 @@ class Taxon
         return $this->acceptedNameUsage;
     }
 
-    public function setAcceptedNameUsage(string $acceptedNameUsage): static
+    public function setAcceptedNameUsage(?string $acceptedNameUsage): static
     {
         $this->acceptedNameUsage = $acceptedNameUsage;
         return $this;
@@ -306,7 +306,7 @@ class Taxon
         return $this->parentNameUsage;
     }
 
-    public function setParentNameUsage(string $parentNameUsage): static
+    public function setParentNameUsage(?string $parentNameUsage): static
     {
         $this->parentNameUsage = $parentNameUsage;
         return $this;
@@ -317,7 +317,7 @@ class Taxon
         return $this->originalNameUsage;
     }
 
-    public function setOriginalNameUsage(string $originalNameUsage): static
+    public function setOriginalNameUsage(?string $originalNameUsage): static
     {
         $this->originalNameUsage = $originalNameUsage;
         return $this;
@@ -328,7 +328,7 @@ class Taxon
         return $this->nameAccordingTo;
     }
 
-    public function setNameAccordingTo(string $nameAccordingTo): static
+    public function setNameAccordingTo(?string $nameAccordingTo): static
     {
         $this->nameAccordingTo = $nameAccordingTo;
         return $this;
@@ -339,7 +339,7 @@ class Taxon
         return $this->namePublishedIn;
     }
 
-    public function setNamePublishedIn(string $namePublishedIn): static
+    public function setNamePublishedIn(?string $namePublishedIn): static
     {
         $this->namePublishedIn = $namePublishedIn;
         return $this;
@@ -350,7 +350,7 @@ class Taxon
         return $this->namePublishedInYear;
     }
 
-    public function setNamePublishedInYear(string $namePublishedInYear): static
+    public function setNamePublishedInYear(?string $namePublishedInYear): static
     {
         $this->namePublishedInYear = $namePublishedInYear;
         return $this;
@@ -361,7 +361,7 @@ class Taxon
         return $this->higherClassification;
     }
 
-    public function setHigherClassification(string $higherClassification): static
+    public function setHigherClassification(?string $higherClassification): static
     {
         $this->higherClassification = $higherClassification;
         return $this;
@@ -372,7 +372,7 @@ class Taxon
         return $this->kingdom;
     }
 
-    public function setKingdom(string $kingdom): static
+    public function setKingdom(?string $kingdom): static
     {
         $this->kingdom = $kingdom;
         return $this;
@@ -383,7 +383,7 @@ class Taxon
         return $this->phylum;
     }
 
-    public function setPhylum(string $phylum): static
+    public function setPhylum(?string $phylum): static
     {
         $this->phylum = $phylum;
         return $this;
@@ -394,7 +394,7 @@ class Taxon
         return $this->class;
     }
 
-    public function setClass(string $class): static
+    public function setClass(?string $class): static
     {
         $this->class = $class;
         return $this;
@@ -405,7 +405,7 @@ class Taxon
         return $this->order;
     }
 
-    public function setOrder(string $order): static
+    public function setOrder(?string $order): static
     {
         $this->order = $order;
         return $this;
@@ -416,7 +416,7 @@ class Taxon
         return $this->superfamily;
     }
 
-    public function setSuperfamily(string $superfamily): static
+    public function setSuperfamily(?string $superfamily): static
     {
         $this->superfamily = $superfamily;
         return $this;
@@ -427,7 +427,7 @@ class Taxon
         return $this->family;
     }
 
-    public function setFamily(string $family): static
+    public function setFamily(?string $family): static
     {
         $this->family = $family;
         return $this;
@@ -438,7 +438,7 @@ class Taxon
         return $this->subfamily;
     }
 
-    public function setSubfamily(string $subfamily): static
+    public function setSubfamily(?string $subfamily): static
     {
         $this->subfamily = $subfamily;
         return $this;
@@ -449,7 +449,7 @@ class Taxon
         return $this->tribe;
     }
 
-    public function setTribe(string $tribe): static
+    public function setTribe(?string $tribe): static
     {
         $this->tribe = $tribe;
         return $this;
@@ -460,7 +460,7 @@ class Taxon
         return $this->subtribe;
     }
 
-    public function setSubtribe(string $subtribe): static
+    public function setSubtribe(?string $subtribe): static
     {
         $this->subtribe = $subtribe;
         return $this;
@@ -471,7 +471,7 @@ class Taxon
         return $this->genus;
     }
 
-    public function setGenus(string $genus): static
+    public function setGenus(?string $genus): static
     {
         $this->genus = $genus;
         return $this;
@@ -482,7 +482,7 @@ class Taxon
         return $this->genericName;
     }
 
-    public function setGenericName(string $genericName): static
+    public function setGenericName(?string $genericName): static
     {
         $this->genericName = $genericName;
         return $this;
@@ -493,7 +493,7 @@ class Taxon
         return $this->subgenus;
     }
 
-    public function setSubgenus(string $subgenus): static
+    public function setSubgenus(?string $subgenus): static
     {
         $this->subgenus = $subgenus;
         return $this;
@@ -504,7 +504,7 @@ class Taxon
         return $this->infragenericEpithet;
     }
 
-    public function setInfragenericEpithet(string $infragenericEpithet): static
+    public function setInfragenericEpithet(?string $infragenericEpithet): static
     {
         $this->infragenericEpithet = $infragenericEpithet;
         return $this;
@@ -515,7 +515,7 @@ class Taxon
         return $this->specificEpithet;
     }
 
-    public function setSpecificEpithet(string $specificEpithet): static
+    public function setSpecificEpithet(?string $specificEpithet): static
     {
         $this->specificEpithet = $specificEpithet;
         return $this;
@@ -526,7 +526,7 @@ class Taxon
         return $this->infraspecificEpithet;
     }
 
-    public function setInfraspecificEpithet(string $infraspecificEpithet): static
+    public function setInfraspecificEpithet(?string $infraspecificEpithet): static
     {
         $this->infraspecificEpithet = $infraspecificEpithet;
         return $this;
@@ -537,7 +537,7 @@ class Taxon
         return $this->cultivarEpithet;
     }
 
-    public function setCultivarEpithet(string $cultivarEpithet): static
+    public function setCultivarEpithet(?string $cultivarEpithet): static
     {
         $this->cultivarEpithet = $cultivarEpithet;
         return $this;
@@ -548,7 +548,7 @@ class Taxon
         return $this->taxonRank;
     }
 
-    public function setTaxonRank(string $taxonRank): static
+    public function setTaxonRank(?string $taxonRank): static
     {
         $this->taxonRank = $taxonRank;
         return $this;
@@ -559,7 +559,7 @@ class Taxon
         return $this->verbatimTaxonRank;
     }
 
-    public function setVerbatimTaxonRank(string $verbatimTaxonRank): static
+    public function setVerbatimTaxonRank(?string $verbatimTaxonRank): static
     {
         $this->verbatimTaxonRank = $verbatimTaxonRank;
         return $this;
@@ -570,7 +570,7 @@ class Taxon
         return $this->scientificNameAuthorship;
     }
 
-    public function setScientificNameAuthorship(string $scientificNameAuthorship): static
+    public function setScientificNameAuthorship(?string $scientificNameAuthorship): static
     {
         $this->scientificNameAuthorship = $scientificNameAuthorship;
         return $this;
@@ -581,7 +581,7 @@ class Taxon
         return $this->vernacularName;
     }
 
-    public function setVernacularName(string $vernacularName): static
+    public function setVernacularName(?string $vernacularName): static
     {
         $this->vernacularName = $vernacularName;
         return $this;
@@ -592,7 +592,7 @@ class Taxon
         return $this->nomenclaturalCode;
     }
 
-    public function setNomenclaturalCode(string $nomenclaturalCode): static
+    public function setNomenclaturalCode(?string $nomenclaturalCode): static
     {
         $this->nomenclaturalCode = $nomenclaturalCode;
         return $this;
@@ -603,7 +603,7 @@ class Taxon
         return $this->taxonomicStatus;
     }
 
-    public function setTaxonomicStatus(string $taxonomicStatus): static
+    public function setTaxonomicStatus(?string $taxonomicStatus): static
     {
         $this->taxonomicStatus = $taxonomicStatus;
         return $this;
@@ -614,7 +614,7 @@ class Taxon
         return $this->nomenclaturalStatus;
     }
 
-    public function setNomenclaturalStatus(string $nomenclaturalStatus): static
+    public function setNomenclaturalStatus(?string $nomenclaturalStatus): static
     {
         $this->nomenclaturalStatus = $nomenclaturalStatus;
         return $this;
@@ -625,7 +625,7 @@ class Taxon
         return $this->taxonRemarks;
     }
 
-    public function setTaxonRemarks(string $taxonRemarks): static
+    public function setTaxonRemarks(?string $taxonRemarks): static
     {
         $this->taxonRemarks = $taxonRemarks;
         return $this;
@@ -636,7 +636,7 @@ class Taxon
         return $this->institutionID;
     }
 
-    public function setInstitutionID(string $institutionID): static
+    public function setInstitutionID(?string $institutionID): static
     {
         $this->institutionID = $institutionID;
         return $this;
@@ -647,7 +647,7 @@ class Taxon
         return $this->collectionID;
     }
 
-    public function setCollectionID(string $collectionID): static
+    public function setCollectionID(?string $collectionID): static
     {
         $this->collectionID = $collectionID;
         return $this;
@@ -658,7 +658,7 @@ class Taxon
         return $this->datasetID;
     }
 
-    public function setDatasetID(string $datasetID): static
+    public function setDatasetID(?string $datasetID): static
     {
         $this->datasetID = $datasetID;
         return $this;
@@ -669,7 +669,7 @@ class Taxon
         return $this->institutionCode;
     }
 
-    public function setInstitutionCode(string $institutionCode): static
+    public function setInstitutionCode(?string $institutionCode): static
     {
         $this->institutionCode = $institutionCode;
         return $this;
@@ -680,7 +680,7 @@ class Taxon
         return $this->collectionCode;
     }
 
-    public function setCollectionCode(string $collectionCode): static
+    public function setCollectionCode(?string $collectionCode): static
     {
         $this->collectionCode = $collectionCode;
         return $this;
@@ -691,7 +691,7 @@ class Taxon
         return $this->datasetName;
     }
 
-    public function setDatasetName(string $datasetName): static
+    public function setDatasetName(?string $datasetName): static
     {
         $this->datasetName = $datasetName;
         return $this;
@@ -702,7 +702,7 @@ class Taxon
         return $this->ownerInstitutionCode;
     }
 
-    public function setOwnerInstitutionCode(string $ownerInstitutionCode): static
+    public function setOwnerInstitutionCode(?string $ownerInstitutionCode): static
     {
         $this->ownerInstitutionCode = $ownerInstitutionCode;
         return $this;
@@ -713,7 +713,7 @@ class Taxon
         return $this->basisOfRecord;
     }
 
-    public function setBasisOfRecord(string $basisOfRecord): static
+    public function setBasisOfRecord(?string $basisOfRecord): static
     {
         $this->basisOfRecord = $basisOfRecord;
         return $this;
@@ -724,7 +724,7 @@ class Taxon
         return $this->informationWithheld;
     }
 
-    public function setInformationWithheld(string $informationWithheld): static
+    public function setInformationWithheld(?string $informationWithheld): static
     {
         $this->informationWithheld = $informationWithheld;
         return $this;
@@ -735,7 +735,7 @@ class Taxon
         return $this->dataGeneralizations;
     }
 
-    public function setDataGeneralizations(string $dataGeneralizations): static
+    public function setDataGeneralizations(?string $dataGeneralizations): static
     {
         $this->dataGeneralizations = $dataGeneralizations;
         return $this;
@@ -746,7 +746,7 @@ class Taxon
         return $this->dynamicProperties;
     }
 
-    public function setDynamicProperties(string $dynamicProperties): static
+    public function setDynamicProperties(?string $dynamicProperties): static
     {
         $this->dynamicProperties = $dynamicProperties;
         return $this;
