@@ -62,7 +62,7 @@ class GeologicalContext
     #[ORM\Column(name: 'lithostratigraphicTerms', type: 'string', nullable: true)]
     private ?string $lithostratigraphicTerms = null;
 
-    #[ORM\Column(name: 'group', type: 'string', nullable: true)]
+    #[ORM\Column(name: '"group"', type: 'string', nullable: true)]
     private ?string $group = null;
 
     #[ORM\Column(name: 'formation', type: 'string', nullable: true)]

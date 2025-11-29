@@ -22,6 +22,7 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
         // attach an organism to the occurrence if not already present
         if (!$occurrence->getOrganism()) {
             $organism = new \App\Entity\DarwinCore\Organism();
+            $organism->setOrganismID($source["_global_object_id"]);
             $occurrence->setOrganism($organism);
         }
 

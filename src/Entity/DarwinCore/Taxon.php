@@ -80,10 +80,10 @@ class Taxon
     #[ORM\Column(name: 'phylum', type: 'string', nullable: true)]
     private ?string $phylum = null;
 
-    #[ORM\Column(name: 'class', type: 'string', nullable: true)]
+    #[ORM\Column(name: '"class"', type: 'string', nullable: true)]
     private ?string $class = null;
 
-    #[ORM\Column(name: 'order', type: 'string', nullable: true)]
+    #[ORM\Column(name: '"order"', type: 'string', nullable: true)]
     private ?string $order = null;
 
     #[ORM\Column(name: 'superfamily', type: 'string', nullable: true)]

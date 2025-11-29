@@ -14,22 +14,28 @@ class OccurrenceImport
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'datetime_immutable', nullable: false)]
     private ?\DateTimeImmutable $firstImportedAt = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'datetime_immutable', nullable: false)]
     private ?\DateTimeImmutable $lastUpdatedAt = null;
 
     #[ORM\Column(length: 255)]
     private ?string $globalObjectID = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private ?int $tagId = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $objectType = null;
+
+    #[ORM\Column(type: 'datetime_immutable')]
     private ?\DateTimeImmutable $remoteLastUpdatedAt = null;
 
     #[ORM\ManyToOne]
     private ?User $manualImportTrigger = null;
 
-    #[ORM\OneToOne(inversedBy: 'import', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
     private ?Occurrence $occurrence = null;
 
@@ -70,6 +76,30 @@ class OccurrenceImport
     public function setGlobalObjectID(string $globalObjectID): static
     {
         $this->globalObjectID = $globalObjectID;
+
+        return $this;
+    }
+
+    public function getTagId(): ?int
+    {
+        return $this->tagId;
+    }
+
+    public function setTagId(?int $tagId): static
+    {
+        $this->tagId = $tagId;
+
+        return $this;
+    }
+
+    public function getObjectType(): ?string
+    {
+        return $this->objectType;
+    }
+
+    public function setObjectType(?string $objectType): static
+    {
+        $this->objectType = $objectType;
 
         return $this;
     }

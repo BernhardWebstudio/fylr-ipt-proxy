@@ -42,6 +42,11 @@ final class ImportDataMessageHandler
         $easydbToken = $message->getEasydbToken();
         $easydbSessionContent = $message->getEasydbSessionContent();
 
+        if (!$this->entityManager->isOpen()) {
+            $this->logger->error('EntityManager is closed at start of import handler', ['jobId' => $jobId]);
+            throw new \RuntimeException('EntityManager is closed, cannot process import');
+        }
+
         $this->logger->info('Starting import job', [
             'jobId' => $jobId,
             'type' => $type,
@@ -114,54 +119,47 @@ final class ImportDataMessageHandler
 
             // Process each entity
             $processedCount = 0;
-            $this->entityManager->beginTransaction();
 
-            try {
-                foreach ($entities as $entity) {
-                    $this->importProcessingService->processEntity($entity, $mapping, $user);
-                    $processedCount++;
+            foreach ($entities as $entity) {
+                $this->importProcessingService->processEntity($entity, $mapping, $user, $criteria);
+                $this->entityManager->flush();
+                $processedCount++;
 
-                    // Update progress every 10 items
-                    if ($processedCount % 10 === 0) {
-                        $progress = ($page - 1) * $pageSize + $processedCount;
-                        $this->jobStatusService->updateJobProgress($jobId, $progress);
-                    }
+                // Update progress every 10 items
+                if ($processedCount % 10 === 0) {
+                    $progress = ($page - 1) * $pageSize + $processedCount;
+                    $this->jobStatusService->updateJobProgress($jobId, $progress);
                 }
+            }
 
-                $this->entityManager->commit();
+            // Update final progress for this page
+            $progress = ($page - 1) * $pageSize + $processedCount;
+            $this->jobStatusService->updateJobProgress($jobId, $progress);
 
-                // Update final progress for this page
-                $progress = ($page - 1) * $pageSize + $processedCount;
-                $this->jobStatusService->updateJobProgress($jobId, $progress);
+            $this->logger->info('Import page completed', [
+                'jobId' => $jobId,
+                'page' => $page,
+                'processed' => $processedCount
+            ]);
 
-                $this->logger->info('Import page completed', [
-                    'jobId' => $jobId,
-                    'page' => $page,
-                    'processed' => $processedCount
-                ]);
+            // If we got a full page of results, there might be more data
+            // Dispatch the next page
+            if (count($entities) === $pageSize) {
+                $nextPageMessage = new ImportDataMessage(
+                    $jobId,
+                    $type,
+                    $criteria,
+                    $userId,
+                    $easydbToken,
+                    $easydbSessionContent,
+                    $page + 1,
+                    $pageSize
+                );
 
-                // If we got a full page of results, there might be more data
-                // Dispatch the next page
-                if (count($entities) === $pageSize) {
-                    $nextPageMessage = new ImportDataMessage(
-                        $jobId,
-                        $type,
-                        $criteria,
-                        $userId,
-                        $easydbToken,
-                        $easydbSessionContent,
-                        $page + 1,
-                        $pageSize
-                    );
-
-                    $this->messageBus->dispatch($nextPageMessage);
-                } else {
-                    // This was the last page
-                    $this->jobStatusService->updateJobStatus($jobId, 'completed');
-                }
-            } catch (\Exception $e) {
-                $this->entityManager->rollback();
-                throw $e;
+                $this->messageBus->dispatch($nextPageMessage);
+            } else {
+                // This was the last page
+                $this->jobStatusService->updateJobStatus($jobId, 'completed');
             }
         } catch (\Exception $e) {
             $this->logger->error('Import job failed', [
@@ -170,7 +168,15 @@ final class ImportDataMessageHandler
                 'trace' => $e->getTraceAsString()
             ]);
 
-            $this->jobStatusService->setJobError($jobId, $e->getMessage());
+            try {
+                if ($this->entityManager->isOpen()) {
+                    $this->jobStatusService->setJobError($jobId, $e->getMessage());
+                } else {
+                    $this->logger->warning('Cannot set job error: EntityManager is closed', ['jobId' => $jobId]);
+                }
+            } catch (\Exception $setErrorException) {
+                $this->logger->error('Failed to set job error', ['jobId' => $jobId, 'error' => $setErrorException->getMessage()]);
+            }
         }
     }
 

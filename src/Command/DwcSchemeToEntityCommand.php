@@ -38,6 +38,10 @@ class DwcSchemeToEntityCommand extends Command
         'dwc:decimalLongitudeDataType' => 'float',
     ];
 
+    private array $reservedWords = [
+        'order', 'class', 'table', 'column', 'select', 'from', 'where', 'group', 'having', 'limit', 'offset'
+    ];
+
     private array $entityRelationships = [
         'Occurrence' => [
             'taxonID' => ['target' => 'Taxon', 'type' => 'ManyToOne', 'mappedBy' => 'occurrences', 'cascade' => ['persist']],
@@ -552,7 +556,8 @@ class DwcSchemeToEntityCommand extends Command
 
         // Add Doctrine mapping
         $doctrineType = $this->getDoctrineType($type);
-        $code .= "    #[ORM\\Column(name: '$name', type: '$doctrineType'";
+        $columnName = in_array($name, $this->reservedWords) ? '"' . $name . '"' : $name;
+        $code .= "    #[ORM\\Column(name: '$columnName', type: '$doctrineType'";
 
         if (!$isIdentifier) {
             $code .= ", nullable: true";

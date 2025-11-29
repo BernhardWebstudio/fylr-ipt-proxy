@@ -87,9 +87,9 @@ final class ImportExportManagementController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData() ?? [];
 
-            // Check which button was clicked by looking at the form data
-            $isImportClicked = $request->request->has('import_selection') &&
-                array_key_exists('import', $request->request->all('import_selection'));
+            // Check which button was clicked
+            $clickedButton = $form->getClickedButton();
+            $isImportClicked = $clickedButton && $clickedButton->getName() === 'import';
 
             // Create and dispatch import job
             if ($isImportClicked) {
@@ -161,7 +161,7 @@ final class ImportExportManagementController extends AbstractController
 
         // Add flash message if search was performed but no results found
         if ($isSubmitted && $hasSearchCriteria && (empty($entities) || empty($entities['objects']))) {
-            $this->addFlash('warning', 'No specimens found matching your search criteria. Please adjust your filters and try again.');
+            $this->addFlash('warning', 'No data found matching your search criteria. Please adjust your filters and try again.');
         }
 
         // then, render the import form
@@ -287,8 +287,7 @@ final class ImportExportManagementController extends AbstractController
             $data = $form->getData();
 
             // Check which button was clicked
-            $isExportClicked = $request->request->has('export_selection') &&
-                array_key_exists('export', $request->request->all('export_selection'));
+            $isExportClicked = $form->get('export')->isClicked();
 
             try {
                 // Search for entities based on form criteria
@@ -299,7 +298,7 @@ final class ImportExportManagementController extends AbstractController
                 );
 
                 if (empty($entities)) {
-                    $this->addFlash('warning', 'No entities found matching your criteria.');
+                    $this->addFlash('warning', 'No data found matching your criteria. Please adjust your filters and try again.');
                     return $this->redirectToRoute('app_export_management');
                 }
 

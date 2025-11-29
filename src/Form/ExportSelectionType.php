@@ -57,12 +57,14 @@ class ExportSelectionType extends AbstractType
             ->add('preview', SubmitType::class, [
                 'label' => 'Preview Data',
                 'attr' => [
+                    'value' => 'preview',
                     'class' => 'btn btn-primary'
                 ]
             ])
             ->add('export', SubmitType::class, [
                 'label' => 'Export Data',
                 'attr' => [
+                    'value' => 'export',
                     'class' => 'btn btn-success'
                 ]
             ]);

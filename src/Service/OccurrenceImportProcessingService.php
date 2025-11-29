@@ -26,13 +26,15 @@ class OccurrenceImportProcessingService
      * @param array $entityData The raw entity data from EasyDB
      * @param EasydbDwCMappingInterface $mapping The mapping to use for converting data
      * @param User|null $user The user triggering the import (optional)
+     * @param array $criteria The import criteria (tagId, objectType, etc.)
      * @return OccurrenceImport The processed import entity
      * @throws \InvalidArgumentException If the entity data is invalid
      */
     public function processEntity(
         array $entityData,
         EasydbDwCMappingInterface $mapping,
-        ?User $user = null
+        ?User $user = null,
+        array $criteria = []
     ): OccurrenceImport {
         $globalObjectId = $entityData['_global_object_id'] ?? null;
 
@@ -46,9 +48,9 @@ class OccurrenceImportProcessingService
             ->findOneBy(['globalObjectID' => $globalObjectId]);
 
         if ($existingImport) {
-            return $this->updateExistingImport($existingImport, $entityData, $mapping, $user);
+            return $this->updateExistingImport($existingImport, $entityData, $mapping, $user, $criteria);
         } else {
-            return $this->createNewImport($entityData, $mapping, $user);
+            return $this->createNewImport($entityData, $mapping, $user, $criteria);
         }
     }
 
@@ -59,13 +61,15 @@ class OccurrenceImportProcessingService
      * @param array $entityData
      * @param EasydbDwCMappingInterface $mapping
      * @param User|null $user
+     * @param array $criteria
      * @return OccurrenceImport
      */
     private function updateExistingImport(
         OccurrenceImport $existingImport,
         array $entityData,
         EasydbDwCMappingInterface $mapping,
-        ?User $user
+        ?User $user,
+        array $criteria
     ): OccurrenceImport {
         $lastModified = new \DateTimeImmutable($entityData['_last_modified'] ?? $entityData['_created'] ?? 'now');
         $globalObjectId = $entityData['_global_object_id'];
@@ -78,10 +82,15 @@ class OccurrenceImportProcessingService
                 $existingImport->setManualImportTrigger($user);
             }
 
+            $existingImport->setTagId($criteria['tagId'] ?? $existingImport->getTagId());
+            $existingImport->setObjectType($entityData['_objecttype'] ?? $existingImport->getObjectType());
+
             $this->logger->debug('Updated existing import', ['globalObjectId' => $globalObjectId]);
         } else {
             $this->logger->debug('Skipping entity - no changes', ['globalObjectId' => $globalObjectId]);
         }
+
+        $existingImport->setLastUpdatedAt(new \DateTimeImmutable());
 
         return $existingImport;
     }
@@ -97,13 +106,21 @@ class OccurrenceImportProcessingService
     private function createNewImport(
         array $entityData,
         EasydbDwCMappingInterface $mapping,
-        ?User $user
+        ?User $user,
+        array $criteria
     ): OccurrenceImport {
         $import = new OccurrenceImport();
+        $now = new \DateTimeImmutable();
+
+        $import->setFirstImportedAt($now);
+        $import->setLastUpdatedAt($now);
 
         if ($user) {
             $import->setManualImportTrigger($user);
         }
+
+        $import->setTagId($criteria['tagId'] ?? null);
+        $import->setObjectType($entityData['_objecttype'] ?? null);
 
         $mapping->mapOccurrence($entityData, $import);
 

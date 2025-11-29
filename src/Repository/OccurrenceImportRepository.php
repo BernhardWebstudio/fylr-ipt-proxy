@@ -28,12 +28,12 @@ class OccurrenceImportRepository extends ServiceEntityRepository
         }
 
         if ($tagId) {
-            $qb->andWhere('o.tagId = :tagId')
+            $qb->andWhere('oi.tagId = :tagId')
                 ->setParameter('tagId', $tagId);
         }
 
         if ($objectType) {
-            $qb->andWhere('o.objectType = :objectType')
+            $qb->andWhere('oi.objectType = :objectType')
                 ->setParameter('objectType', $objectType);
         }
 
