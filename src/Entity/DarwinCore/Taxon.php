@@ -20,13 +20,13 @@ class Taxon
     #[ORM\Column(name: 'taxonID', type: 'string', unique: true)]
     private string $taxonID;
 
-    #[ORM\OneToMany(mappedBy: 'taxon', targetEntity: Occurrence::class)]
+    #[ORM\OneToMany(mappedBy: 'taxon', targetEntity: Occurrence::class, cascade: ['persist'])]
     private Collection $occurrences;
 
-    #[ORM\OneToMany(mappedBy: 'taxon', targetEntity: Identification::class)]
+    #[ORM\OneToMany(mappedBy: 'taxon', targetEntity: Identification::class, cascade: ['persist'])]
     private Collection $identifications;
 
-    #[ORM\OneToMany(mappedBy: 'taxon', targetEntity: MeasurementOrFact::class)]
+    #[ORM\OneToMany(mappedBy: 'taxon', targetEntity: MeasurementOrFact::class, cascade: ['persist'])]
     private Collection $measurementOrFacts;
 
     #[ORM\Column(name: 'scientificNameID', type: 'string', nullable: true)]

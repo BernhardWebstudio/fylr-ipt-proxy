@@ -267,4 +267,37 @@ class JobStatusService
 
         return true;
     }
+
+    /**
+     * Reset a failed job to allow re-running
+     */
+    public function resetJob(string $jobId): bool
+    {
+        $jobStatus = $this->jobStatusRepository->findByJobId($jobId);
+
+        if (!$jobStatus) {
+            $this->logger->warning('Job not found for reset', ['jobId' => $jobId]);
+            return false;
+        }
+
+        if (!$jobStatus->canBeReset()) {
+            $this->logger->warning('Job cannot be reset - not in failed state', [
+                'jobId' => $jobId,
+                'status' => $jobStatus->getStatus()
+            ]);
+            return false;
+        }
+
+        $jobStatus->setStatus(JobStatus::STATUS_PENDING);
+        $jobStatus->setProgress(0);
+        $jobStatus->setErrorMessage(null);
+        $jobStatus->setCompletedAt(null);
+        $jobStatus->setResultFilePath(null);
+
+        $this->entityManager->flush();
+
+        $this->logger->info('Job reset for re-run', ['jobId' => $jobId]);
+
+        return true;
+    }
 }

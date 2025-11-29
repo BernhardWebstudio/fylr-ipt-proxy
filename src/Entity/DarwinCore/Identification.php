@@ -27,7 +27,7 @@ class Identification
     #[ORM\JoinColumn(name: 'taxonID', referencedColumnName: 'id', nullable: true)]
     private ?Taxon $taxon = null;
 
-    #[ORM\OneToMany(mappedBy: 'identification', targetEntity: Occurrence::class)]
+    #[ORM\OneToMany(mappedBy: 'identification', targetEntity: Occurrence::class, cascade: ['persist'])]
     private Collection $occurrences;
 
     #[ORM\Column(name: 'verbatimIdentification', type: 'string', nullable: true)]

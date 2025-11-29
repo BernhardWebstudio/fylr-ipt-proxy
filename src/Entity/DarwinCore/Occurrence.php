@@ -23,42 +23,42 @@ class Occurrence
     /**
      * Reference to Organism
      */
-    #[ORM\ManyToOne(targetEntity: Organism::class, inversedBy: 'occurrences')]
+    #[ORM\ManyToOne(targetEntity: Organism::class, inversedBy: 'occurrences', cascade: ['persist'])]
     #[ORM\JoinColumn(name: 'organismID', referencedColumnName: 'id', nullable: true)]
     private ?Organism $organism = null;
 
     /**
      * Reference to MaterialEntity
      */
-    #[ORM\ManyToOne(targetEntity: MaterialEntity::class, inversedBy: 'occurrences')]
+    #[ORM\ManyToOne(targetEntity: MaterialEntity::class, inversedBy: 'occurrences', cascade: ['persist'])]
     #[ORM\JoinColumn(name: 'materialEntityID', referencedColumnName: 'id', nullable: true)]
     private ?MaterialEntity $materialEntity = null;
 
     /**
      * Reference to Event
      */
-    #[ORM\ManyToOne(targetEntity: Event::class, inversedBy: 'occurrences')]
+    #[ORM\ManyToOne(targetEntity: Event::class, inversedBy: 'occurrences', cascade: ['persist'])]
     #[ORM\JoinColumn(name: 'eventID', referencedColumnName: 'id', nullable: true)]
     private ?Event $event = null;
 
     /**
      * Reference to Location
      */
-    #[ORM\ManyToOne(targetEntity: Location::class, inversedBy: 'occurrences')]
+    #[ORM\ManyToOne(targetEntity: Location::class, inversedBy: 'occurrences', cascade: ['persist'])]
     #[ORM\JoinColumn(name: 'locationID', referencedColumnName: 'id', nullable: true)]
     private ?Location $location = null;
 
     /**
      * Reference to Identification
      */
-    #[ORM\ManyToOne(targetEntity: Identification::class, inversedBy: 'occurrences')]
+    #[ORM\ManyToOne(targetEntity: Identification::class, inversedBy: 'occurrences', cascade: ['persist'])]
     #[ORM\JoinColumn(name: 'identificationID', referencedColumnName: 'id', nullable: true)]
     private ?Identification $identification = null;
 
     /**
      * Reference to Taxon
      */
-    #[ORM\ManyToOne(targetEntity: Taxon::class, inversedBy: 'occurrences')]
+    #[ORM\ManyToOne(targetEntity: Taxon::class, inversedBy: 'occurrences', cascade: ['persist'])]
     #[ORM\JoinColumn(name: 'taxonID', referencedColumnName: 'id', nullable: true)]
     private ?Taxon $taxon = null;
 

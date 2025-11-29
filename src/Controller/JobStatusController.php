@@ -3,11 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Message\ImportDataMessage;
 use App\Service\JobStatusService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -158,6 +160,71 @@ final class JobStatusController extends AbstractController
             $this->addFlash('success', 'Job cancelled successfully.');
         } else {
             $this->addFlash('error', 'Failed to cancel job.');
+        }
+
+        return $this->redirectToRoute('app_job_status', ['jobId' => $jobId]);
+    }
+
+    #[Route('/job/{jobId}/reset', name: 'app_job_reset', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function resetJob(string $jobId, MessageBusInterface $messageBus): Response
+    {
+        $jobStatus = $this->jobStatusService->getJobStatus($jobId);
+
+        if (!$jobStatus) {
+            $this->addFlash('error', 'Job not found.');
+            return $this->redirectToRoute('app_jobs_list');
+        }
+
+        // Check if user has access to this job
+        /** @var User $user */
+        $user = $this->getUser();
+        if ($jobStatus->getUser()->getId() !== $user->getId()) {
+            $this->addFlash('error', 'Access denied.');
+            return $this->redirectToRoute('app_jobs_list');
+        }
+
+        if (!$jobStatus->canBeReset()) {
+            $this->addFlash('error', 'Only failed jobs can be reset.');
+            return $this->redirectToRoute('app_job_status', ['jobId' => $jobId]);
+        }
+
+        if ($jobStatus->getType() !== 'import') {
+            $this->addFlash('error', 'Reset is currently only supported for import jobs.');
+            return $this->redirectToRoute('app_job_status', ['jobId' => $jobId]);
+        }
+
+        if ($this->jobStatusService->resetJob($jobId)) {
+            // Re-dispatch the import message with the same parameters
+            // We need to reconstruct the message from the job status
+            $criteria = $jobStatus->getCriteria() ?? [];
+            $type = $criteria['objectType'] ?? $jobStatus->getType();
+
+            // For now, we'll assume the session credentials are still valid
+            // We might want to store credentials separately or require re-authentication
+            $request = $this->container->get('request_stack')->getCurrentRequest();
+            $session = $request->getSession();
+            $easydbToken = $session->get('easydb_token');
+            $easydbSessionContent = $session->get('easydb_session_content');
+
+            if (!$easydbToken || !$easydbSessionContent) {
+                $this->addFlash('error', 'EasyDB session expired. Please log in again to retry the job.');
+                return $this->redirectToRoute('app_job_status', ['jobId' => $jobId]);
+            }
+
+            $importMessage = new ImportDataMessage(
+                $jobId,
+                $type,
+                $criteria,
+                $user->getId(),
+                $easydbToken,
+                $easydbSessionContent
+            );
+            $messageBus->dispatch($importMessage);
+
+            $this->addFlash('success', 'Job reset and re-started successfully.');
+        } else {
+            $this->addFlash('error', 'Failed to reset job.');
         }
 
         return $this->redirectToRoute('app_job_status', ['jobId' => $jobId]);

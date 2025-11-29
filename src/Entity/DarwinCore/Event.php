@@ -27,7 +27,7 @@ class Event
     #[ORM\JoinColumn(name: 'locationID', referencedColumnName: 'id', nullable: true)]
     private ?Location $location = null;
 
-    #[ORM\OneToMany(mappedBy: 'event', targetEntity: Occurrence::class)]
+    #[ORM\OneToMany(mappedBy: 'event', targetEntity: Occurrence::class, cascade: ['persist'])]
     private Collection $occurrences;
 
     #[ORM\Column(name: 'parentEventID', type: 'string', nullable: true)]

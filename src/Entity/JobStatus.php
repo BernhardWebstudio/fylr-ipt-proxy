@@ -245,6 +245,11 @@ class JobStatus
         return $this->status === self::STATUS_PENDING || $this->status === self::STATUS_RUNNING;
     }
 
+    public function canBeReset(): bool
+    {
+        return $this->status === self::STATUS_FAILED || $this->status === self::STATUS_CANCELLED;
+    }
+
     public function getProgressPercentage(): int
     {
         if ($this->totalItems === 0) {

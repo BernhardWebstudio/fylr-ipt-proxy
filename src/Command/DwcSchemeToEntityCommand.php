@@ -40,12 +40,12 @@ class DwcSchemeToEntityCommand extends Command
 
     private array $entityRelationships = [
         'Occurrence' => [
-            'taxonID' => ['target' => 'Taxon', 'type' => 'ManyToOne', 'mappedBy' => 'occurrences'],
-            'eventID' => ['target' => 'Event', 'type' => 'ManyToOne', 'mappedBy' => 'occurrences'],
-            'organismID' => ['target' => 'Organism', 'type' => 'ManyToOne', 'mappedBy' => 'occurrences'],
-            'materialEntityID' => ['target' => 'MaterialEntity', 'type' => 'ManyToOne', 'mappedBy' => 'occurrences'],
-            'locationID' => ['target' => 'Location', 'type' => 'ManyToOne', 'mappedBy' => 'occurrences'],
-            'identificationID' => ['target' => 'Identification', 'type' => 'ManyToOne', 'mappedBy' => 'occurrences'],
+            'taxonID' => ['target' => 'Taxon', 'type' => 'ManyToOne', 'mappedBy' => 'occurrences', 'cascade' => ['persist']],
+            'eventID' => ['target' => 'Event', 'type' => 'ManyToOne', 'mappedBy' => 'occurrences', 'cascade' => ['persist']],
+            'organismID' => ['target' => 'Organism', 'type' => 'ManyToOne', 'mappedBy' => 'occurrences', 'cascade' => ['persist']],
+            'materialEntityID' => ['target' => 'MaterialEntity', 'type' => 'ManyToOne', 'mappedBy' => 'occurrences', 'cascade' => ['persist']],
+            'locationID' => ['target' => 'Location', 'type' => 'ManyToOne', 'mappedBy' => 'occurrences', 'cascade' => ['persist']],
+            'identificationID' => ['target' => 'Identification', 'type' => 'ManyToOne', 'mappedBy' => 'occurrences', 'cascade' => ['persist']],
         ],
         'Event' => [
             'locationID' => ['target' => 'Location', 'type' => 'ManyToOne', 'mappedBy' => 'events'],
@@ -282,6 +282,7 @@ class DwcSchemeToEntityCommand extends Command
                         'relationshipType' => $relationshipInfo['type'],
                         'targetProperty' => $relationshipInfo['property'] ?? $identifierName,
                         'mappedBy' => $relationshipInfo['mappedBy'] ?? null,
+                        'cascade' => $relationshipInfo['cascade'] ?? null,
                         'description' => 'Reference to ' . $relationshipInfo['target']
                     ];
                 }
@@ -309,6 +310,7 @@ class DwcSchemeToEntityCommand extends Command
                         'relationshipType' => $relationshipInfo['type'],
                         'targetProperty' => $relationshipInfo['property'] ?? $name,
                         'mappedBy' => $relationshipInfo['mappedBy'] ?? null,
+                        'cascade' => $relationshipInfo['cascade'] ?? null,
                         'description' => $this->extractDocumentation($element)
                     ];
                 } else {
@@ -334,6 +336,7 @@ class DwcSchemeToEntityCommand extends Command
                         'relationshipType' => $relationshipInfo['type'],
                         'targetProperty' => $relationshipInfo['property'] ?? $term['name'],
                         'mappedBy' => $relationshipInfo['mappedBy'] ?? null,
+                        'cascade' => $relationshipInfo['cascade'] ?? null,
                         'description' => $term['description']
                     ];
                     // Remove from record level terms since it's now a relationship
@@ -625,13 +628,17 @@ class DwcSchemeToEntityCommand extends Command
             $inversedBy = $relationship['mappedBy'] ?? null;
             $inversedByAttr = $inversedBy ? ", inversedBy: '{$inversedBy}'" : '';
 
-            $code .= "    #[ORM\\ManyToOne(targetEntity: {$target}::class{$inversedByAttr})]\n";
+            // Add cascade if specified
+            $cascade = $relationship['cascade'] ?? null;
+            $cascadeAttr = $cascade ? ", cascade: ['persist']" : '';
+
+            $code .= "    #[ORM\\ManyToOne(targetEntity: {$target}::class{$inversedByAttr}{$cascadeAttr})]\n";
             // Foreign keys should reference the primary key 'id', not the identifier columns
             $code .= "    #[ORM\\JoinColumn(name: '{$name}', referencedColumnName: 'id', nullable: true)]\n";
             $code .= "    private ?{$target} \${$propertyName} = null;\n\n";
         } elseif ($relationshipType === 'OneToMany') {
             $mappedBy = $relationship['mappedBy'] ?? $propertyName;
-            $code .= "    #[ORM\\OneToMany(mappedBy: '{$mappedBy}', targetEntity: {$target}::class)]\n";
+            $code .= "    #[ORM\\OneToMany(mappedBy: '{$mappedBy}', targetEntity: {$target}::class, cascade: ['persist'])]\n";
             $code .= "    private Collection \${$propertyName};\n\n";
         }
 

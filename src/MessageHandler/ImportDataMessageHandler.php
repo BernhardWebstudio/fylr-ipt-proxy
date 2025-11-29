@@ -63,9 +63,10 @@ final class ImportDataMessageHandler
             }
 
             // Find the appropriate mapping for this type
-            $mapping = $this->findMappingForType($type);
+            $objectType = $criteria['objectType'] ?? null;
+            $mapping = $this->findMappingForType($objectType);
             if (!$mapping) {
-                throw new \RuntimeException("No mapping found for type: {$type}");
+                throw new \RuntimeException("No mapping found for type: {$objectType}");
             }
 
             // Calculate offset based on page and page size

@@ -290,7 +290,7 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
                     }
                 }
 
-                $location->setLocality($aufsammlung["lokalitaet"]);
+                $location->setLocality($aufsammlung["lokalitaet"] ?? null);
             }
 
             $location->setGeodeticDatum(
@@ -298,14 +298,14 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
             );
 
             $location->setCoordinateUncertaintyInMeters(
-                $aufsammlung["fehlerradius"]
+                $aufsammlung["fehlerradius"] ?? null
             );
 
             $location->setDecimalLatitude($aufsammlung["breitengraddezimal"] ?? null);
             $location->setDecimalLongitude($aufsammlung["langngraddzimal"] ?? null);
 
             $location->setVerbatimLocality(implode(" | ", array_filter(array_map(function ($coll) {
-                return $coll["lokalitaettrans"];
+                return $coll["lokalitaettrans"] ?? null;
             }, $aufsammlungen))));
 
             $occurrence->setLocation($location);

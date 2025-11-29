@@ -102,6 +102,13 @@
                                                     </button>
                                                 </form>
                                                 {% endif %}
+                                                {% if job.canBeReset %}
+                                                <form method="post" action="{{ path('app_job_reset', {jobId: job.jobId}) }}" style="display: inline;">
+                                                    <button type="submit" class="btn btn-outline-info btn-sm" title="Reset & Re-run Job">
+                                                        <i class="fa fa-refresh"></i>
+                                                    </button>
+                                                </form>
+                                                {% endif %}
                                                 <form method="post" action="{{ path('app_job_delete', {jobId: job.jobId}) }}" style="display: inline;" onsubmit="return confirm('Delete this job permanently?');">
                                                     <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete Job">
                                                         <i class="fa fa-trash"></i>

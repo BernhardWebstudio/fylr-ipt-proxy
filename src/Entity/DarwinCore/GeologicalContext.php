@@ -20,7 +20,7 @@ class GeologicalContext
     #[ORM\Column(name: 'geologicalContextID', type: 'string', unique: true)]
     private string $geologicalContextID;
 
-    #[ORM\OneToMany(mappedBy: 'geologicalContext', targetEntity: Location::class)]
+    #[ORM\OneToMany(mappedBy: 'geologicalContext', targetEntity: Location::class, cascade: ['persist'])]
     private Collection $locations;
 
     #[ORM\Column(name: 'earliestEonOrLowestEonothem', type: 'string', nullable: true)]

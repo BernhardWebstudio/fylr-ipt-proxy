@@ -27,7 +27,7 @@ class MaterialEntity
     #[ORM\JoinColumn(name: 'materialSampleID', referencedColumnName: 'id', nullable: true)]
     private ?MaterialSample $materialSample = null;
 
-    #[ORM\OneToMany(mappedBy: 'materialEntity', targetEntity: Occurrence::class)]
+    #[ORM\OneToMany(mappedBy: 'materialEntity', targetEntity: Occurrence::class, cascade: ['persist'])]
     private Collection $occurrences;
 
     #[ORM\Column(name: 'preparations', type: 'string', nullable: true)]

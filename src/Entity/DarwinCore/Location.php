@@ -27,10 +27,10 @@ class Location
     #[ORM\JoinColumn(name: 'geologicalContextID', referencedColumnName: 'id', nullable: true)]
     private ?GeologicalContext $geologicalContext = null;
 
-    #[ORM\OneToMany(mappedBy: 'location', targetEntity: Event::class)]
+    #[ORM\OneToMany(mappedBy: 'location', targetEntity: Event::class, cascade: ['persist'])]
     private Collection $events;
 
-    #[ORM\OneToMany(mappedBy: 'location', targetEntity: Occurrence::class)]
+    #[ORM\OneToMany(mappedBy: 'location', targetEntity: Occurrence::class, cascade: ['persist'])]
     private Collection $occurrences;
 
     #[ORM\Column(name: 'higherGeographyID', type: 'string', nullable: true)]
