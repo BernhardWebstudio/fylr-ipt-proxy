@@ -8,6 +8,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Form\FormEvent;
 
 class ImportSelectionType extends AbstractType
 {
@@ -54,6 +56,17 @@ class ImportSelectionType extends AbstractType
                 ]
             ])
         ;
+
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
+            $form = $event->getForm();
+            $choiceFieldsWithPossibleSingleValues = ['tagId', 'objectType'];
+            foreach ($choiceFieldsWithPossibleSingleValues as $field) {
+                $choices = $form->get($field)->getConfig()->getOption('choices');
+                if (count($choices) === 1) {
+                    $form->get($field)->setData(array_key_first($choices));
+                }
+            }
+        });
     }
 
     public function configureOptions(OptionsResolver $resolver): void
