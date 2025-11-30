@@ -7,6 +7,8 @@
 **/._*
 **/.dockerignore
 **/.DS_Store
+.git
+.git/
 **/.git/
 **/.gitattributes
 **/.gitignore
