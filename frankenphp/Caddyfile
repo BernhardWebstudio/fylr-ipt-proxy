@@ -27,6 +27,12 @@
 		}
 	}
 
+	# TLS configuration to prevent SSL_ERROR_INTERNAL_ERROR_ALERT
+	tls {
+		protocols tls1.2 tls1.3
+		alpn h2 http/1.1
+	}
+
 	root /app/public
 	encode zstd br gzip
 
