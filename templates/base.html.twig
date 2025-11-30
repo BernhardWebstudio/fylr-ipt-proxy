@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app.request.locale }}">
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,7 +20,10 @@
 		{% endblock %}
 	</head>
 	<body
-		class="with-custom-webkit-scrollbars with-custom-css-scrollbars ps-md-sbwidth" data-dm-shortcut-enabled="true" data-sidebar-shortcut-enabled="true" data-set-preferred-mode-onload="true">
+		class="with-custom-webkit-scrollbars with-custom-css-scrollbars ps-md-sbwidth"
+		data-dm-shortcut-enabled="true" data-sidebar-shortcut-enabled="true" data-set-preferred-mode-onload="true"
+		data-controller="bootstrap-dropdown"
+	>
 
 		<!-- Sidebar start -->
 		<nav class="sidebar offcanvas-start offcanvas-md" tabindex="-1" id="main-menu-sidebar">
@@ -32,39 +35,39 @@
 				<button type="button" class="btn-close d-md-none" data-bs-dismiss="offcanvas" aria-label="Close" data-bs-target="#main-menu-sidebar"></button>
 			</div>
 			<div class="offcanvas-body">
-				<h5 class="sidebar-title">Navigation</h5>
+				<h5 class="sidebar-title">{{ 'home.navigation'|trans|default('Navigation') }}</h5>
 				<ul class="sidebar-menu sidebar-nav">
 					<li>
 						<a href="{{ path('app_home') }}" class="sidebar-link nav-link {{ app.request.attributes.get('_route') == 'app_home' ? 'active' : '' }}">
 							<i class="fa fa-home" aria-hidden="true"></i>
-							Home
+							{{ 'home.home'|trans|default('Home') }}
 						</a>
 					</li>
 
 					{% if app.user %}
 						<div class="sidebar-divider"></div>
 						<li>
-							<h5 class="sidebar-title">Data Management</h5>
+							<h5 class="sidebar-title">{{ 'home.data_management'|trans|default('Data Management') }}</h5>
 						</li>
 
 						<li class="nav-item">
 							<a href="{{ path('app_import_management') }}" class="sidebar-link nav-link {{ app.request.attributes.get('_route') starts with 'app_import' ? 'active' : '' }}">
 								<i class="fa fa-download" aria-hidden="true"></i>
-								Import Data
+								{{ 'home.import_data'|trans|default('Import Data') }}
 							</a>
 						</li>
 
 						<li class="nav-item">
 							<a href="{{ path('app_export_management') }}" class="sidebar-link nav-link {{ app.request.attributes.get('_route') starts with 'app_export' ? 'active' : '' }}">
 								<i class="fa fa-upload" aria-hidden="true"></i>
-								Export Data
+								{{ 'home.export_data'|trans|default('Export Data') }}
 							</a>
 						</li>
 
 						<li class="nav-item">
 							<a href="{{ path('app_jobs_list') }}" class="sidebar-link nav-link {{ app.request.attributes.get('_route') starts with 'app_job' ? 'active' : '' }}">
 								<i class="fa fa-tasks" aria-hidden="true"></i>
-								Job History
+								{{ 'home.job_history'|trans }}
 							</a>
 						</li>
 					{% endif %}
@@ -109,6 +112,22 @@
 									</li>
 									<li><hr class="dropdown-divider"></li>
 									<li>
+										<h6 class="dropdown-header">{{ 'label.language'|trans }}</h6>
+									</li>
+									<li>
+										<a href="{{ path('app_change_locale', {locale: 'en'}) }}" class="dropdown-item {{ app.request.locale == 'en' ? 'active' : '' }}">
+											<i class="fa fa-language" aria-hidden="true"></i>
+											{{ 'language.english'|trans }}
+										</a>
+									</li>
+									<li>
+										<a href="{{ path('app_change_locale', {locale: 'de'}) }}" class="dropdown-item {{ app.request.locale == 'de' ? 'active' : '' }}">
+											<i class="fa fa-language" aria-hidden="true"></i>
+											{{ 'language.german'|trans }}
+										</a>
+									</li>
+									<li><hr class="dropdown-divider"></li>
+									<li>
 										<a href="{{ path('app_logout') }}" class="dropdown-item">
 											<i class="fa fa-sign-out" aria-hidden="true"></i>
 											Logout
@@ -116,14 +135,34 @@
 									</li>
 								</ul>
 							</div>
-						{% else %}
-							<a href="{{ path('app_login') }}" class="btn btn-primary">
-								<i class="fa fa-sign-in" aria-hidden="true"></i>
-								Login
-							</a>
-						{% endif %}
+					{% else %}
+						<div class="dropdown btn-group">
+							<button class="btn dropdown-toggle" data-bs-toggle="dropdown" type="button" id="navbar-dropdown-toggle-btn-guest" aria-expanded="false">
+								<i class="fa fa-language" aria-hidden="true"></i>
+								{{ 'label.language'|trans }}
+							</button>
+							<ul class="dropdown-menu dropdown-content">
+								<li>
+									<a href="{{ path('app_change_locale', {locale: 'en'}) }}" class="dropdown-item {{ app.request.locale == 'en' ? 'active' : '' }}">
+										<i class="fa fa-language" aria-hidden="true"></i>
+										{{ 'language.english'|trans }}
+									</a>
+								</li>
+								<li>
+									<a href="{{ path('app_change_locale', {locale: 'de'}) }}" class="dropdown-item {{ app.request.locale == 'de' ? 'active' : '' }}">
+										<i class="fa fa-language" aria-hidden="true"></i>
+										{{ 'language.german'|trans }}
+									</a>
+								</li>
+							</ul>
+						</div>
+						<a href="{{ path('app_login') }}" class="btn btn-primary">
+							<i class="fa fa-sign-in" aria-hidden="true"></i>
+							Login
+						</a>
+					{% endif %}
 
-						<button class="btn btn-action" type="button" onclick="halfmoon.toggleDarkMode()">
+						<button class="btn btn-action" type="button" data-theme-toggle>
 							<i class="fa fa-moon-o" aria-hidden="true"></i>
 							<span class="sr-only">Toggle dark mode</span>
 						</button>
@@ -155,6 +194,31 @@
 
 		<!-- FontAwesome for icons -->
 		<script src="https://use.fontawesome.com/releases/v5.15.4/js/all.js"></script>
+
+		<script>
+		// Theme toggle button logic (remains global)
+		document.addEventListener('click', function(e) {
+			var btn = e.target.closest('[data-theme-toggle]');
+			if (btn) {
+				var current = document.documentElement.getAttribute('data-bs-theme') || 'light';
+				var next = current === 'dark' ? 'light' : 'dark';
+				document.documentElement.setAttribute('data-bs-theme', next);
+				if (window.localStorage) {
+					localStorage.setItem('theme', next);
+				}
+				e.preventDefault();
+			}
+		});
+		// On page load, set theme from localStorage
+		document.addEventListener('DOMContentLoaded', function() {
+			if (window.localStorage) {
+				var theme = localStorage.getItem('theme');
+				if (theme) {
+					document.documentElement.setAttribute('data-bs-theme', theme);
+				}
+			}
+		});
+		</script>
 
 		{% block body_javascripts %}{% endblock %}
 	</body>

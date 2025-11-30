@@ -16,6 +16,3 @@ services:
       target: frankenphp_prod
     environment:
       APP_SECRET: ${APP_SECRET}
-    volumes:
-      - ./var/log:/app/var/log
-      - ./var/export:/app/var/export

@@ -32,4 +32,12 @@ return [
         'version' => '2.0.2',
         'type' => 'css',
     ],
+    // Chart.js via CDN (auto build)
+    'chart.js/auto' => [
+        'version' => '4.4.1',
+    ],
+    // Chart.js dependency used for color utilities
+    '@kurkle/color' => [
+        'version' => '0.3.2',
+    ],
 ];

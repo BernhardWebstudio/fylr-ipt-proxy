@@ -20,7 +20,7 @@ class OccurrenceImport
     #[ORM\Column(type: 'datetime_immutable', nullable: false)]
     private ?\DateTimeImmutable $lastUpdatedAt = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, unique: true)]
     private ?string $globalObjectID = null;
 
     #[ORM\Column(type: 'integer', nullable: true)]

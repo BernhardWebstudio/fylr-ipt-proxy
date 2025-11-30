@@ -169,7 +169,13 @@ class EasydbApiService
 
         $this->sessionService->checkStatusCode($response);
         $content = $response->toArray();
-        return $content;
+        assert(isset($content['objects']));
+        if (count($content['objects']) === 0) {
+            return null;
+        }
+        assert(count($content['objects']) === 1);
+
+        return $content['objects'][0];
     }
 
     /**
@@ -312,7 +318,11 @@ class EasydbApiService
 
         // If global object ID is provided, use existing method
         if ($globalObjectID) {
-            return $this->loadEntityByGlobalObjectID($globalObjectID);
+            return [
+                'objects' => [
+                    $this->loadEntityByGlobalObjectID($globalObjectID)
+                ]
+            ];
         }
 
         // If tag ID is provided, use tag search

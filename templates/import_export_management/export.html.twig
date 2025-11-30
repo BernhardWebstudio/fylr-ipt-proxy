@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Export Management
+{% block title %}{{ 'export.title'|trans }}
 {% endblock %}
 
 {% block stylesheets %}
@@ -86,11 +86,10 @@
 				<div class="content">
 					<h1 class="content-title">
 						<i class="fa fa-upload" aria-hidden="true"></i>
-						Export Management
+						{{ 'export.heading'|trans }}
 					</h1>
 					<p class="text-muted">
-						Export entities from this proxy's database to various formats.
-						                    Use the filters below to select data for export.
+						{{ 'export.description'|trans }}
 					</p>
 
 					<!-- Export Form -->
@@ -98,7 +97,7 @@
 						<div class="card-header">
 							<h5 class="card-title">
 								<i class="fa fa-filter" aria-hidden="true"></i>
-								Filter & Export Options
+								{{ 'export.filter_options'|trans }}
 							</h5>
 						</div>
 						<div class="card-body">
@@ -118,7 +117,7 @@
 									{{ form_label(form.tagId) }}
 									{{ form_widget(form.tagId, {'attr': {'class': 'form-control'}}) }}
 									<small class="form-text text-muted">
-										Select a tag to export all entities with that tag.
+										{{ 'export.select_tag_help'|trans }}
 									</small>
 									{{ form_errors(form.tagId) }}
 								</div>
@@ -127,7 +126,7 @@
 									{{ form_label(form.objectType) }}
 									{{ form_widget(form.objectType, {'attr': {'class': 'form-control'}}) }}
 									<small class="form-text text-muted">
-										Limit export to specific object type.
+										{{ 'export.limit_type_help'|trans }}
 									</small>
 									{{ form_errors(form.objectType) }}
 								</div>
@@ -139,8 +138,8 @@
 								</div>
 
 								<div class="form-group">
-									<label>Actions</label><br/>
-									<div class="btn-group" role="group" aria-label="Actions">
+									<label>{{ 'label.actions'|trans }}</label><br/>
+									<div class="btn-group" role="group" aria-label="{{ 'label.actions'|trans }}">
 										{{ form_widget(form.preview, {'attr': {'class': 'btn btn-primary'}}) }}
 										{{ form_widget(form.export, {'attr': {'class': 'btn btn-success'}}) }}
 									</div>
@@ -157,15 +156,15 @@
 							<div class="card-header d-flex justify-content-between align-items-center">
 								<h5 class="card-title mb-0">
 									<i class="fa fa-table" aria-hidden="true"></i>
-									Export Preview
+									{{ 'export.preview_results'|trans }}
 									<span class="badge bg-primary ms-2">{{ previewEntities|length }}
-										items</span>
+										{{ 'import.items'|trans }}</span>
 								</h5>
 								<div class="text-muted">
-									Page
+									{{ 'import.page'|trans }}
 									{{ currentPage + 1 }}
 									{% if hasMore %}
-										<span class="text-muted">• More available</span>
+										<span class="text-muted">{{ 'import.more_available'|trans }}</span>
 									{% endif %}
 								</div>
 							</div>

@@ -45,9 +45,6 @@ services:
       STABILITY: ${STABILITY:-stable}
     depends_on:
       - database
-    volumes:
-      - ./var/log:/app/var/log
-      - ./var/export:/app/var/export
 
 # Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
 ###> symfony/mercure-bundle ###

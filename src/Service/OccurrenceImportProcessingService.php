@@ -48,8 +48,10 @@ class OccurrenceImportProcessingService
             ->findOneBy(['globalObjectID' => $globalObjectId]);
 
         if ($existingImport) {
+            $this->logger->debug('Found existing import', ['globalObjectId' => $globalObjectId]);
             return $this->updateExistingImport($existingImport, $entityData, $mapping, $user, $criteria);
         } else {
+            $this->logger->debug('Creating new import', ['globalObjectId' => $globalObjectId]);
             return $this->createNewImport($entityData, $mapping, $user, $criteria);
         }
     }
@@ -115,6 +117,12 @@ class OccurrenceImportProcessingService
         $import->setFirstImportedAt($now);
         $import->setLastUpdatedAt($now);
 
+        // Set identifiers and metadata required for future lookups/updates
+        $globalObjectId = $entityData['_global_object_id'];
+        $import->setGlobalObjectID($globalObjectId);
+        $remoteLastUpdated = new \DateTimeImmutable($entityData['_last_modified'] ?? $entityData['_created'] ?? 'now');
+        $import->setRemoteLastUpdatedAt($remoteLastUpdated);
+
         if ($user) {
             $import->setManualImportTrigger($user);
         }
@@ -126,7 +134,6 @@ class OccurrenceImportProcessingService
 
         $this->entityManager->persist($import);
 
-        $globalObjectId = $entityData['_global_object_id'];
         $this->logger->debug('Created new import', ['globalObjectId' => $globalObjectId]);
 
         return $import;

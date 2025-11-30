@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Import Data from EasyDB
+{% block title %}{{ 'import.title'|trans }}
 {% endblock %}
 
 {% block stylesheets %}
@@ -76,6 +76,16 @@
 				min-width: 100%;
 			}
 		}
+
+		/* Import button loading state */
+		.btn.importing {
+			opacity: 0.7;
+			cursor: not-allowed;
+		}
+
+		.btn.importing:hover {
+			opacity: 0.7;
+		}
 	</style>
 {% endblock %}
 
@@ -86,20 +96,17 @@
 				<div class="content">
 					<h1 class="content-title">
 						<i class="fa fa-download" aria-hidden="true"></i>
-						Import Data from EasyDB
+						{{ 'import.heading'|trans }}
 					</h1>
 
 					<p class="text-muted">
-						Select criteria to preview and import specimen data from EasyDB.
-																		                        Use filters to narrow down your selection before importing.
-					</p>
-
-					<!-- Import Form -->
+						{{ 'import.description'|trans }}
+					</p>					<!-- Import Form -->
 					<div class="card">
 						<div class="card-header">
 							<h5 class="card-title">
 								<i class="fa fa-filter" aria-hidden="true"></i>
-								Filter & Import Options
+								{{ 'import.filter_options'|trans }}
 							</h5>
 						</div>
 						<div class="card-body">
@@ -128,8 +135,8 @@
 								</div>
 
 								<div class="form-group">
-									<label>Actions</label><br />
-									<div class="btn-group" role="group" aria-label="Actions">
+									<label>{{ 'label.actions'|trans }}</label><br />
+									<div class="btn-group" role="group" aria-label="{{ 'label.actions'|trans }}">
 										{{ form_widget(form.preview, {'attr': {'class': 'btn btn-primary'}}) }}
 										{{ form_widget(form.import, {'attr': {'class': 'btn btn-success'}}) }}
 									</div>
@@ -141,24 +148,20 @@
 					</div>
 
 					<!-- Results Table -->
-					{# Handle case where data is wrapped in 'data' key #}
-					{% if easydbData.data is defined and easydbData.objects is not defined %}
-						{% set easydbData = easydbData.data %}
-					{% endif %}
-					{% if easydbData and easydbData.objects is defined and easydbData.objects|length > 0 %}
+					{% if easydbData is defined and easydbData|length > 0 %}
 						<div class="card mt-4">
 							<div class="card-header d-flex justify-content-between align-items-center">
 								<h5 class="card-title mb-0">
 									<i class="fa fa-table" aria-hidden="true"></i>
-									Preview Results
-									<span class="badge badge-primary ml-2">{{ easydbData.objects|length }}
-										items</span>
+									{{ 'import.preview_results'|trans }}
+									<span class="badge badge-primary ml-2">{{ easydbData|length }}
+										{{ 'import.items'|trans }}</span>
 								</h5>
 								<div class="text-muted">
-									Page
+									{{ 'import.page'|trans }}
 									{{ currentPage + 1 }}
 									{% if hasMore %}
-										<span class="text-muted">• More available</span>
+										<span class="text-muted">{{ 'import.more_available'|trans }}</span>
 									{% endif %}
 								</div>
 							</div>
@@ -174,12 +177,12 @@
 															<i class="fa fa-sort text-muted" aria-hidden="true"></i>
 														{% endif %}
 													</th>
-												{% endfor %}
-												<th scope="col" width="120">Actions</th>
+													{% endfor %}
+												<th scope="col" width="120">{{ 'label.actions'|trans }}</th>
 											</tr>
 										</thead>
 										<tbody>
-											{% for object in easydbData.objects %}
+											{% for object in easydbData %}
 												<tr>
 													{% for columnKey, column in tableColumns %}
 														{% set value = tableConfigService.extractValue(object, column.path, column.fallback_path ?? null) %}
@@ -195,16 +198,24 @@
 															{% endif %}
 														</td>
 													{% endfor %}
-													<td data-label="Actions">
-														{% set globalObjectId = tableConfigService.extractValue(object, '_global_object_id') %}
+												<td data-label="{{ 'label.actions'|trans }}">
+													{% set globalObjectId = tableConfigService.extractValue(object, '_global_object_id') %}
 														{% set objectType = object._objecttype ?? 'fungarium' %}
 														{% if globalObjectId %}
-															<div class="btn-group btn-group-sm" role="group">
-																<a href="https://www.nahima.ethz.ch/#/detail/{{ object._uuid }}" class="btn btn-outline-primary btn-sm" title="View Details" data-toggle="tooltip" target="_blank" rel="noopener">
-																	<i class="fa fa-eye" aria-hidden="true"></i>
-																</a>
-																<form method="post" action="{{ path('app_import_management_one', {type: objectType, globalObjectId: globalObjectId}) }}" style="display: inline;">
-																	<button type="submit" class="btn btn-outline-success btn-sm" title="Import This Item" data-toggle="tooltip">
+														<div class="btn-group btn-group-sm" role="group">
+															<a href="https://www.nahima.ethz.ch/#/detail/{{ object._uuid }}" class="btn btn-outline-primary btn-sm" title="{{ 'action.view_details'|trans }}" data-toggle="tooltip" target="_blank" rel="noopener">
+																<i class="fa fa-eye" aria-hidden="true"></i>
+															</a>
+															<form method="post"
+																  action="{{ path('app_import_management_one', {type: objectType, globalObjectId: globalObjectId}) }}"
+																  style="display: inline;"
+																  data-controller="import-item"
+																  data-action="submit->import-item#submit">
+																<button type="submit"
+																		class="btn btn-outline-success btn-sm"
+																		title="{{ 'action.import_this_item'|trans }}"
+																		data-toggle="tooltip"
+																		data-import-item-target="button">
 																		<i class="fa fa-download" aria-hidden="true"></i>
 																	</button>
 																</form>

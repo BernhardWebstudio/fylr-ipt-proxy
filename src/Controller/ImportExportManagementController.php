@@ -25,6 +25,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /** @package App\Controller */
 final class ImportExportManagementController extends AbstractController
@@ -39,6 +40,7 @@ final class ImportExportManagementController extends AbstractController
         LoggerInterface $logger,
         JobStatusService $jobStatusService,
         MessageBusInterface $messageBus,
+        TranslatorInterface $translator,
         #[AutowireIterator("app.easydb_dwc_mapping")] iterable $mappings
     ): Response {
         try {
@@ -66,7 +68,7 @@ final class ImportExportManagementController extends AbstractController
                 }
             }
         } catch (\Exception $e) {
-            $this->addFlash('warning', 'Could not load tags: ' . $e->getMessage());
+            $this->addFlash('warning', $translator->trans('flash.could_not_load_tags', ['%message%' => $e->getMessage()]));
         }
 
         // Load data from query parameters to persist form values after redirect
@@ -109,7 +111,7 @@ final class ImportExportManagementController extends AbstractController
                 $easydbSessionContent = $session->get('easydb_session_content');
 
                 if (!$easydbToken || !$easydbSessionContent) {
-                    $this->addFlash('error', 'No valid EasyDB session available. Please log in again.');
+                    $this->addFlash('error', $translator->trans('flash.no_easydb_session'));
                     return $this->redirectToRoute('app_import_management');
                 }
 
@@ -127,7 +129,7 @@ final class ImportExportManagementController extends AbstractController
                 );
                 $messageBus->dispatch($importMessage);
 
-                $this->addFlash('success', "Import job started. Job ID: {$jobId}");
+                $this->addFlash('success', $translator->trans('flash.import_job_started', ['%jobId%' => $jobId]));
                 return $this->redirectToRoute('app_job_status', ['jobId' => $jobId]);
             }
 
@@ -149,7 +151,11 @@ final class ImportExportManagementController extends AbstractController
 
         $entities = [];
         if (($queryData['globalObjectId'] ?? false)) {
-            $entities = $easydbApiService->loadEntityByGlobalObjectID($queryData['globalObjectId']);
+            $entities = [
+                'objects' => [
+                    $easydbApiService->loadEntityByGlobalObjectID($queryData['globalObjectId'])
+                ]
+            ];
         } else if ($hasSearchCriteria) {
             $entities = $easydbApiService->searchByTag(
                 $queryData['tagId'] ?? null,
@@ -159,9 +165,22 @@ final class ImportExportManagementController extends AbstractController
             );
         }
 
+        $keysToUnwrap = ['data', 'objects', 'entities'];
+        foreach ($keysToUnwrap as $key) {
+            if (array_key_exists($key, $entities) && is_array($entities[$key])) {
+                $entities = $entities[$key];
+            }
+        }
+
         // Add flash message if search was performed but no results found
-        if ($isSubmitted && $hasSearchCriteria && (empty($entities) || empty($entities['objects']))) {
-            $this->addFlash('warning', 'No data found matching your search criteria. Please adjust your filters and try again.');
+        if ($isSubmitted && $hasSearchCriteria && (empty($entities))) {
+            $this->addFlash('warning', $translator->trans('flash.no_data_found'));
+            $logger->info('No entities found for import preview', [
+                'globalObjectId' => $queryData['globalObjectId'] ?? null,
+                'tagId' => $queryData['tagId'] ?? null,
+                'objectType' => $queryData['objectType'] ?? null,
+                'entities' => $entities,
+            ]);
         }
 
         // then, render the import form
@@ -180,22 +199,24 @@ final class ImportExportManagementController extends AbstractController
         ]);
     }
 
-    #[Route('/import/{globalObjectId}', name: 'app_import_management_one', methods: ['POST'])]
+    #[Route('/import/{type}/{globalObjectId}', name: 'app_import_management_one', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
     public function importOne(
         Request $request,
+        string $type,
         string $globalObjectId,
         EntityManagerInterface $entityManager,
         EasydbApiService $easydbApiService,
         OccurrenceImportProcessingService $importProcessingService,
         LoggerInterface $logger,
+        TranslatorInterface $translator,
         #[AutowireIterator("app.easydb_dwc_mapping")] iterable $mappings
     ): Response {
         // Implementation for importing a single object by its global ID.
         // Useful as Webhook endpoint.
         try {
             $entityData = $easydbApiService->loadEntityByGlobalObjectID($globalObjectId);
-            $type = $entityData['_objecttype'] ?? null;
+            $type = $type ?? $entityData['_objecttype'] ?? null;
 
             $mapping = null;
             foreach ($mappings as $map) {
@@ -217,15 +238,40 @@ final class ImportExportManagementController extends AbstractController
             $entityManager->flush();
 
             $logger->info('Successfully imported single entity', ['globalObjectId' => $globalObjectId, 'type' => $type]);
-            $this->addFlash('success', 'Import of Specimen with ID ' . $globalObjectId . ' was successful');
-            return new Response('Import successful', 200);
+            $this->addFlash('success', $translator->trans('flash.import_successful', ['%globalObjectId%' => $globalObjectId]));
+
+            // Preserve the current view state by extracting query params from referer
+            $referer = $request->headers->get('referer');
+            $queryParams = [];
+            if ($referer) {
+                $parsedUrl = parse_url($referer);
+                if (isset($parsedUrl['query'])) {
+                    parse_str($parsedUrl['query'], $queryParams);
+                }
+            }
+
+            // Redirect back to import page with preserved query params
+            return $this->redirectToRoute('app_import_management', $queryParams);
         } catch (\Exception $e) {
             $logger->error('Failed to import single entity', [
                 'globalObjectId' => $globalObjectId,
-                'type' => $type,
+                'type' => $type ?? 'unknown',
                 'error' => $e->getMessage()
             ]);
-            return new Response('Import failed: ' . $e->getMessage(), 500);
+            $this->addFlash('error', 'Import of Specimen with ID ' . $globalObjectId . ' failed: ' . $e->getMessage());
+
+            // Preserve the current view state by extracting query params from referer
+            $referer = $request->headers->get('referer');
+            $queryParams = [];
+            if ($referer) {
+                $parsedUrl = parse_url($referer);
+                if (isset($parsedUrl['query'])) {
+                    parse_str($parsedUrl['query'], $queryParams);
+                }
+            }
+
+            // Redirect back to import page with preserved query params
+            return $this->redirectToRoute('app_import_management', $queryParams);
         }
     }
 
@@ -238,6 +284,7 @@ final class ImportExportManagementController extends AbstractController
         EntityManagerInterface $entityManager,
         TableConfigurationService $tableConfigService,
         LoggerInterface $logger,
+        TranslatorInterface $translator,
         #[AutowireIterator("app.easydb_dwc_mapping")] iterable $mappings
     ): Response {
         try {
@@ -265,7 +312,7 @@ final class ImportExportManagementController extends AbstractController
                 }
             }
         } catch (\Exception $e) {
-            $this->addFlash('warning', 'Could not load tags: ' . $e->getMessage());
+            $this->addFlash('warning', $translator->trans('flash.could_not_load_tags', ['%message%' => $e->getMessage()]));
         }
 
         // Load data from query parameters to persist form values after redirect

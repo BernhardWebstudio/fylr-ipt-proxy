@@ -87,11 +87,6 @@ class TableConfigurationService
      */
     public function extractValue($data, string $path, ?string $fallbackPath = null): ?string
     {
-        if ($path === "_global_object_id") {
-            // log the data structure for debugging
-            $this->logger->debug('Extracting global_object_id from data', ['data' => $data]);
-        }
-
         $value = $this->getNestedValue($data, $path);
 
         if (empty($value) && $fallbackPath) {

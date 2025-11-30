@@ -8,21 +8,40 @@ use App\Entity\DarwinCore\Event;
 use App\Entity\DarwinCore\Location;
 use App\Entity\DarwinCore\Identification;
 use App\Entity\OccurrenceImport;
+use Doctrine\ORM\EntityManagerInterface;
 
 class FungariumDwCMapping implements EasydbDwCMappingInterface
 {
+    public function __construct(private EntityManagerInterface $entityManager)
+    {
+    }
     public function mapOccurrence(array $source, OccurrenceImport $target): void
     {
         // Set basic import metadata
         $target->setGlobalObjectID($source["_global_object_id"]);
         $target->setRemoteLastUpdatedAt(new \DateTimeImmutable($source["_last_modified"] ?? $source["_created"]));
 
-        // Create or get the occurrence entity
-        $occurrence = $target->getOccurrence() ?? new Occurrence();
-        // attach an organism to the occurrence if not already present
+        // Resolve or create the occurrence entity by unique occurrenceID
+        $occurrenceId = $source["_global_object_id"];
+        $occurrence = $target->getOccurrence();
+        if (!$occurrence) {
+            $occurrence = $this->entityManager->getRepository(Occurrence::class)
+                ->findOneBy(['occurrenceID' => $occurrenceId]);
+        }
+        if (!$occurrence) {
+            $occurrence = new Occurrence();
+            $occurrence->setOccurrenceID($occurrenceId);
+        }
+
+        // Resolve or create organism by unique organismID
         if (!$occurrence->getOrganism()) {
-            $organism = new \App\Entity\DarwinCore\Organism();
-            $organism->setOrganismID($source["_global_object_id"]);
+            $organismId = $source["_global_object_id"];
+            $organism = $this->entityManager->getRepository(\App\Entity\DarwinCore\Organism::class)
+                ->findOneBy(['organismID' => $organismId]);
+            if (!$organism) {
+                $organism = new \App\Entity\DarwinCore\Organism();
+                $organism->setOrganismID($organismId);
+            }
             $occurrence->setOrganism($organism);
         }
 
@@ -50,9 +69,6 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
 
     private function mapBasicOccurrenceInfo(array $source, Occurrence $occurrence): void
     {
-        // Use global object ID as occurrence ID
-        $occurrence->setOccurrenceID($source["_global_object_id"]);
-
         // Extract catalog number from fungarium.zugangsnummer
         if (isset($source["fungarium"]["zugangsnummer"])) {
             $occurrence->setCatalogNumber($source["fungarium"]["zugangsnummer"]);
@@ -189,9 +205,14 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
         if (!empty($aufsammlungen)) {
             $aufsammlung = $aufsammlungen[0]; // Take the first collection event
 
-            // Create event entity
-            $event = new Event();
-            $event->setEventID($aufsammlung["_global_object_id"] ?? uniqid('event_'));
+            // Resolve or create event entity by unique eventID
+            $eventId = $aufsammlung["_global_object_id"] ?? uniqid('event_');
+            $event = $this->entityManager->getRepository(Event::class)
+                ->findOneBy(['eventID' => $eventId]);
+            if (!$event) {
+                $event = new Event();
+                $event->setEventID($eventId);
+            }
 
             // Map collection date
             if (isset($aufsammlung["sammeldatum"])) {
@@ -247,13 +268,20 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
         if (!empty($aufsammlungen)) {
             $aufsammlung = $aufsammlungen[0];
 
-            // Create location entity
-            $location = new Location();
+            // Resolve or create Location entity by unique locationID
+            $location = null;
 
             if (isset($aufsammlung["sammelort"])) {
                 $sammelort = $aufsammlung["sammelort"];
-
-                $location->setLocationID($sammelort["_global_object_id"] ?? uniqid('loc_'));
+                $resolvedLocationId = $sammelort["_global_object_id"] ?? null;
+                if ($resolvedLocationId) {
+                    $location = $this->entityManager->getRepository(Location::class)
+                        ->findOneBy(['locationID' => $resolvedLocationId]);
+                }
+                if (!$location) {
+                    $location = new Location();
+                    $location->setLocationID($resolvedLocationId ?? uniqid('loc_'));
+                }
 
                 // Extract country information
                 if (isset($sammelort["_standard"]["1"]["text"]["en-US"])) {

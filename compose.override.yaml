@@ -29,8 +29,6 @@ services:
       target: frankenphp_dev
     volumes:
       - ./:/app
-      - ./var/log:/app/var/log
-      - ./var/export:/app/var/export
     environment:
       APP_ENV: "${APP_ENV:-dev}"
       XDEBUG_MODE: "${XDEBUG_MODE:-off}"
