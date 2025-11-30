@@ -88,6 +88,37 @@ class EasydbApiService
     }
 
     /**
+     * Initialize EasyDB session using login/password credentials.
+     * Suitable for webhook or background contexts where HTTP session is unavailable.
+     */
+    public function initializeFromLoginPassword(?string $login, ?string $password): bool
+    {
+        // Skip if already initialized
+        if ($this->isInitialized) {
+            return true;
+        }
+
+        if (!$login || !$password) {
+            return false;
+        }
+
+        try {
+            // Start a fresh session and authenticate
+            $this->sessionService->startSession();
+            $this->sessionService->authenticateSession($login, $password);
+
+            // Mark initialized; token and session are held by EasydbSessionService
+            $this->isInitialized = true;
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->warning('Failed to initialize EasyDB session via login/password', [
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        }
+    }
+
+    /**
      * Ensure the service is initialized, attempting to initialize from HTTP session if needed
      */
     private function ensureInitialized(): void
@@ -162,6 +193,48 @@ class EasydbApiService
                         'fields' => ['_global_object_id'],
                         'in' => [$globalObjectID],
                         'type' => 'in',
+                    ]
+                ]
+            ]
+        ]);
+
+        $this->sessionService->checkStatusCode($response);
+        $content = $response->toArray();
+        assert(isset($content['objects']));
+        if (count($content['objects']) === 0) {
+            return null;
+        }
+        assert(count($content['objects']) === 1);
+
+        return $content['objects'][0];
+    }
+
+    /**
+     * Load an entity by its global object ID
+     */
+    public function loadEntityByUUIDAndSystemObjectID(string $uuid, int $systemObjectID): ?array
+    {
+        $this->ensureInitialized();
+
+        $response = $this->httpClient->request('POST', $this->sessionService->getUrl("search"), [
+            'json' => [
+                'format' => 'long',
+                'search' => [
+                    [
+                        "search" => [
+                            [
+                                'fields' => ['_system_object_id'],
+                                'in' => [$systemObjectID],
+                                'type' => 'in',
+                                'bool' => 'must',
+                            ],
+                            [
+                                'fields' => ['_uuid'],
+                                'in' => [$uuid],
+                                'type' => 'in',
+                                'bool' => 'must',
+                            ]
+                        ]
                     ]
                 ]
             ]

@@ -199,6 +199,57 @@ final class ImportExportManagementController extends AbstractController
         ]);
     }
 
+    #[Route('/import/{type}/{uuid}/{systemObjectId}', name: 'app_import_management_entity', methods: ['POST'])]
+    public function importOneByUUID(
+        Request $request,
+        string $type,
+        string $uuid,
+        int $systemObjectId,
+        EntityManagerInterface $entityManager,
+        EasydbApiService $easydbApiService,
+        OccurrenceImportProcessingService $importProcessingService,
+        LoggerInterface $logger,
+        TranslatorInterface $translator,
+        #[AutowireIterator("app.easydb_dwc_mapping")] iterable $mappings
+    ): Response {
+        // Implementation for importing a single object by its UUID and systemObjectId.
+        // Useful as Webhook endpoint.
+
+        // Ensure EasyDB credentials are available: try HTTP session first,
+        // then fall back to environment variables (for webhook/no-user contexts).
+        if (!$easydbApiService->hasValidSession()) {
+            // Prefer login/password from env to create a fresh authenticated session
+            $envLogin = $_ENV['EASYDB_LOGIN'] ?? getenv('EASYDB_LOGIN') ?: null;
+            $envPassword = $_ENV['EASYDB_PASSWORD'] ?? getenv('EASYDB_PASSWORD') ?: null;
+
+            if (!$envLogin || !$envPassword || !$easydbApiService->initializeFromLoginPassword($envLogin, $envPassword)) {
+                $logger->error('No EasyDB login/password available for webhook import or authentication failed');
+                return new Response('Missing EasyDB credentials (login/password).', 401);
+            }
+        }
+
+        $entityData = $easydbApiService->loadEntityByUUIDAndSystemObjectID($uuid, $systemObjectId);
+
+        $globalObjectId = $entityData['_global_object_id'] ?? null;
+        if (!$globalObjectId) {
+            $logger->error('Entity without global object ID, skipping', ['entityData' => $entityData]);
+            return new Response('Entity must have a global object ID', 400);
+        }
+
+        return $this->importOne(
+            $request,
+            $type,
+            $globalObjectId,
+            $entityManager,
+            $easydbApiService,
+            $importProcessingService,
+            $logger,
+            $translator,
+            $mappings
+        );
+    }
+
+
     #[Route('/import/{type}/{globalObjectId}', name: 'app_import_management_one', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
     public function importOne(
@@ -382,7 +433,7 @@ final class ImportExportManagementController extends AbstractController
                         'globalObjectId' => $data['globalObjectId'] ?? null,
                         'tagId' => $data['tagId'] ?? null,
                         'objectType' => $data['objectType'] ?? null,
-                        'export' => $form->get('export')->isClicked(),
+                        'export' => $isExportClicked,
                     ]);
                 }
 
