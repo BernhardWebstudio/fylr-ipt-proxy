@@ -38,6 +38,24 @@ jobs:
       -
         name: Start services
         run: docker compose up --wait --no-build
+        continue-on-error: true
+
+      -
+        name: "Debug: dump Docker Compose state and php logs (always)"
+        run: |
+          echo "==== docker ps ===="
+          docker ps -a || true
+          echo "==== docker compose ps ===="
+          docker compose ps || true
+          echo "==== php container inspect (State and Health) ===="
+          PHP_ID=$(docker compose ps -q php) || true
+          if [ -n "$PHP_ID" ]; then
+            docker inspect --format='{{json .State}}' "$PHP_ID" || true
+            docker inspect --format='{{json .State.Health}}' "$PHP_ID" || true
+            docker inspect --format='{{json .State.Health.Log}}' "$PHP_ID" || true
+          fi
+          echo "==== php container logs ===="
+          docker compose logs --no-tail --timestamps php || true
       -
         name: Check HTTP reachability
         run: curl -v --fail-with-body http://localhost

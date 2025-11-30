@@ -70,7 +70,7 @@ VOLUME /app/var/
 # Healthcheck: test the main HTTP server (port 80) rather than the Prometheus metrics
 # endpoint on port 2019 which may not be enabled in some FrankenPHP builds.
 # Increase the start period and retries to avoid flakiness during CI startup.
-HEALTHCHECK --interval=30s --timeout=5s --start-period=120s --retries=5 CMD curl -fsS http://localhost/ || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=120s --retries=5 CMD sh -c "curl -fsS http://localhost/ >/dev/null 2>&1 || (echo 'healthcheck failed, curling again with verbose output:' && curl -v http://localhost/ || true; exit 1)"
 
 ENTRYPOINT ["docker-entrypoint-supervisor"]
 CMD ["supervisord", "-c", "/etc/supervisor/supervisord.conf", "-n"]
