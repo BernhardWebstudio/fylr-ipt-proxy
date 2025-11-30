@@ -54,7 +54,10 @@ COPY --link frankenphp/Caddyfile /etc/frankenphp/Caddyfile
 
 ENTRYPOINT ["docker-entrypoint"]
 
-HEALTHCHECK --start-period=60s CMD curl -f http://localhost:2019/metrics || exit 1
+# Healthcheck: test the main HTTP server (port 80) rather than the Prometheus metrics
+# endpoint on port 2019 which may not be enabled in some FrankenPHP builds.
+# Increase the start period and retries to avoid flakiness during CI startup.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=120s --retries=5 CMD curl -fsS http://localhost/ || exit 1
 CMD [ "frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile" ]
 
 # Dev FrankenPHP image
