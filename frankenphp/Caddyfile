@@ -1,11 +1,6 @@
 {
 	skip_install_trust
 
-	# Default TLS configuration to prevent SSL_ERROR_INTERNAL_ERROR_ALERT
-	servers {
-		protocols h1 h2 h3
-	}
-
 	{$CADDY_GLOBAL_OPTIONS}
 
 	frankenphp {
