@@ -19,6 +19,7 @@ VOLUME /app/var/
 # hadolint ignore=DL3008
 RUN apt-get update && apt-get install -y --no-install-recommends \
 	acl \
+	curl \
 	file \
 	gettext \
 	git \
