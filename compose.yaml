@@ -1,5 +1,7 @@
 services:
   php:
+    env_file:
+      - .env.local
     image: ${IMAGES_PREFIX:-}app-php
     restart: unless-stopped
     environment:
@@ -34,6 +36,8 @@ services:
 
   # Message queue consumer for processing async jobs
   messenger_consumer:
+    env_file:
+      - .env.local
     image: ${IMAGES_PREFIX:-}app-php
     restart: unless-stopped
     command: ["php", "bin/console", "messenger:consume", "async", "--limit=100", "--memory-limit=128M", "--time-limit=3600"]
@@ -54,6 +58,8 @@ services:
 
 ###> doctrine/doctrine-bundle ###
   database:
+    env_file:
+      - .env.local
     image: postgres:${POSTGRES_VERSION:-16}-alpine
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-app}

@@ -3,6 +3,8 @@
 # managing both the web server and message queue consumers
 services:
   app:
+    env_file:
+      - .env.local
     build:
       context: .
       dockerfile: Dockerfile.supervisor
@@ -39,6 +41,8 @@ services:
 
 ###> doctrine/doctrine-bundle ###
   database:
+    env_file:
+      - .env.local
     image: postgres:${POSTGRES_VERSION:-16}-alpine
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-app}
