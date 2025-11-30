@@ -18,3 +18,9 @@
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+
+resources/queries
+resources/examples
+docker/db
+docker/supervisor
+docker/var

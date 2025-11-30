@@ -237,6 +237,7 @@ final class ImportExportManagementController extends AbstractController
         DataExportService $dataExportService,
         EntityManagerInterface $entityManager,
         TableConfigurationService $tableConfigService,
+        LoggerInterface $logger,
         #[AutowireIterator("app.easydb_dwc_mapping")] iterable $mappings
     ): Response {
         try {
@@ -287,7 +288,7 @@ final class ImportExportManagementController extends AbstractController
             $data = $form->getData();
 
             // Check which button was clicked
-            $isExportClicked = $form->get('export')->isClicked();
+            $isExportClicked = $form->get('export')->isClicked() || $form->getClickedButton()?->getName() === 'export';
 
             try {
                 // Search for entities based on form criteria
@@ -304,6 +305,7 @@ final class ImportExportManagementController extends AbstractController
 
                 // If Export button was clicked, perform the export
                 if ($isExportClicked) {
+                    $logger->info('Export initiated', ['format' => $data['exportFormat']]);
                     $format = $data['exportFormat'];
 
                     switch ($format) {
@@ -328,6 +330,13 @@ final class ImportExportManagementController extends AbstractController
                             $this->addFlash('error', 'Unsupported export format: ' . $format);
                             return $this->redirectToRoute('app_export_management');
                     }
+                } else {
+                    $logger->info('Preview requested for export', [
+                        'globalObjectId' => $data['globalObjectId'] ?? null,
+                        'tagId' => $data['tagId'] ?? null,
+                        'objectType' => $data['objectType'] ?? null,
+                        'export' => $form->get('export')->isClicked(),
+                    ]);
                 }
 
                 // If Preview button was clicked, redirect to same page with query parameters
