@@ -28,47 +28,47 @@ class TableConfigurationService
             ],
             'taxon_name' => [
                 'label' => 'Taxon Name',
-                'path' => '_reverse_nested:bestimmung:fungarium.0.taxonnametrans',
-                'fallback_path' => '_reverse_nested:bestimmung:fungarium.0.taxonname._standard.1.text.en-US',
+                'path' => 'fungarium._reverse_nested:bestimmung:fungarium.0.taxonnametrans',
+                'fallback_path' => 'fungarium._reverse_nested:bestimmung:fungarium.0.taxonname._standard.1.text.en-US',
                 'sortable' => true,
                 'searchable' => true,
             ],
             'genus' => [
                 'label' => 'Genus',
-                'path' => '_reverse_nested:bestimmung:fungarium.0.genustrans',
-                'fallback_path' => '_reverse_nested:bestimmung:fungarium.0.genus._standard.1.text.en-US',
+                'path' => 'fungarium._reverse_nested:bestimmung:fungarium.0.genustrans',
+                'fallback_path' => 'fungarium._reverse_nested:bestimmung:fungarium.0.genus._standard.1.text.en-US',
                 'sortable' => true,
                 'searchable' => true,
             ],
             'species' => [
                 'label' => 'Species',
-                'path' => '_reverse_nested:bestimmung:fungarium.0.arttrans',
+                'path' => 'fungarium._reverse_nested:bestimmung:fungarium.0.arttrans',
                 'sortable' => true,
                 'searchable' => true,
             ],
             'author' => [
                 'label' => 'Author',
-                'path' => '_reverse_nested:bestimmung:fungarium.0.autor._standard.1.text.en-US',
-                'fallback_path' => '_reverse_nested:bestimmung:fungarium.0.autor._standard.1.text.de-DE',
+                'path' => 'fungarium._reverse_nested:bestimmung:fungarium.0.autor._standard.1.text.en-US',
+                'fallback_path' => 'fungarium._reverse_nested:bestimmung:fungarium.0.autor._standard.1.text.de-DE',
                 'sortable' => false,
                 'searchable' => true,
             ],
             'collector' => [
                 'label' => 'Collector',
-                'path' => '_reverse_nested:bestimmung:fungarium.0.bestimmertrans',
+                'path' => 'fungarium._reverse_nested:bestimmung:fungarium.0.bestimmertrans',
                 'sortable' => true,
                 'searchable' => true,
             ],
             'collection_location' => [
                 'label' => 'Collection Location',
-                'path' => '_reverse_nested:aufsammlung:fungarium.0.sammelort._standard.1.text.en-US',
-                'fallback_path' => '_reverse_nested:aufsammlung:fungarium.0.sammelort._standard.1.text.de-DE',
+                'path' => 'fungarium._reverse_nested:aufsammlung:fungarium.0.sammelort._standard.1.text.en-US',
+                'fallback_path' => 'fungarium._reverse_nested:aufsammlung:fungarium.0.sammelort._standard.1.text.de-DE',
                 'sortable' => false,
                 'searchable' => true,
             ],
             'habitat' => [
                 'label' => 'Habitat',
-                'path' => '_reverse_nested:aufsammlung:fungarium.0.habitattrans',
+                'path' => 'fungarium._reverse_nested:aufsammlung:fungarium.0.habitattrans',
                 'sortable' => false,
                 'searchable' => true,
             ],
@@ -125,8 +125,8 @@ class TableConfigurationService
         $allColumns = $this->getImportTableColumns();
 
         if ($visibleColumnKeys === null) {
-            // Default visible columns
-            $visibleColumnKeys = ['zugangsnummer', 'taxon_name', 'genus', 'species', 'collector', 'global_object_id'];
+            // Default visible columns - matching export columns
+            $visibleColumnKeys = ['zugangsnummer', 'taxon_name', 'genus', 'species', 'collector', 'collection_location', 'global_object_id'];
         }
 
         return array_intersect_key($allColumns, array_flip($visibleColumnKeys));

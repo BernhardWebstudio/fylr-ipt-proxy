@@ -263,11 +263,13 @@ class EasydbApiService
                 'format' => 'long',
                 'search' => [
                     [
-                        'type' => 'object',
-                        'objecttypes' => [$poolType],
-                        'offset' => $offset,
-                        'limit' => $limit,
-                        'search' => [],
+                        'search' => [[
+                            'type' => 'in',
+                            'in' => [$poolType],
+                            'fields' => ['_objecttype']
+                        ]],
+                        'type' => 'complex',
+                        // 'search' => [],
                         'sort' => [
                             [
                                 'field' => '_system_object_id',
@@ -276,7 +278,9 @@ class EasydbApiService
                             ]
                         ]
                     ]
-                ]
+                ],
+                'offset' => $offset,
+                'limit' => $limit,
             ]
         ]);
 

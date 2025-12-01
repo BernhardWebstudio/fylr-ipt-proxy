@@ -1,0 +1,77 @@
+{#
+  Reusable empty state partial for import/export management
+
+  Parameters:
+  - type: 'no_results' | 'ready' (required)
+  - context: 'import' | 'export' (required)
+  - hasSearchCriteria: boolean (for no_results state)
+#}
+
+<div class="card mt-4">
+    <div class="card-body text-center">
+        <div class="my-4">
+            {% if type == 'no_results' %}
+                <i class="fa fa-search fa-3x text-muted" aria-hidden="true"></i>
+                <h5 class="mt-3">No Results Found</h5>
+                <p class="text-muted">
+                    {% if context == 'import' %}
+                        No specimens found matching your search criteria.
+                        Try adjusting your filters or check your connection to EasyDB.
+                    {% else %}
+                        No entities found matching your search criteria.
+                        Try adjusting your filters or check your database.
+                    {% endif %}
+                </p>
+                {% if hasSearchCriteria %}
+                    <div class="mt-3">
+                        <strong>Current filters:</strong>
+                        <ul class="list-unstyled mt-2 text-left" style="max-width: 400px; margin: 0 auto;">
+                            {% if app.request.query.get('globalObjectId') %}
+                                <li>
+                                    <i class="fa fa-filter" aria-hidden="true"></i>
+                                    Global Object ID:
+                                    {{ app.request.query.get('globalObjectId') }}
+                                </li>
+                            {% endif %}
+                            {% if app.request.query.get('tagId') %}
+                                <li>
+                                    <i class="fa fa-tag" aria-hidden="true"></i>
+                                    Tag ID:
+                                    {{ app.request.query.get('tagId') }}
+                                </li>
+                            {% endif %}
+                            {% if app.request.query.get('objectType') %}
+                                <li>
+                                    <i class="fa fa-cube" aria-hidden="true"></i>
+                                    Object Type:
+                                    {{ app.request.query.get('objectType') }}
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                {% endif %}
+            {% elseif type == 'ready' %}
+                <i class="fa fa-filter fa-3x text-muted" aria-hidden="true"></i>
+                <h5 class="mt-3">Ready to {{ context|capitalize }}</h5>
+                <p class="text-muted">
+                    {% if context == 'import' %}
+                        Use the filters above to search for specimens in EasyDB, then preview and import them into your collection.
+                    {% else %}
+                        Use the filters above to search for entities in your database,
+                        preview them in a table, and export to your preferred format.
+                    {% endif %}
+                </p>
+                {% if context == 'export' %}
+                    <div class="mt-3">
+                        <h6>Available Export Formats:</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>CSV:</strong> Comma-separated values, suitable for spreadsheets</li>
+                            <li><strong>JSON:</strong> JavaScript Object Notation, good for programmatic access</li>
+                            <li><strong>XML:</strong> Extensible Markup Language, structured data format</li>
+                        </ul>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>

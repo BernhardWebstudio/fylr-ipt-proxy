@@ -43,6 +43,7 @@ final class ImportExportManagementController extends AbstractController
         TranslatorInterface $translator,
         #[AutowireIterator("app.easydb_dwc_mapping")] iterable $mappings
     ): Response {
+        $nEntriesPerPage = 100;
         try {
             $objectTypeChoices = $this->loadAccessibleObjectTypes($mappings);
         } catch (\RuntimeException $th) {
@@ -77,15 +78,18 @@ final class ImportExportManagementController extends AbstractController
             'tagId' => $request->query->getInt('tagId') ?: null,
             'objectType' => $request->query->get('objectType'),
         ];
-
-        // create a form to select the EasyDB data to import, pre-populated with query params
         $form = $this->createForm(ImportSelectionType::class, $queryData, [
             'tag_choices' => $tagChoices,
             'object_type_choices' => $objectTypeChoices,
         ]);
-
         $form->handleRequest($request);
 
+        $hasSearchCriteria = ($queryData['tagId'] ?? false) || ($queryData['objectType'] ?? false) || ($queryData['globalObjectId'] ?? false);
+        $isSubmitted = $request->query->getBoolean('submitted', false);
+        $currentPage = $request->query->getInt('page', 0);
+        $offset = ($currentPage * $nEntriesPerPage);
+        $previewEntities = [];
+        $hasMore = false;
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData() ?? [];
 
@@ -144,42 +148,33 @@ final class ImportExportManagementController extends AbstractController
             ]);
             return $this->redirectToRoute('app_import_management', $queryParams);
         }
-
-        $nEntriesPerPage = 100;
-        $hasSearchCriteria = ($queryData['tagId'] ?? false) || ($queryData['objectType'] ?? false) || ($queryData['globalObjectId'] ?? false);
-        $isSubmitted = $request->query->getBoolean('submitted', false);
-
-        $entities = [];
-        if (($queryData['globalObjectId'] ?? false)) {
-            $entities = [
-                'objects' => [
-                    $easydbApiService->loadEntityByGlobalObjectID($queryData['globalObjectId'])
-                ]
-            ];
-        } else if ($hasSearchCriteria) {
-            $entities = $easydbApiService->searchByTag(
+        if ($hasSearchCriteria) {
+            $result = $easydbApiService->searchEntities(
+                $queryData['globalObjectId'] ?? null,
                 $queryData['tagId'] ?? null,
                 $queryData['objectType'] ?? null,
-                $request->query->getInt('page', 0) * $nEntriesPerPage,
+                $offset,
                 $nEntriesPerPage
             );
-        }
-
-        $keysToUnwrap = ['data', 'objects', 'entities'];
-        foreach ($keysToUnwrap as $key) {
-            if (array_key_exists($key, $entities) && is_array($entities[$key])) {
-                $entities = $entities[$key];
+            $objects = [];
+            if (isset($result['objects']) && is_array($result['objects'])) {
+                $objects = $result['objects'];
+            } elseif (isset($result['data']) && is_array($result['data'])) {
+                $objects = $result['data'];
+            } elseif (is_array($result)) {
+                $objects = $result;
             }
+            $hasMore = count($objects) > $nEntriesPerPage;
+            if ($hasMore) {
+                $objects = array_slice($objects, 0, $nEntriesPerPage);
+            }
+            $previewEntities = $objects;
         }
-
-        // Add flash message if search was performed but no results found
-        if ($isSubmitted && $hasSearchCriteria && (empty($entities))) {
+        if ($isSubmitted && $hasSearchCriteria && empty($previewEntities)) {
             $this->addFlash('warning', $translator->trans('flash.no_data_found'));
             $logger->info('No entities found for import preview', [
-                'globalObjectId' => $queryData['globalObjectId'] ?? null,
-                'tagId' => $queryData['tagId'] ?? null,
-                'objectType' => $queryData['objectType'] ?? null,
-                'entities' => $entities,
+                'criteria' => $queryData,
+                'entities' => $previewEntities,
             ]);
         }
 
@@ -188,18 +183,58 @@ final class ImportExportManagementController extends AbstractController
             'form' => $form->createView(),
             'availableObjectTypes' => $objectTypeChoices,
             'availableTags' => $tagChoices,
-            'easydbData' => $entities,
-            'currentPage' => $request->query->getInt('page', 0),
+            'previewEntities' => $previewEntities,
+            'currentPage' => $currentPage,
             'nEntriesPerPage' => $nEntriesPerPage,
-            'hasMore' => array_key_exists('objects', $entities) && count($entities['objects']) === $nEntriesPerPage,
+            'hasMore' => $hasMore,
             'tableColumns' => $tableConfigService->getVisibleColumns(),
             'tableConfigService' => $tableConfigService,
             'isSubmitted' => $isSubmitted,
-            'hasSearchCriteria' => $hasSearchCriteria,
+            'hasSearchCriteria' => $hasSearchCriteria
         ]);
     }
 
-    #[Route('/import/{type}/{uuid}/{systemObjectId}', name: 'app_import_management_entity', methods: ['POST'])]
+    #[Route('/import/{globalObjectId}', name: 'app_import_management_one_goi', methods: ['POST'])]
+    public function importOneByGlobalObjectID(
+        Request $request,
+        string $globalObjectId,
+        EntityManagerInterface $entityManager,
+        EasydbApiService $easydbApiService,
+        OccurrenceImportProcessingService $importProcessingService,
+        LoggerInterface $logger,
+        TranslatorInterface $translator,
+        #[AutowireIterator("app.easydb_dwc_mapping")] iterable $mappings
+    ): Response {
+
+        // Ensure EasyDB credentials are available: try HTTP session first,
+        // then fall back to environment variables (for webhook/no-user contexts).
+        if (!$easydbApiService->hasValidSession()) {
+            // Prefer login/password from env to create a fresh authenticated session
+            $envLogin = $_ENV['EASYDB_LOGIN'] ?? getenv('EASYDB_LOGIN') ?: null;
+            $envPassword = $_ENV['EASYDB_PASSWORD'] ?? getenv('EASYDB_PASSWORD') ?: null;
+
+            if (!$envLogin || !$envPassword || !$easydbApiService->initializeFromLoginPassword($envLogin, $envPassword)) {
+                $logger->error('No EasyDB login/password available for webhook import or authentication failed');
+                return new Response('Missing EasyDB credentials (login/password).', 401);
+            }
+        }
+
+        $entityData = $easydbApiService->loadEntityByGlobalObjectID($globalObjectId);
+        return $this->importOne(
+            $request,
+            $entityData['_objecttype'] ?? null,
+            $globalObjectId,
+            $entityManager,
+            $easydbApiService,
+            $importProcessingService,
+            $logger,
+            $translator,
+            $mappings
+        );
+    }
+
+
+    #[Route('/import/{type}/{uuid}/{systemObjectId}', name: 'app_import_management_one_uuid', methods: ['POST'])]
     public function importOneByUUID(
         Request $request,
         string $type,
