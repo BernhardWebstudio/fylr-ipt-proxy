@@ -194,7 +194,8 @@ final class ImportExportManagementController extends AbstractController
         ]);
     }
 
-    #[Route('/import/webhook', name: 'app_import_management_webhook', methods: ['POST', 'GET'])]
+    #[Route('/import/webhook')]
+    #[Route('/import-webhook', name: 'app_import_management_webhook')]
     public function importWebhook(
         Request $request,
         LoggerInterface $logger
