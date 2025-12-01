@@ -194,6 +194,26 @@ final class ImportExportManagementController extends AbstractController
         ]);
     }
 
+    #[Route('/import/webhook', name: 'app_import_management_webhook', methods: ['POST', 'GET'])]
+    public function importWebhook(
+        Request $request,
+        LoggerInterface $logger
+    ): Response {
+        // log what we get, since we don't know the exact format yet
+        $logger->info('Received webhook call', [
+            'method' => $request->getMethod(),
+            'headers' => $request->headers->all(),
+            'content' => $request->getContent(),
+            'query' => $request->query->all(),
+            'request' => $request->request->all(),
+        ]);
+
+        // This endpoint is a placeholder to receive webhook calls from EasyDB.
+        // Actual processing is done in the importOneByGlobalObjectID or
+        // importOneByUUID methods below.
+        return new Response('Webhook endpoint. Use /import/{globalObjectId} or /import/{type}/{uuid}/{systemObjectId} to trigger imports.', 200);
+    }
+
     #[Route('/import/{globalObjectId}', name: 'app_import_management_one_goi', methods: ['POST'])]
     public function importOneByGlobalObjectID(
         Request $request,
