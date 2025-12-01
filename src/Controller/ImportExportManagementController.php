@@ -201,7 +201,7 @@ final class ImportExportManagementController extends AbstractController
         LoggerInterface $logger
     ): Response {
         // log what we get, since we don't know the exact format yet
-        $logger->warning('Received unhandled webhook call', [
+        $logger->error('Received unhandled webhook call', [
             'method' => $request->getMethod(),
             'headers' => $request->headers->all(),
             'content' => $request->getContent(),
