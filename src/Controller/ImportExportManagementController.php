@@ -198,21 +198,106 @@ final class ImportExportManagementController extends AbstractController
     #[Route('/import-webhook', name: 'app_import_management_webhook')]
     public function importWebhook(
         Request $request,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        EntityManagerInterface $entityManager,
+        EasydbApiService $easydbApiService,
+        OccurrenceImportProcessingService $importProcessingService,
+        TranslatorInterface $translator,
+        #[AutowireIterator("app.easydb_dwc_mapping")] iterable $mappings
     ): Response {
-        // log what we get, since we don't know the exact format yet
-        $logger->error('Received unhandled webhook call', [
-            'method' => $request->getMethod(),
-            'headers' => $request->headers->all(),
-            'content' => $request->getContent(),
-            'query' => $request->query->all(),
-            'request' => $request->request->all(),
-        ]);
+        try {
+            $content = $request->getContent();
+            $data = json_decode($content, true);
 
-        // This endpoint is a placeholder to receive webhook calls from EasyDB.
-        // Actual processing is done in the importOneByGlobalObjectID or
-        // importOneByUUID methods below.
-        return new Response('Webhook endpoint. Use /import/{globalObjectId} or /import/{type}/{uuid}/{systemObjectId} to trigger imports.', 200);
+            if (!$data || !isset($data['objects']) || !is_array($data['objects'])) {
+                $logger->error('Invalid webhook payload', [
+                    'content' => $content,
+                ]);
+                return new Response('Invalid webhook payload', 400);
+            }
+
+            $logger->info('Received webhook call', [
+                'action' => $data['action'] ?? null,
+                'operation' => $data['operation'] ?? null,
+                'objectCount' => count($data['objects']),
+            ]);
+
+            $successCount = 0;
+            $errors = [];
+
+            // Process each object in the webhook payload
+            foreach ($data['objects'] as $object) {
+                $type = $object['_objecttype'] ?? null;
+                $uuid = $object['_uuid'] ?? null;
+                $systemObjectId = $object['_system_object_id'] ?? null;
+
+                if (!$type || !$uuid || !$systemObjectId) {
+                    $logger->warning('Incomplete object data in webhook', ['object' => $object]);
+                    $errors[] = 'Missing required fields for object';
+                    continue;
+                }
+
+                try {
+                    // Forward to the existing importOneByUUID method
+                    $response = $this->importOneByUUID(
+                        $request,
+                        $type,
+                        $uuid,
+                        $systemObjectId,
+                        $entityManager,
+                        $easydbApiService,
+                        $importProcessingService,
+                        $logger,
+                        $translator,
+                        $mappings
+                    );
+
+                    if ($response->getStatusCode() === 200) {
+                        $successCount++;
+                        $logger->info('Successfully imported object from webhook', [
+                            'type' => $type,
+                            'uuid' => $uuid,
+                            'systemObjectId' => $systemObjectId,
+                        ]);
+                    } else {
+                        $errors[] = "Failed to import $type/$uuid: " . $response->getContent();
+                    }
+                } catch (\Exception $e) {
+                    $logger->error('Error processing webhook object', [
+                        'type' => $type,
+                        'uuid' => $uuid,
+                        'systemObjectId' => $systemObjectId,
+                        'error' => $e->getMessage(),
+                    ]);
+                    $errors[] = "Error importing $type/$uuid: " . $e->getMessage();
+                }
+            }
+
+            // Return summary response
+            $message = sprintf(
+                'Webhook processed: %d of %d objects imported successfully',
+                $successCount,
+                count($data['objects'])
+            );
+
+            if (!empty($errors)) {
+                $message .= '. Errors: ' . implode('; ', $errors);
+            }
+
+            $logger->info('Webhook processing complete', [
+                'successCount' => $successCount,
+                'totalCount' => count($data['objects']),
+                'errorCount' => count($errors),
+            ]);
+
+            return new Response($message, empty($errors) ? 200 : 207);
+        } catch (\Exception $e) {
+            $logger->error('Webhook processing failed', [
+                'error' => $e->getMessage(),
+                'content' => $request->getContent(),
+            ]);
+            return new Response('Webhook processing failed: ' . $e->getMessage(), 500);
+        }
     }
 
     #[Route('/import/{globalObjectId}', name: 'app_import_management_one_goi', methods: ['POST'])]
