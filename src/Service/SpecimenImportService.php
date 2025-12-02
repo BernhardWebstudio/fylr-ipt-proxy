@@ -28,12 +28,14 @@ class SpecimenImportService
      * @param string $globalObjectId The global object ID (e.g., "123@abc-123")
      * @param User|null $user The user triggering the import (optional)
      * @param bool $flush Whether to flush changes to the database (default: true)
+     * @param bool $force Force re-mapping even if remote data hasn't changed (default: false)
      * @throws \RuntimeException If import fails
      */
     public function importByGlobalObjectId(
         string $globalObjectId,
         ?User $user = null,
-        bool $flush = true
+        bool $flush = true,
+        bool $force = false
     ): void {
         $this->logger->info('Starting import by global object ID', [
             'globalObjectId' => $globalObjectId,

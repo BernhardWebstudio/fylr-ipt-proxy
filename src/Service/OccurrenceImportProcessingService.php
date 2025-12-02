@@ -27,6 +27,7 @@ class OccurrenceImportProcessingService
      * @param EasydbDwCMappingInterface $mapping The mapping to use for converting data
      * @param User|null $user The user triggering the import (optional)
      * @param array $criteria The import criteria (tagId, objectType, etc.)
+     * @param bool $force Force re-mapping even if remote data hasn't changed (default: false)
      * @return OccurrenceImport The processed import entity
      * @throws \InvalidArgumentException If the entity data is invalid
      */
@@ -34,7 +35,8 @@ class OccurrenceImportProcessingService
         array $entityData,
         EasydbDwCMappingInterface $mapping,
         ?User $user = null,
-        array $criteria = []
+        array $criteria = [],
+        bool $force = false
     ): OccurrenceImport {
         $globalObjectId = $entityData['_global_object_id'] ?? null;
 
@@ -49,7 +51,7 @@ class OccurrenceImportProcessingService
 
         if ($existingImport) {
             $this->logger->debug('Found existing import', ['globalObjectId' => $globalObjectId]);
-            return $this->updateExistingImport($existingImport, $entityData, $mapping, $user, $criteria);
+            return $this->updateExistingImport($existingImport, $entityData, $mapping, $user, $criteria, $force);
         } else {
             $this->logger->debug('Creating new import', ['globalObjectId' => $globalObjectId]);
             return $this->createNewImport($entityData, $mapping, $user, $criteria);
@@ -57,13 +59,14 @@ class OccurrenceImportProcessingService
     }
 
     /**
-     * Update an existing import if the remote data is newer.
+     * Update an existing import if the remote data is newer or if forced.
      *
      * @param OccurrenceImport $existingImport
      * @param array $entityData
      * @param EasydbDwCMappingInterface $mapping
      * @param User|null $user
      * @param array $criteria
+     * @param bool $force Force re-mapping regardless of timestamp
      * @return OccurrenceImport
      */
     private function updateExistingImport(
@@ -71,13 +74,14 @@ class OccurrenceImportProcessingService
         array $entityData,
         EasydbDwCMappingInterface $mapping,
         ?User $user,
-        array $criteria
+        array $criteria,
+        bool $force = false
     ): OccurrenceImport {
         $lastModified = new \DateTimeImmutable($entityData['_last_modified'] ?? $entityData['_created'] ?? 'now');
         $globalObjectId = $entityData['_global_object_id'];
 
-        // Only update if the remote data is newer
-        if ($lastModified > $existingImport->getRemoteLastUpdatedAt()) {
+        // Update if the remote data is newer OR if force flag is set
+        if ($force || $lastModified > $existingImport->getRemoteLastUpdatedAt()) {
             $mapping->mapOccurrence($entityData, $existingImport);
 
             if ($user) {

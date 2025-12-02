@@ -37,6 +37,7 @@ class RefreshAllImportedSpecimenCommand extends Command
             ->addOption('password', 'p', InputOption::VALUE_OPTIONAL, 'EasyDB login password')
             ->addOption('batch-size', 'b', InputOption::VALUE_OPTIONAL, 'Number of specimens to process before flushing to database', 10)
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Run without making any changes to the database')
+            ->addOption('force', 'f', InputOption::VALUE_NONE, 'Force re-mapping even if remote data has not changed (useful after fixing mapping code)')
         ;
     }
 
@@ -47,6 +48,7 @@ class RefreshAllImportedSpecimenCommand extends Command
         $password = $input->getOption('password') ?? getenv('EASYDB_PASSWORD');
         $batchSize = (int) ($input->getOption('batch-size') ?? 10);
         $dryRun = $input->getOption('dry-run');
+        $force = $input->getOption('force');
 
         // Initialize EasyDB session with credentials if provided
         if ($login && $password) {
@@ -63,6 +65,10 @@ class RefreshAllImportedSpecimenCommand extends Command
 
         if ($dryRun) {
             $io->warning('DRY RUN MODE - No changes will be persisted to the database');
+        }
+
+        if ($force) {
+            $io->note('FORCE MODE - Re-mapping all specimens even if remote data has not changed');
         }
 
         // Get all imported specimens
@@ -95,7 +101,8 @@ class RefreshAllImportedSpecimenCommand extends Command
                 $this->specimenImportService->importByGlobalObjectId(
                     $globalObjectId,
                     null, // no specific user
-                    false // don't flush yet - we'll batch flush
+                    false, // don't flush yet - we'll batch flush
+                    $force // force re-mapping even if remote hasn't changed
                 );
 
                 $successCount++;
