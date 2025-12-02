@@ -92,8 +92,13 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
 
             // Set type status if specimen is a type
             if (isset($bestimmung["typus"]) && $bestimmung["typus"] === true) {
-                $identification = new Identification();
-                $identification->setIdentificationID($bestimmung["_global_object_id"] ?? uniqid('id_'));
+                $identificationId = $bestimmung["_global_object_id"] ?? uniqid('id_');
+                $identification = $this->entityManager->getRepository(Identification::class)
+                    ->findOneBy(['identificationID' => $identificationId]);
+                if (!$identification) {
+                    $identification = new Identification();
+                    $identification->setIdentificationID($identificationId);
+                }
                 $identification->setTypeStatus("Type");
                 $identification->setTaxon($taxon);
                 $occurrence->setIdentification($identification);
