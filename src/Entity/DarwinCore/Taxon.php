@@ -143,7 +143,7 @@ class Taxon
     #[ORM\Column(name: 'nomenclaturalStatus', type: 'string', nullable: true)]
     private ?string $nomenclaturalStatus = null;
 
-    #[ORM\Column(name: 'taxonRemarks', type: 'string', nullable: true)]
+    #[ORM\Column(name: 'taxonRemarks', type: 'text', nullable: true)]
     private ?string $taxonRemarks = null;
 
     #[ORM\Column(name: 'institutionID', type: 'string', nullable: true)]
@@ -176,7 +176,7 @@ class Taxon
     #[ORM\Column(name: 'dataGeneralizations', type: 'string', nullable: true)]
     private ?string $dataGeneralizations = null;
 
-    #[ORM\Column(name: 'dynamicProperties', type: 'string', nullable: true)]
+    #[ORM\Column(name: 'dynamicProperties', type: 'text', nullable: true)]
     private ?string $dynamicProperties = null;
 
     public function __construct()

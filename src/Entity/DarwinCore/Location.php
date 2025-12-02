@@ -69,7 +69,7 @@ class Location
     #[ORM\Column(name: 'locality', type: 'string', nullable: true)]
     private ?string $locality = null;
 
-    #[ORM\Column(name: 'verbatimLocality', type: 'string', nullable: true)]
+    #[ORM\Column(name: 'verbatimLocality', type: 'text', nullable: true)]
     private ?string $verbatimLocality = null;
 
     #[ORM\Column(name: 'minimumElevationInMeters', type: 'float', nullable: true)]
@@ -78,7 +78,7 @@ class Location
     #[ORM\Column(name: 'maximumElevationInMeters', type: 'float', nullable: true)]
     private ?float $maximumElevationInMeters = null;
 
-    #[ORM\Column(name: 'verbatimElevation', type: 'string', nullable: true)]
+    #[ORM\Column(name: 'verbatimElevation', type: 'text', nullable: true)]
     private ?string $verbatimElevation = null;
 
     #[ORM\Column(name: 'verticalDatum', type: 'string', nullable: true)]
@@ -90,7 +90,7 @@ class Location
     #[ORM\Column(name: 'maximumDepthInMeters', type: 'float', nullable: true)]
     private ?float $maximumDepthInMeters = null;
 
-    #[ORM\Column(name: 'verbatimDepth', type: 'string', nullable: true)]
+    #[ORM\Column(name: 'verbatimDepth', type: 'text', nullable: true)]
     private ?string $verbatimDepth = null;
 
     #[ORM\Column(name: 'minimumDistanceAboveSurfaceInMeters', type: 'float', nullable: true)]
@@ -102,7 +102,7 @@ class Location
     #[ORM\Column(name: 'locationAccordingTo', type: 'string', nullable: true)]
     private ?string $locationAccordingTo = null;
 
-    #[ORM\Column(name: 'locationRemarks', type: 'string', nullable: true)]
+    #[ORM\Column(name: 'locationRemarks', type: 'text', nullable: true)]
     private ?string $locationRemarks = null;
 
     #[ORM\Column(name: 'decimalLatitude', type: 'float', nullable: true)]
@@ -123,19 +123,19 @@ class Location
     #[ORM\Column(name: 'pointRadiusSpatialFit', type: 'string', nullable: true)]
     private ?string $pointRadiusSpatialFit = null;
 
-    #[ORM\Column(name: 'verbatimCoordinates', type: 'string', nullable: true)]
+    #[ORM\Column(name: 'verbatimCoordinates', type: 'text', nullable: true)]
     private ?string $verbatimCoordinates = null;
 
-    #[ORM\Column(name: 'verbatimLatitude', type: 'string', nullable: true)]
+    #[ORM\Column(name: 'verbatimLatitude', type: 'text', nullable: true)]
     private ?string $verbatimLatitude = null;
 
-    #[ORM\Column(name: 'verbatimLongitude', type: 'string', nullable: true)]
+    #[ORM\Column(name: 'verbatimLongitude', type: 'text', nullable: true)]
     private ?string $verbatimLongitude = null;
 
-    #[ORM\Column(name: 'verbatimCoordinateSystem', type: 'string', nullable: true)]
+    #[ORM\Column(name: 'verbatimCoordinateSystem', type: 'text', nullable: true)]
     private ?string $verbatimCoordinateSystem = null;
 
-    #[ORM\Column(name: 'verbatimSRS', type: 'string', nullable: true)]
+    #[ORM\Column(name: 'verbatimSRS', type: 'text', nullable: true)]
     private ?string $verbatimSRS = null;
 
     #[ORM\Column(name: 'footprintWKT', type: 'string', nullable: true)]
@@ -159,7 +159,7 @@ class Location
     #[ORM\Column(name: 'georeferenceSources', type: 'string', nullable: true)]
     private ?string $georeferenceSources = null;
 
-    #[ORM\Column(name: 'georeferenceRemarks', type: 'string', nullable: true)]
+    #[ORM\Column(name: 'georeferenceRemarks', type: 'text', nullable: true)]
     private ?string $georeferenceRemarks = null;
 
     #[ORM\Column(name: 'institutionID', type: 'string', nullable: true)]
@@ -192,7 +192,7 @@ class Location
     #[ORM\Column(name: 'dataGeneralizations', type: 'string', nullable: true)]
     private ?string $dataGeneralizations = null;
 
-    #[ORM\Column(name: 'dynamicProperties', type: 'string', nullable: true)]
+    #[ORM\Column(name: 'dynamicProperties', type: 'text', nullable: true)]
     private ?string $dynamicProperties = null;
 
     public function __construct()

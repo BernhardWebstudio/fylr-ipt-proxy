@@ -116,22 +116,22 @@ class Occurrence
     #[ORM\Column(name: 'occurrenceStatus', type: 'string', nullable: true)]
     private ?string $occurrenceStatus = null;
 
-    #[ORM\Column(name: 'associatedMedia', type: 'string', nullable: true)]
+    #[ORM\Column(name: 'associatedMedia', type: 'text', nullable: true)]
     private ?string $associatedMedia = null;
 
-    #[ORM\Column(name: 'associatedOccurrences', type: 'string', nullable: true)]
+    #[ORM\Column(name: 'associatedOccurrences', type: 'text', nullable: true)]
     private ?string $associatedOccurrences = null;
 
-    #[ORM\Column(name: 'associatedReferences', type: 'string', nullable: true)]
+    #[ORM\Column(name: 'associatedReferences', type: 'text', nullable: true)]
     private ?string $associatedReferences = null;
 
-    #[ORM\Column(name: 'associatedTaxa', type: 'string', nullable: true)]
+    #[ORM\Column(name: 'associatedTaxa', type: 'text', nullable: true)]
     private ?string $associatedTaxa = null;
 
-    #[ORM\Column(name: 'otherCatalogNumbers', type: 'string', nullable: true)]
+    #[ORM\Column(name: 'otherCatalogNumbers', type: 'text', nullable: true)]
     private ?string $otherCatalogNumbers = null;
 
-    #[ORM\Column(name: 'occurrenceRemarks', type: 'string', nullable: true)]
+    #[ORM\Column(name: 'occurrenceRemarks', type: 'text', nullable: true)]
     private ?string $occurrenceRemarks = null;
 
     #[ORM\Column(name: 'institutionID', type: 'string', nullable: true)]
@@ -164,7 +164,7 @@ class Occurrence
     #[ORM\Column(name: 'dataGeneralizations', type: 'string', nullable: true)]
     private ?string $dataGeneralizations = null;
 
-    #[ORM\Column(name: 'dynamicProperties', type: 'string', nullable: true)]
+    #[ORM\Column(name: 'dynamicProperties', type: 'text', nullable: true)]
     private ?string $dynamicProperties = null;
 
     public function getId(): ?int

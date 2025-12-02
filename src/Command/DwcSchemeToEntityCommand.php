@@ -555,7 +555,7 @@ class DwcSchemeToEntityCommand extends Command
         }
 
         // Add Doctrine mapping
-        $doctrineType = $this->getDoctrineType($type);
+        $doctrineType = $this->getDoctrineType($type, $name);
         $columnName = in_array($name, $this->reservedWords) ? '"' . $name . '"' : $name;
         $code .= "    #[ORM\\Column(name: '$columnName', type: '$doctrineType'";
 
@@ -708,8 +708,41 @@ class DwcSchemeToEntityCommand extends Command
         return $code;
     }
 
-    private function getDoctrineType(string $phpType): string
+    /**
+     * Returns Doctrine type for a property, using 'text' for known long fields.
+     */
+    private function getDoctrineType(string $phpType, string $propertyName = ''): string
     {
+        // List of Darwin Core fields that should be mapped to Doctrine 'text' (unlimited length)
+        $longTextFields = [
+            'associatedMedia',
+            'dynamicProperties',
+            'occurrenceRemarks',
+            'associatedOccurrences',
+            'associatedReferences',
+            'associatedTaxa',
+            'otherCatalogNumbers',
+            'eventRemarks',
+            'fieldNotes',
+            'verbatimEventDate',
+            'verbatimLocality',
+            'verbatimElevation',
+            'verbatimDepth',
+            'verbatimLatitude',
+            'verbatimLongitude',
+            'verbatimSRS',
+            'verbatimCoordinateSystem',
+            'verbatimCoordinates',
+            'identificationRemarks',
+            'taxonRemarks',
+            'locationRemarks',
+            'georeferenceRemarks',
+            'measurementRemarks',
+            'resourceRelationshipRemarks',
+        ];
+        if ($phpType === 'string' && in_array($propertyName, $longTextFields, true)) {
+            return 'text';
+        }
         return match ($phpType) {
             'int' => 'integer',
             'float' => 'float',

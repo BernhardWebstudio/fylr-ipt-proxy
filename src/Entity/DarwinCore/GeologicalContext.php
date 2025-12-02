@@ -104,7 +104,7 @@ class GeologicalContext
     #[ORM\Column(name: 'dataGeneralizations', type: 'string', nullable: true)]
     private ?string $dataGeneralizations = null;
 
-    #[ORM\Column(name: 'dynamicProperties', type: 'string', nullable: true)]
+    #[ORM\Column(name: 'dynamicProperties', type: 'text', nullable: true)]
     private ?string $dynamicProperties = null;
 
     public function __construct()

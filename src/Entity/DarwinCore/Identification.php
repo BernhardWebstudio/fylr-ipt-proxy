@@ -54,7 +54,7 @@ class Identification
     #[ORM\Column(name: 'identificationVerificationStatus', type: 'string', nullable: true)]
     private ?string $identificationVerificationStatus = null;
 
-    #[ORM\Column(name: 'identificationRemarks', type: 'string', nullable: true)]
+    #[ORM\Column(name: 'identificationRemarks', type: 'text', nullable: true)]
     private ?string $identificationRemarks = null;
 
     #[ORM\Column(name: 'institutionID', type: 'string', nullable: true)]
@@ -87,7 +87,7 @@ class Identification
     #[ORM\Column(name: 'dataGeneralizations', type: 'string', nullable: true)]
     private ?string $dataGeneralizations = null;
 
-    #[ORM\Column(name: 'dynamicProperties', type: 'string', nullable: true)]
+    #[ORM\Column(name: 'dynamicProperties', type: 'text', nullable: true)]
     private ?string $dynamicProperties = null;
 
     public function __construct()

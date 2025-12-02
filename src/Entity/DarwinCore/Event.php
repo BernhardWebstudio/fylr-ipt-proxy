@@ -60,7 +60,7 @@ class Event
     #[ORM\Column(name: 'day', type: 'string', nullable: true)]
     private ?string $day = null;
 
-    #[ORM\Column(name: 'verbatimEventDate', type: 'string', nullable: true)]
+    #[ORM\Column(name: 'verbatimEventDate', type: 'text', nullable: true)]
     private ?string $verbatimEventDate = null;
 
     #[ORM\Column(name: 'habitat', type: 'string', nullable: true)]
@@ -78,10 +78,10 @@ class Event
     #[ORM\Column(name: 'samplingEffort', type: 'string', nullable: true)]
     private ?string $samplingEffort = null;
 
-    #[ORM\Column(name: 'fieldNotes', type: 'string', nullable: true)]
+    #[ORM\Column(name: 'fieldNotes', type: 'text', nullable: true)]
     private ?string $fieldNotes = null;
 
-    #[ORM\Column(name: 'eventRemarks', type: 'string', nullable: true)]
+    #[ORM\Column(name: 'eventRemarks', type: 'text', nullable: true)]
     private ?string $eventRemarks = null;
 
     #[ORM\Column(name: 'institutionID', type: 'string', nullable: true)]
@@ -114,7 +114,7 @@ class Event
     #[ORM\Column(name: 'dataGeneralizations', type: 'string', nullable: true)]
     private ?string $dataGeneralizations = null;
 
-    #[ORM\Column(name: 'dynamicProperties', type: 'string', nullable: true)]
+    #[ORM\Column(name: 'dynamicProperties', type: 'text', nullable: true)]
     private ?string $dynamicProperties = null;
 
     public function __construct()
