@@ -82,6 +82,9 @@ class OccurrenceImportProcessingService
 
         // Update if the remote data is newer OR if force flag is set
         if ($force || $lastModified > $existingImport->getRemoteLastUpdatedAt()) {
+            $occurrence = $existingImport->getOccurrence();
+            $oldMedia = $occurrence?->getAssociatedMedia();
+            
             $mapping->mapOccurrence($entityData, $existingImport);
 
             if ($user) {
@@ -91,7 +94,24 @@ class OccurrenceImportProcessingService
             $existingImport->setTagId($criteria['tagId'] ?? $existingImport->getTagId());
             $existingImport->setObjectType($entityData['_objecttype'] ?? $existingImport->getObjectType());
 
-            $this->logger->debug('Updated existing import', ['globalObjectId' => $globalObjectId]);
+            // Explicitly persist the occurrence to ensure Doctrine tracks changes
+            // This is important when the occurrence was retrieved from the repository
+            $occurrence = $existingImport->getOccurrence();
+            if ($occurrence) {
+                $this->entityManager->persist($occurrence);
+                $newMedia = $occurrence->getAssociatedMedia();
+                $this->logger->info('Updated occurrence media', [
+                    'globalObjectId' => $globalObjectId,
+                    'oldMedia' => $oldMedia ? substr($oldMedia, 0, 50) . '...' : 'null',
+                    'newMedia' => $newMedia ? substr($newMedia, 0, 50) . '...' : 'null',
+                    'mediaChanged' => $oldMedia !== $newMedia,
+                ]);
+            }
+
+            $this->logger->debug('Updated existing import', [
+                'globalObjectId' => $globalObjectId,
+                'forced' => $force
+            ]);
         } else {
             $this->logger->debug('Skipping entity - no changes', ['globalObjectId' => $globalObjectId]);
         }
