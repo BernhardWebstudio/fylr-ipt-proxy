@@ -367,7 +367,7 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
 
         $mediaUrls = [];
         foreach ($mediaItems as $mediaItem) {
-            $publicEas = $mediaItem["Mediaassetpublic"]["_standard"]["eas"] ?? [];
+            $publicEas = $mediaItem["mediaassetpublic"]["_standard"]["eas"] ?? [];
             if (empty($publicEas)) {
                 continue; // Skip if no public eas found
             }
@@ -525,7 +525,7 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
     /**
      * Parse coordinate string that may contain direction prefix (N/S/E/W) and degree symbol.
      * Examples: "E 8.660184°", "N 47.290916°", "8.660184", "-47.290916"
-     * 
+     *
      * @param string|null $coordinate The coordinate string to parse
      * @return float|null The parsed coordinate as a float, or null if parsing fails
      */
@@ -549,7 +549,7 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
 
         // Try to extract the numeric value
         $numericValue = floatval($coordinate);
-        
+
         if ($numericValue == 0 && $coordinate !== '0' && $coordinate !== '0.0') {
             // Parsing failed
             return null;
