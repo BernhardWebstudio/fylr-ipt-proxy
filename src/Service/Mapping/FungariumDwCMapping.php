@@ -116,9 +116,15 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
 
     private function parseTaxonFromIdentification(array $bestimmung): Taxon
     {
-        // Create taxon entity
-        $taxon = new Taxon();
-        $taxon->setTaxonID($bestimmung["_global_object_id"] ?? uniqid('taxon_'));
+
+        // Try to load existing Taxon by taxonID
+        $taxonId = $bestimmung["_global_object_id"] ?? uniqid('taxon_');
+        $taxon = $this->entityManager->getRepository(Taxon::class)
+            ->findOneBy(['taxonID' => $taxonId]);
+        if (!$taxon) {
+            $taxon = new Taxon();
+            $taxon->setTaxonID($taxonId);
+        }
 
         // Extract scientific name from taxonname or taxonnametrans
         $scientificName = null;
