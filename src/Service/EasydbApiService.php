@@ -323,6 +323,40 @@ class EasydbApiService
     }
 
     /**
+     * Perform a fulltext search for entities
+     */
+    public function searchFulltext(string $searchTerm, string|array $objectType, int $offset = 0, int $limit = 100): array
+    {
+        $this->ensureInitialized();
+
+        $response = $this->httpClient->request('POST', $this->sessionService->getUrl("search"), [
+            'json' => [
+                'objecttypes' => is_array($objectType) ? $objectType : [$objectType],
+                'format' => 'long',
+                'search' => [
+                    [
+                        'search' => [
+                            [
+                                'type' => 'match',
+                                'mode' => 'fulltext',
+                                'bool' => 'must',
+                                'string' => $searchTerm,
+                            ]
+                        ],
+                        'type' => 'complex'
+                    ]
+                ],
+                'offset' => $offset,
+                'limit' => $limit,
+            ]
+        ]);
+
+        $this->sessionService->checkStatusCode($response);
+        $content = $response->toArray();
+        return $content['objects'] ?? [];
+    }
+
+    /**
      * Search entities by tag ID and optionally by object type
      */
     public function searchByTag(?int $tagId = null, ?string $objectType = null, int $offset = 0, int $limit = 100): array
