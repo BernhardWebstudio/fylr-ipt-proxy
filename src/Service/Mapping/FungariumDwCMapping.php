@@ -12,9 +12,7 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class FungariumDwCMapping implements EasydbDwCMappingInterface
 {
-    public function __construct(private EntityManagerInterface $entityManager)
-    {
-    }
+    public function __construct(private EntityManagerInterface $entityManager) {}
     public function mapOccurrence(array $source, OccurrenceImport $target): void
     {
         // Set basic import metadata
@@ -322,6 +320,11 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
                 $location->setLocality($aufsammlung["lokalitaet"] ?? null);
             }
 
+            if (!$location) {
+                $location = new Location();
+                $location->setLocationID(uniqid('loc_'));
+            }
+
             $location->setGeodeticDatum(
                 $aufsammlung["datumsformatgeodaeischeskooordinatensystem"]["_standard"]["en-US"] ?? null
             );
@@ -330,8 +333,8 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
                 $aufsammlung["fehlerradius"] ?? null
             );
 
-            $location->setDecimalLatitude($aufsammlung["breitengraddezimal"] ?? null);
-            $location->setDecimalLongitude($aufsammlung["langngraddzimal"] ?? null);
+            $location->setDecimalLatitude(floatval($aufsammlung["breitengraddezimal"]) ?? null);
+            $location->setDecimalLongitude(floatval($aufsammlung["langngraddzimal"]) ?? null);
 
             $location->setVerbatimLocality(implode(" | ", array_filter(array_map(function ($coll) {
                 return $coll["lokalitaettrans"] ?? null;
