@@ -20,7 +20,7 @@
 ###< symfony/asset-mapper ###
 
 resources/queries
-resources/examples
+resources/examples/*.xlsx
 docker/db
 docker/supervisor
 docker/var

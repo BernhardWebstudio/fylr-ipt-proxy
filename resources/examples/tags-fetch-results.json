@@ -1,0 +1,673 @@
+[
+    {
+        "_basetype": "taggroup",
+        "taggroup": {
+            "_id": 1,
+            "type": "choice",
+            "displayname": {
+                "de-DE": "STATUS",
+                "en-US": "STATE"
+            },
+            "reference": "state"
+        },
+        "_tags": [
+            {
+                "_basetype": "tag",
+                "tag": {
+                    "_id": 1,
+                    "type": "individual",
+                    "displayname": {
+                        "de-DE": "ENTWURF",
+                        "en-US": "DRAFT"
+                    },
+                    "description": {
+                        "de-DE": "wird standardmäßig beim Anlegen neuer Sammlungsobjektdatensätze vergeben"
+                    },
+                    "displaytype": "facet",
+                    "enabled": true,
+                    "sticky": false,
+                    "is_default": true,
+                    "frontend_prefs": {
+                        "webfrontend": {
+                            "icon": "fa-circle",
+                            "color": "black"
+                        }
+                    },
+                    "reference": "draft",
+                    "shortname": "draft"
+                }
+            },
+            {
+                "_basetype": "tag",
+                "tag": {
+                    "_id": 2,
+                    "type": "individual",
+                    "displayname": {
+                        "de-DE": "ZUR ENTWURFSPRÜFUNG",
+                        "en-US": "DRAFT CHECKING"
+                    },
+                    "description": {},
+                    "displaytype": "facet",
+                    "enabled": true,
+                    "sticky": false,
+                    "is_default": false,
+                    "frontend_prefs": {
+                        "webfrontend": {
+                            "icon": "fa-eye",
+                            "color": "orange"
+                        }
+                    },
+                    "reference": null,
+                    "shortname": null
+                }
+            },
+            {
+                "_basetype": "tag",
+                "tag": {
+                    "_id": 3,
+                    "type": "individual",
+                    "displayname": {
+                        "de-DE": "ZUR PRÜFUNG",
+                        "en-US": "CHECKING"
+                    },
+                    "description": {},
+                    "displaytype": "facet",
+                    "enabled": true,
+                    "sticky": false,
+                    "is_default": false,
+                    "frontend_prefs": {
+                        "webfrontend": {
+                            "icon": "fa-eye",
+                            "color": "green"
+                        }
+                    },
+                    "reference": null,
+                    "shortname": null
+                }
+            },
+            {
+                "_basetype": "tag",
+                "tag": {
+                    "_id": 4,
+                    "type": "individual",
+                    "displayname": {
+                        "de-DE": "INTERN",
+                        "en-US": "INTERNAL"
+                    },
+                    "description": {},
+                    "displaytype": "facet",
+                    "enabled": true,
+                    "sticky": false,
+                    "is_default": false,
+                    "frontend_prefs": {
+                        "webfrontend": {
+                            "icon": "fa-flag",
+                            "color": "blue"
+                        }
+                    },
+                    "reference": null,
+                    "shortname": null
+                }
+            },
+            {
+                "_basetype": "tag",
+                "tag": {
+                    "_id": 5,
+                    "type": "individual",
+                    "displayname": {
+                        "de-DE": "GELÖSCHT",
+                        "en-US": "DELETED"
+                    },
+                    "description": {},
+                    "displaytype": "facet",
+                    "enabled": true,
+                    "sticky": false,
+                    "is_default": false,
+                    "frontend_prefs": {
+                        "webfrontend": {
+                            "icon": "fa-eraser",
+                            "color": "red"
+                        }
+                    },
+                    "reference": null,
+                    "shortname": null
+                }
+            }
+        ]
+    },
+    {
+        "_basetype": "taggroup",
+        "taggroup": {
+            "_id": 2,
+            "type": "choice",
+            "displayname": {
+                "de-DE": "IUCN",
+                "en-US": "IUCN"
+            },
+            "reference": "iucn"
+        },
+        "_tags": [
+            {
+                "_basetype": "tag",
+                "tag": {
+                    "_id": 6,
+                    "type": "individual",
+                    "displayname": {
+                        "de-DE": "IUCNREDLIST",
+                        "en-US": "IUCNREDLIST"
+                    },
+                    "description": {},
+                    "displaytype": "facet",
+                    "enabled": true,
+                    "sticky": false,
+                    "is_default": false,
+                    "frontend_prefs": {
+                        "webfrontend": {
+                            "icon": "fa-ban",
+                            "color": "red"
+                        }
+                    },
+                    "reference": "iucn_redlist",
+                    "shortname": "iucn_redlist"
+                }
+            },
+            {
+                "_basetype": "tag",
+                "tag": {
+                    "_id": 7,
+                    "type": "individual",
+                    "displayname": {
+                        "de-DE": "IUCNUNCLEAR",
+                        "en-US": "IUCNUNCLEAR"
+                    },
+                    "description": {},
+                    "displaytype": "facet",
+                    "enabled": true,
+                    "sticky": false,
+                    "is_default": false,
+                    "frontend_prefs": {
+                        "webfrontend": {
+                            "icon": "fa-chain-broken",
+                            "color": "blue"
+                        }
+                    },
+                    "reference": "iucn_unclear",
+                    "shortname": "iucn_unclear"
+                }
+            },
+            {
+                "_basetype": "tag",
+                "tag": {
+                    "_id": 19,
+                    "type": "individual",
+                    "displayname": {
+                        "de-DE": "LOCALREDLIST",
+                        "en-US": "LOCALREDLIST"
+                    },
+                    "description": {},
+                    "displaytype": "facet",
+                    "enabled": true,
+                    "sticky": false,
+                    "is_default": false,
+                    "frontend_prefs": {
+                        "webfrontend": {
+                            "icon": "fa-ban",
+                            "color": "orange"
+                        }
+                    },
+                    "reference": null,
+                    "shortname": "local_redlist"
+                }
+            }
+        ]
+    },
+    {
+        "_basetype": "taggroup",
+        "taggroup": {
+            "_id": 3,
+            "type": "checkbox",
+            "displayname": {
+                "de-DE": "LEIHE",
+                "en-US": "LOAN"
+            },
+            "reference": "loan"
+        },
+        "_tags": [
+            {
+                "_basetype": "tag",
+                "tag": {
+                    "_id": 8,
+                    "type": "individual",
+                    "displayname": {
+                        "de-DE": "Typusmaterial verschickt",
+                        "en-US": "type material send"
+                    },
+                    "description": {},
+                    "displaytype": "facet",
+                    "enabled": true,
+                    "sticky": false,
+                    "is_default": false,
+                    "frontend_prefs": {
+                        "webfrontend": {
+                            "icon": null,
+                            "color": null
+                        }
+                    },
+                    "reference": null,
+                    "shortname": null
+                }
+            },
+            {
+                "_basetype": "tag",
+                "tag": {
+                    "_id": 9,
+                    "type": "individual",
+                    "displayname": {
+                        "de-DE": "Versendet",
+                        "en-US": "send"
+                    },
+                    "description": {},
+                    "displaytype": "facet",
+                    "enabled": true,
+                    "sticky": false,
+                    "is_default": false,
+                    "frontend_prefs": {
+                        "webfrontend": {
+                            "icon": null,
+                            "color": null
+                        }
+                    },
+                    "reference": null,
+                    "shortname": null
+                }
+            },
+            {
+                "_basetype": "tag",
+                "tag": {
+                    "_id": 10,
+                    "type": "individual",
+                    "displayname": {
+                        "de-DE": "Zurückerhalten",
+                        "en-US": "returned"
+                    },
+                    "description": {},
+                    "displaytype": "facet",
+                    "enabled": true,
+                    "sticky": false,
+                    "is_default": false,
+                    "frontend_prefs": {
+                        "webfrontend": {
+                            "icon": null,
+                            "color": null
+                        }
+                    },
+                    "reference": null,
+                    "shortname": null
+                }
+            },
+            {
+                "_basetype": "tag",
+                "tag": {
+                    "_id": 11,
+                    "type": "individual",
+                    "displayname": {
+                        "de-DE": "Teilweise zurückerhalten",
+                        "en-US": "partially returned"
+                    },
+                    "description": {},
+                    "displaytype": "facet",
+                    "enabled": true,
+                    "sticky": false,
+                    "is_default": false,
+                    "frontend_prefs": {
+                        "webfrontend": {
+                            "icon": null,
+                            "color": null
+                        }
+                    },
+                    "reference": null,
+                    "shortname": null
+                }
+            },
+            {
+                "_basetype": "tag",
+                "tag": {
+                    "_id": 12,
+                    "type": "individual",
+                    "displayname": {
+                        "de-DE": "Bestätigung verschickt",
+                        "en-US": "confirmation send"
+                    },
+                    "description": {},
+                    "displaytype": "facet",
+                    "enabled": true,
+                    "sticky": false,
+                    "is_default": false,
+                    "frontend_prefs": {
+                        "webfrontend": {
+                            "icon": null,
+                            "color": null
+                        }
+                    },
+                    "reference": null,
+                    "shortname": null
+                }
+            },
+            {
+                "_basetype": "tag",
+                "tag": {
+                    "_id": 13,
+                    "type": "individual",
+                    "displayname": {
+                        "de-DE": "Bestätigung erhalten",
+                        "en-US": "confirmation received"
+                    },
+                    "description": {},
+                    "displaytype": "facet",
+                    "enabled": true,
+                    "sticky": false,
+                    "is_default": false,
+                    "frontend_prefs": {
+                        "webfrontend": {
+                            "icon": null,
+                            "color": null
+                        }
+                    },
+                    "reference": null,
+                    "shortname": null
+                }
+            },
+            {
+                "_basetype": "tag",
+                "tag": {
+                    "_id": 14,
+                    "type": "individual",
+                    "displayname": {
+                        "de-DE": "Mahnung verschickt",
+                        "en-US": "reminder send"
+                    },
+                    "description": {},
+                    "displaytype": "facet",
+                    "enabled": true,
+                    "sticky": false,
+                    "is_default": false,
+                    "frontend_prefs": {
+                        "webfrontend": {
+                            "icon": null,
+                            "color": null
+                        }
+                    },
+                    "reference": null,
+                    "shortname": null
+                }
+            },
+            {
+                "_basetype": "tag",
+                "tag": {
+                    "_id": 15,
+                    "type": "individual",
+                    "displayname": {
+                        "de-DE": "Ausleihstatus (laufend)",
+                        "en-US": "loan status (ongoing)"
+                    },
+                    "description": {},
+                    "displaytype": "facet",
+                    "enabled": true,
+                    "sticky": false,
+                    "is_default": false,
+                    "frontend_prefs": {
+                        "webfrontend": {
+                            "icon": null,
+                            "color": "blue"
+                        }
+                    },
+                    "reference": null,
+                    "shortname": null
+                }
+            },
+            {
+                "_basetype": "tag",
+                "tag": {
+                    "_id": 16,
+                    "type": "individual",
+                    "displayname": {
+                        "de-DE": "Ausleihstatus (abgeschlossen)",
+                        "en-US": "loan status (done)"
+                    },
+                    "description": {},
+                    "displaytype": "facet",
+                    "enabled": true,
+                    "sticky": false,
+                    "is_default": false,
+                    "frontend_prefs": {
+                        "webfrontend": {
+                            "icon": null,
+                            "color": "green"
+                        }
+                    },
+                    "reference": null,
+                    "shortname": null
+                }
+            },
+            {
+                "_basetype": "tag",
+                "tag": {
+                    "_id": 22,
+                    "type": "individual",
+                    "displayname": {
+                        "de-DE": "Leihgabe von: Museum Luzern",
+                        "en-US": "Specimen on loan from: Museum Luzern"
+                    },
+                    "description": {},
+                    "displaytype": "facet",
+                    "enabled": true,
+                    "sticky": false,
+                    "is_default": false,
+                    "frontend_prefs": {
+                        "webfrontend": {
+                            "icon": "fa-globe",
+                            "color": "orange"
+                        }
+                    },
+                    "reference": null,
+                    "shortname": null
+                }
+            },
+            {
+                "_basetype": "tag",
+                "tag": {
+                    "_id": 23,
+                    "type": "individual",
+                    "displayname": {
+                        "de-DE": "Leihgabe von: Muséum d'Histoire Naturelle de Neuchâtel",
+                        "en-US": "Specimen on loan from: Muséum d'Histoire Naturelle de Neuchâtel"
+                    },
+                    "description": {},
+                    "displaytype": "facet",
+                    "enabled": true,
+                    "sticky": false,
+                    "is_default": false,
+                    "frontend_prefs": {
+                        "webfrontend": {
+                            "icon": "fa-globe",
+                            "color": "orange"
+                        }
+                    },
+                    "reference": null,
+                    "shortname": null
+                }
+            },
+            {
+                "_basetype": "tag",
+                "tag": {
+                    "_id": 24,
+                    "type": "individual",
+                    "displayname": {
+                        "de-DE": "Leihgabe von: Naturhistorisches Museum der Universität Zürich",
+                        "en-US": "Specimen on loan from: Naturhistorisches Museum der Universität Zürich"
+                    },
+                    "description": {},
+                    "displaytype": "facet",
+                    "enabled": true,
+                    "sticky": false,
+                    "is_default": false,
+                    "frontend_prefs": {
+                        "webfrontend": {
+                            "icon": "fa-globe",
+                            "color": "orange"
+                        }
+                    },
+                    "reference": null,
+                    "shortname": null
+                }
+            },
+            {
+                "_basetype": "tag",
+                "tag": {
+                    "_id": 25,
+                    "type": "individual",
+                    "displayname": {
+                        "de-DE": "Leihgabe von: Museo cantonale di storia naturale",
+                        "en-US": "Specimen on loan from: Museo cantonale di storia naturale"
+                    },
+                    "description": {},
+                    "displaytype": "facet",
+                    "enabled": true,
+                    "sticky": false,
+                    "is_default": false,
+                    "frontend_prefs": {
+                        "webfrontend": {
+                            "icon": "fa-globe",
+                            "color": "orange"
+                        }
+                    },
+                    "reference": null,
+                    "shortname": null
+                }
+            }
+        ]
+    },
+    {
+        "_basetype": "taggroup",
+        "taggroup": {
+            "_id": 4,
+            "type": "choice",
+            "displayname": {
+                "de-DE": "BILDSTATUS",
+                "en-US": "PICTURE STATE"
+            },
+            "reference": "picture_state"
+        },
+        "_tags": [
+            {
+                "_basetype": "tag",
+                "tag": {
+                    "_id": 17,
+                    "type": "individual",
+                    "displayname": {
+                        "de-DE": "ÖFFENTLICH",
+                        "en-US": "PUBLIC"
+                    },
+                    "description": {},
+                    "displaytype": "facet",
+                    "enabled": true,
+                    "sticky": false,
+                    "is_default": false,
+                    "frontend_prefs": {
+                        "webfrontend": {
+                            "icon": "fa-check-circle",
+                            "color": null
+                        }
+                    },
+                    "reference": "public",
+                    "shortname": "public"
+                }
+            },
+            {
+                "_basetype": "tag",
+                "tag": {
+                    "_id": 18,
+                    "type": "individual",
+                    "displayname": {
+                        "de-DE": "NICHT ÖFFENTLICH",
+                        "en-US": "NON-PUBLIC"
+                    },
+                    "description": {},
+                    "displaytype": "facet",
+                    "enabled": true,
+                    "sticky": false,
+                    "is_default": false,
+                    "frontend_prefs": {
+                        "webfrontend": {
+                            "icon": "warning",
+                            "color": null
+                        }
+                    },
+                    "reference": "non_public",
+                    "shortname": "non_public"
+                }
+            }
+        ]
+    },
+    {
+        "_basetype": "taggroup",
+        "taggroup": {
+            "_id": 5,
+            "type": "choice",
+            "displayname": {
+                "de-DE": "FORMATE",
+                "en-US": "FORMATS"
+            }
+        },
+        "_tags": [
+            {
+                "_basetype": "tag",
+                "tag": {
+                    "_id": 20,
+                    "type": "individual",
+                    "displayname": {
+                        "de-DE": "3D-Modell",
+                        "en-US": "3D model"
+                    },
+                    "description": {},
+                    "displaytype": "facet",
+                    "enabled": true,
+                    "sticky": false,
+                    "is_default": false,
+                    "frontend_prefs": {
+                        "webfrontend": {
+                            "icon": "fa-eye",
+                            "color": "magenta"
+                        }
+                    },
+                    "reference": null,
+                    "shortname": null
+                }
+            },
+            {
+                "_basetype": "tag",
+                "tag": {
+                    "_id": 21,
+                    "type": "individual",
+                    "displayname": {
+                        "de-DE": "Video",
+                        "en-US": "Video"
+                    },
+                    "description": {},
+                    "displaytype": "facet",
+                    "enabled": true,
+                    "sticky": false,
+                    "is_default": false,
+                    "frontend_prefs": {
+                        "webfrontend": {
+                            "icon": "fa-circle",
+                            "color": "orange"
+                        }
+                    },
+                    "reference": null,
+                    "shortname": null
+                }
+            }
+        ]
+    }
+]

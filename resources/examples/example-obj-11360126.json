@@ -1,0 +1,502 @@
+{
+    "_system_object_id": 11360126,
+    "_tags": [],
+    "_collections": [],
+    "_objecttype": "fungarium",
+    "_last_modified": "2025-07-15T10:07:57Z",
+    "fungarium": {
+        "_id": 129657,
+        "_pool": {
+            "pool": {
+                "_id": 10,
+                "name": {
+                    "de-DE": "Fungarium",
+                    "en-US": "Fungal Collection"
+                },
+                "_id_parent": 8
+            },
+            "_path": [
+                {
+                    "pool": {
+                        "_id": 1,
+                        "name": {
+                            "de-DE": "Alle Pools",
+                            "en-US": "All pools"
+                        }
+                    },
+                    "_basetype": "pool"
+                },
+                {
+                    "pool": {
+                        "_id": 8,
+                        "name": {
+                            "de-DE": "Vereinigte Herbarien Z + ZT",
+                            "en-US": "United Herbaria Z + ZT"
+                        },
+                        "_id_parent": 1
+                    },
+                    "_basetype": "pool"
+                },
+                {
+                    "pool": {
+                        "_id": 10,
+                        "name": {
+                            "de-DE": "Fungarium",
+                            "en-US": "Fungal Collection"
+                        },
+                        "_id_parent": 8
+                    },
+                    "_basetype": "pool"
+                }
+            ],
+            "_level": 3,
+            "_basetype": "pool"
+        },
+        "zugangsnummer": "ZT Myc 0099260",
+        "_reverse_nested:bestimmung:fungarium": [
+            {
+                "taxonname": {
+                    "_objecttype": "taxonnamen",
+                    "_mask": "taxonnamen__all_fields",
+                    "_system_object_id": 3851568,
+                    "_uuid": "91a4103d-26ae-451d-ad60-dd1bb56b7baa",
+                    "_format": "standard",
+                    "_standard": {
+                        "1": {
+                            "text": {
+                                "de-DE": "Boletus torosus Fr.",
+                                "en-US": "Boletus torosus Fr."
+                            },
+                            "html": {
+                                "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Boletus torosus Fr.</span></span>",
+                                "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Boletus torosus Fr.</span></span>"
+                            }
+                        }
+                    },
+                    "_global_object_id": "3851568@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+                    "_sort": {
+                        "de-DE": "Boletus torosus Fr.                                             Boletus torosus Fr. {851879} ",
+                        "en-US": "Boletus torosus Fr.                                             Boletus torosus Fr. {851879} "
+                    },
+                    "taxonnamen": {
+                        "_id": 851879,
+                        "_pool": {
+                            "pool": {
+                                "_id": 10,
+                                "name": {
+                                    "de-DE": "Fungarium",
+                                    "en-US": "Fungal Collection"
+                                },
+                                "_id_parent": 8
+                            },
+                            "_path": [
+                                {
+                                    "pool": {
+                                        "_id": 1,
+                                        "name": {
+                                            "de-DE": "Alle Pools",
+                                            "en-US": "All pools"
+                                        }
+                                    },
+                                    "_basetype": "pool"
+                                },
+                                {
+                                    "pool": {
+                                        "_id": 8,
+                                        "name": {
+                                            "de-DE": "Vereinigte Herbarien Z + ZT",
+                                            "en-US": "United Herbaria Z + ZT"
+                                        },
+                                        "_id_parent": 1
+                                    },
+                                    "_basetype": "pool"
+                                },
+                                {
+                                    "pool": {
+                                        "_id": 10,
+                                        "name": {
+                                            "de-DE": "Fungarium",
+                                            "en-US": "Fungal Collection"
+                                        },
+                                        "_id_parent": 8
+                                    },
+                                    "_basetype": "pool"
+                                }
+                            ],
+                            "_level": 3,
+                            "_basetype": "pool"
+                        },
+                        "_version": 2
+                    }
+                },
+                "_version": 1,
+                "_uuid": "81d0024d-8ef7-4102-a0eb-f9249a69b810",
+                "typus": false,
+                "_system_object_id": 11360127,
+                "_pool": {
+                    "pool": {
+                        "_id": 10,
+                        "name": {
+                            "de-DE": "Fungarium",
+                            "en-US": "Fungal Collection"
+                        },
+                        "_id_parent": 8
+                    },
+                    "_path": [
+                        {
+                            "pool": {
+                                "_id": 1,
+                                "name": {
+                                    "de-DE": "Alle Pools",
+                                    "en-US": "All pools"
+                                }
+                            },
+                            "_basetype": "pool"
+                        },
+                        {
+                            "pool": {
+                                "_id": 8,
+                                "name": {
+                                    "de-DE": "Vereinigte Herbarien Z + ZT",
+                                    "en-US": "United Herbaria Z + ZT"
+                                },
+                                "_id_parent": 1
+                            },
+                            "_basetype": "pool"
+                        },
+                        {
+                            "pool": {
+                                "_id": 10,
+                                "name": {
+                                    "de-DE": "Fungarium",
+                                    "en-US": "Fungal Collection"
+                                },
+                                "_id_parent": 8
+                            },
+                            "_basetype": "pool"
+                        }
+                    ],
+                    "_level": 3,
+                    "_basetype": "pool"
+                },
+                "_objecttype": "bestimmung",
+                "genus": {
+                    "_objecttype": "genus",
+                    "genus": {
+                        "_id": 2443,
+                        "_pool": {
+                            "pool": {
+                                "_id": 6,
+                                "name": {
+                                    "de-DE": "Systematiken Pflanzenkunde"
+                                },
+                                "_id_parent": 1
+                            },
+                            "_path": [
+                                {
+                                    "pool": {
+                                        "_id": 1,
+                                        "name": {
+                                            "de-DE": "Alle Pools",
+                                            "en-US": "All pools"
+                                        }
+                                    },
+                                    "_basetype": "pool"
+                                },
+                                {
+                                    "pool": {
+                                        "_id": 6,
+                                        "name": {
+                                            "de-DE": "Systematiken Pflanzenkunde"
+                                        },
+                                        "_id_parent": 1
+                                    },
+                                    "_basetype": "pool"
+                                }
+                            ],
+                            "_level": 2,
+                            "_basetype": "pool"
+                        },
+                        "_version": 2
+                    },
+                    "_mask": "genus_all_fields",
+                    "_system_object_id": 36718,
+                    "_uuid": "02962abc-f0bd-41e9-b6d4-743a2133b852",
+                    "_format": "standard",
+                    "_standard": {
+                        "1": {
+                            "text": {
+                                "de-DE": "Boletus",
+                                "en-US": "Boletus"
+                            },
+                            "html": {
+                                "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Boletus</span></span>",
+                                "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Boletus</span></span>"
+                            }
+                        }
+                    },
+                    "_global_object_id": "36718@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+                    "_sort": {
+                        "de-DE": "Boletus                                                         Boletus {2443} ",
+                        "en-US": "Boletus                                                         Boletus {2443} "
+                    }
+                },
+                "_id": 1848166,
+                "_global_object_id": "11360127@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a"
+            }
+        ],
+        "_version": 2,
+        "_reverse_nested:aufsammlung:fungarium": [
+            {
+                "_id": 976803,
+                "sammelort": {
+                    "_mask": "gazetteer__all_fields",
+                    "_format": "standard",
+                    "_objecttype": "gazetteer",
+                    "gazetteer": {
+                        "_id": 111,
+                        "_id_parent": 4,
+                        "_version": 1
+                    },
+                    "_system_object_id": 1944,
+                    "_has_children": true,
+                    "_level": 2,
+                    "_path": [
+                        {
+                            "gazetteer": {
+                                "_id": 4,
+                                "_id_parent": null,
+                                "_version": 1
+                            },
+                            "_objecttype": "gazetteer",
+                            "_mask": "gazetteer__all_fields",
+                            "_format": "standard",
+                            "_system_object_id": 1837,
+                            "_uuid": "ee078676-91f8-421b-a8b0-631cbb100cc1",
+                            "_has_children": true,
+                            "_standard": {
+                                "1": {
+                                    "text": {
+                                        "de-DE": "Europa (Kontinent)",
+                                        "en-US": "Europe (Kontinent)"
+                                    },
+                                    "html": {
+                                        "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-space\">Europa</span><span class=\"ez-format-round-parentheses\">Kontinent</span></span>",
+                                        "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-space\">Europe</span><span class=\"ez-format-round-parentheses\">Kontinent</span></span>"
+                                    }
+                                }
+                            },
+                            "_global_object_id": "1837@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a"
+                        },
+                        {
+                            "gazetteer": {
+                                "_id": 111,
+                                "_id_parent": 4,
+                                "_version": 1
+                            },
+                            "_objecttype": "gazetteer",
+                            "_mask": "gazetteer__all_fields",
+                            "_format": "standard",
+                            "_system_object_id": 1944,
+                            "_uuid": "14d1fdb2-f2f3-41e3-9627-80c9a409c8ad",
+                            "_has_children": true,
+                            "_standard": {
+                                "1": {
+                                    "text": {
+                                        "de-DE": "Schweiz (Land)",
+                                        "en-US": "Switzerland (Land)"
+                                    },
+                                    "html": {
+                                        "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-space\">Schweiz</span><span class=\"ez-format-round-parentheses\">Land</span></span>",
+                                        "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-space\">Switzerland</span><span class=\"ez-format-round-parentheses\">Land</span></span>"
+                                    }
+                                }
+                            },
+                            "_global_object_id": "1944@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a"
+                        }
+                    ],
+                    "_uuid": "14d1fdb2-f2f3-41e3-9627-80c9a409c8ad",
+                    "_standard": {
+                        "1": {
+                            "text": {
+                                "de-DE": "Schweiz (Land)",
+                                "en-US": "Switzerland (Land)"
+                            },
+                            "html": {
+                                "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-space\">Schweiz</span><span class=\"ez-format-round-parentheses\">Land</span></span>",
+                                "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-space\">Switzerland</span><span class=\"ez-format-round-parentheses\">Land</span></span>"
+                            }
+                        }
+                    },
+                    "_global_object_id": "1944@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+                    "_sort": {
+                        "de-DE": "Schweiz (Land)                                                  Europa (Kontinent) {4} Schweiz (Land) {111} ",
+                        "en-US": "Switzerland (Land)                                              Europe (Kontinent) {4} Switzerland (Land) {111} "
+                    }
+                },
+                "lokalitaet": "Aargau, Bremgarten",
+                "sammeldatumtrans": "31.08.1994",
+                "_objecttype": "aufsammlung",
+                "breitengrad": "243070",
+                "_nested:aufsammlung__sammler": [
+                    {
+                        "_id": 506529,
+                        "sammler": {
+                            "_mask": "person__public",
+                            "_system_object_id": 7083428,
+                            "person": {
+                                "_id": 9197,
+                                "_version": 2
+                            },
+                            "_uuid": "14681bf1-949b-4b86-a9f1-28cb1a2061ef",
+                            "_format": "standard",
+                            "_objecttype": "person",
+                            "_standard": {
+                                "1": {
+                                    "text": {
+                                        "de-DE": "F. Waldvogel",
+                                        "en-US": "F. Waldvogel"
+                                    },
+                                    "html": {
+                                        "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">F. Waldvogel</span></span>",
+                                        "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">F. Waldvogel</span></span>"
+                                    }
+                                }
+                            },
+                            "_global_object_id": "7083428@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+                            "_sort": {
+                                "de-DE": "F. Waldvogel                                                    F. Waldvogel {9197} ",
+                                "en-US": "F. Waldvogel                                                    F. Waldvogel {9197} "
+                            }
+                        },
+                        "_standard": {}
+                    }
+                ],
+                "_uuid": "0fd283ef-cc1f-41b9-ba61-89f0876cac18",
+                "_global_object_id": "11360128@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+                "laengengrad": "668790",
+                "_version": 1,
+                "sammeldatum": {
+                    "_from": "1994-08-31T00:00:00Z",
+                    "_to": "1994-08-31T23:59:59Z",
+                    "value": "1994-08-31"
+                },
+                "sammlertrans": "F. Waldvogel",
+                "_nested:aufsammlung__weitereids": [
+                    {
+                        "_standard": {},
+                        "andereid": "W 1052 +",
+                        "typ": {
+                            "_uuid": "41d57bf1-3435-4890-a0e5-97c7212827d9",
+                            "_format": "standard",
+                            "_objecttype": "id_typen",
+                            "id_typen": {
+                                "_id": 5,
+                                "_version": 1
+                            },
+                            "_mask": "id_typen_all_fields",
+                            "_system_object_id": 9,
+                            "_standard": {
+                                "1": {
+                                    "text": {
+                                        "de-DE": "Collection Number",
+                                        "en-US": "Collection Number"
+                                    },
+                                    "html": {
+                                        "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Collection Number</span></span>",
+                                        "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Collection Number</span></span>"
+                                    }
+                                }
+                            },
+                            "_global_object_id": "9@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+                            "_sort": {
+                                "de-DE": "Collection Number                                               Collection Number {5} ",
+                                "en-US": "Collection Number                                               Collection Number {5} "
+                            }
+                        },
+                        "_id": 36707
+                    }
+                ],
+                "_pool": {
+                    "pool": {
+                        "_id": 10,
+                        "name": {
+                            "de-DE": "Fungarium",
+                            "en-US": "Fungal Collection"
+                        },
+                        "_id_parent": 8
+                    },
+                    "_path": [
+                        {
+                            "pool": {
+                                "_id": 1,
+                                "name": {
+                                    "de-DE": "Alle Pools",
+                                    "en-US": "All pools"
+                                }
+                            },
+                            "_basetype": "pool"
+                        },
+                        {
+                            "pool": {
+                                "_id": 8,
+                                "name": {
+                                    "de-DE": "Vereinigte Herbarien Z + ZT",
+                                    "en-US": "United Herbaria Z + ZT"
+                                },
+                                "_id_parent": 1
+                            },
+                            "_basetype": "pool"
+                        },
+                        {
+                            "pool": {
+                                "_id": 10,
+                                "name": {
+                                    "de-DE": "Fungarium",
+                                    "en-US": "Fungal Collection"
+                                },
+                                "_id_parent": 8
+                            },
+                            "_basetype": "pool"
+                        }
+                    ],
+                    "_level": 3,
+                    "_basetype": "pool"
+                },
+                "_system_object_id": 11360128,
+                "neuhabitat": {
+                    "de-DE": "Buchen-Hainbuchen-Wald, auf Kalkboden"
+                }
+            }
+        ]
+    },
+    "_published_count": 0,
+    "_mask": "fungarium__public__unrestricted",
+    "_global_object_id": "11360126@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+    "_published": [],
+    "_uuid": "aca577ee-0e24-47bc-b651-174d451d999e",
+    "_created": "2025-07-15T10:06:01Z",
+    "_standard": {
+        "1": {
+            "text": {
+                "de-DE": "ZT Myc 0099260"
+            },
+            "html": {
+                "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">ZT Myc 0099260</span></span>"
+            }
+        },
+        "2": {
+            "text": {
+                "de-DE": "Boletus torosus Fr."
+            },
+            "html": {
+                "de-DE": "<span class=\"ez-format-comma\">Boletus torosus Fr.</span>"
+            }
+        }
+    },
+    "_format": "long",
+    "_sort": [
+        11360126
+    ],
+    "_generated_rights": {}
+}

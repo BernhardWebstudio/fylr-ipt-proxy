@@ -1,0 +1,758 @@
+{
+    "_system_object_id": 1410465,
+    "_tags": [],
+    "_collections": [
+        {
+            "_id": 78
+        }
+    ],
+    "_objecttype": "fungarium",
+    "_last_modified": "2022-11-14T22:48:40Z",
+    "fungarium": {
+        "_id": 23447,
+        "_pool": {
+            "pool": {
+                "_id": 10,
+                "name": {
+                    "de-DE": "Fungarium",
+                    "en-US": "Fungal Collection"
+                },
+                "_id_parent": 8
+            },
+            "_path": [
+                {
+                    "pool": {
+                        "_id": 1,
+                        "name": {
+                            "de-DE": "Alle Pools",
+                            "en-US": "All pools"
+                        }
+                    },
+                    "_basetype": "pool"
+                },
+                {
+                    "pool": {
+                        "_id": 8,
+                        "name": {
+                            "de-DE": "Vereinigte Herbarien Z + ZT",
+                            "en-US": "United Herbaria Z + ZT"
+                        },
+                        "_id_parent": 1
+                    },
+                    "_basetype": "pool"
+                },
+                {
+                    "pool": {
+                        "_id": 10,
+                        "name": {
+                            "de-DE": "Fungarium",
+                            "en-US": "Fungal Collection"
+                        },
+                        "_id_parent": 8
+                    },
+                    "_basetype": "pool"
+                }
+            ],
+            "_level": 3,
+            "_basetype": "pool"
+        },
+        "zugangsnummer": "ZT Myc 30429",
+        "migreferenz": "Fungarium ID Neu-023-448_Fungarium ID-24159_zugangsnummer-ZT Myc 30429",
+        "_reverse_nested:fungarium_mediaassetpublic:fungarium": [
+            {
+                "mediaassetpublic": {
+                    "_mask": "mediaasset__fungarium",
+                    "_system_object_id": 4254034,
+                    "mediaasset": {
+                        "_id": 471881,
+                        "_pool": {
+                            "pool": {
+                                "_id": 10,
+                                "name": {
+                                    "de-DE": "Fungarium",
+                                    "en-US": "Fungal Collection"
+                                },
+                                "_id_parent": 8
+                            },
+                            "_path": [
+                                {
+                                    "pool": {
+                                        "_id": 1,
+                                        "name": {
+                                            "de-DE": "Alle Pools",
+                                            "en-US": "All pools"
+                                        }
+                                    },
+                                    "_basetype": "pool"
+                                },
+                                {
+                                    "pool": {
+                                        "_id": 8,
+                                        "name": {
+                                            "de-DE": "Vereinigte Herbarien Z + ZT",
+                                            "en-US": "United Herbaria Z + ZT"
+                                        },
+                                        "_id_parent": 1
+                                    },
+                                    "_basetype": "pool"
+                                },
+                                {
+                                    "pool": {
+                                        "_id": 10,
+                                        "name": {
+                                            "de-DE": "Fungarium",
+                                            "en-US": "Fungal Collection"
+                                        },
+                                        "_id_parent": 8
+                                    },
+                                    "_basetype": "pool"
+                                }
+                            ],
+                            "_level": 3,
+                            "_basetype": "pool"
+                        },
+                        "_version": 2
+                    },
+                    "_tags": [],
+                    "_format": "standard",
+                    "_uuid": "0b970358-ad5a-458a-94f2-5fd80b7c2d3d",
+                    "_objecttype": "mediaasset",
+                    "_standard": {
+                        "eas": {
+                            "1": [
+                                {
+                                    "filesize": 3529481,
+                                    "date_inserted": "2023-01-23T18:13:42Z",
+                                    "class_extension": "image.jpg",
+                                    "original_filename_basename": "ZT Myc 30429",
+                                    "class_version_status": [
+                                        "image.preview.done",
+                                        "image.small.done",
+                                        "image.original.done",
+                                        "image.huge.done",
+                                        "image.full.done"
+                                    ],
+                                    "date_uploaded": "2022-10-26T08:23:34Z",
+                                    "eas_parent_id": null,
+                                    "extension": "jpg",
+                                    "original_filepath": "ZT Myc 30429.JPG",
+                                    "technical_metadata": {
+                                        "orientation": 1,
+                                        "file_sha224_checksum": "4815f71e8a77867750d199216df25c4f15f6945112edbac2a6548de3",
+                                        "camera_scanner": "NIKON D7000",
+                                        "width": 4928,
+                                        "height": 3264,
+                                        "dpi": 300,
+                                        "max_dimension": 4928,
+                                        "format": "landscape",
+                                        "aspect_ratio": 1.5098039215686274,
+                                        "colordepth": 24,
+                                        "colorspace": "rgb"
+                                    },
+                                    "class": "image",
+                                    "original_filename": "ZT Myc 30429.JPG",
+                                    "class_version_extension": [
+                                        "image.preview.jpg",
+                                        "image.small.jpg",
+                                        "image.original.jpg",
+                                        "image.huge.jpg",
+                                        "image.full.jpg"
+                                    ],
+                                    "versions": {
+                                        "small": {
+                                            "class": "image",
+                                            "url": "https://www.nahima.ethz.ch/eas/partitions-inline/2/0/494000/494961/5c945d047eae5f440efdd8c9d27a9141774e682f/image/jpeg",
+                                            "width": 377,
+                                            "status": "done",
+                                            "has_more_jobs": false,
+                                            "height": 250,
+                                            "filesize": 15970,
+                                            "aspect_ratio": 1.5080000162124634,
+                                            "extension": "jpg",
+                                            "dpi": 300,
+                                            "download_url": "https://www.nahima.ethz.ch/eas/partitions/2/0/494000/494961/5c945d047eae5f440efdd8c9d27a9141774e682f/image/jpeg/ZT%20Myc%2030429-small.jpg",
+                                            "_download_allowed": false
+                                        }
+                                    },
+                                    "_id": 494961,
+                                    "preferred": true,
+                                    "status": "done",
+                                    "pages_allowed": false
+                                }
+                            ]
+                        },
+                        "1": {
+                            "text": {
+                                "de-DE": "ZT Myc 30429.JPG",
+                                "en-US": "ZT Myc 30429.JPG"
+                            },
+                            "html": {
+                                "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">ZT Myc 30429.JPG</span></span>",
+                                "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">ZT Myc 30429.JPG</span></span>"
+                            }
+                        }
+                    },
+                    "_global_object_id": "4254034@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+                    "_sort": {
+                        "de-DE": "ZT Myc 30429.JPG                                                ZT Myc 30429.JPG {471881} ",
+                        "en-US": "ZT Myc 30429.JPG                                                ZT Myc 30429.JPG {471881} "
+                    }
+                },
+                "_id": 11018,
+                "_system_object_id": 4280597,
+                "_version": 1,
+                "_uuid": "246416b1-7ded-4321-ad7c-0940d8893ab6",
+                "_objecttype": "fungarium_mediaassetpublic",
+                "_global_object_id": "4280597@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a"
+            }
+        ],
+        "_nested:fungarium__andereids": [
+            {
+                "andereid": "023-448",
+                "typ": {
+                    "_uuid": "6dbcc4af-5098-442d-8bd0-15c5bc620df8",
+                    "_format": "standard",
+                    "_objecttype": "id_typen",
+                    "id_typen": {
+                        "_id": 49,
+                        "_version": 1
+                    },
+                    "_mask": "id_typen_all_fields",
+                    "_system_object_id": 53,
+                    "_standard": {
+                        "1": {
+                            "text": {
+                                "de-DE": "Fungarium ID Neu",
+                                "en-US": "Fungarium ID Neu"
+                            },
+                            "html": {
+                                "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Fungarium ID Neu</span></span>",
+                                "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Fungarium ID Neu</span></span>"
+                            }
+                        }
+                    },
+                    "_global_object_id": "53@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+                    "_sort": {
+                        "de-DE": "Fungarium ID Neu                                                Fungarium ID Neu {49} ",
+                        "en-US": "Fungarium ID Neu                                                Fungarium ID Neu {49} "
+                    }
+                }
+            },
+            {
+                "andereid": "24159",
+                "typ": {
+                    "_uuid": "5ae409c9-1e75-450f-8504-7bfd28cae008",
+                    "_format": "standard",
+                    "_objecttype": "id_typen",
+                    "id_typen": {
+                        "_id": 48,
+                        "_version": 1
+                    },
+                    "_mask": "id_typen_all_fields",
+                    "_system_object_id": 52,
+                    "_standard": {
+                        "1": {
+                            "text": {
+                                "de-DE": "Fungarium ID",
+                                "en-US": "Fungarium ID"
+                            },
+                            "html": {
+                                "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Fungarium ID</span></span>",
+                                "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Fungarium ID</span></span>"
+                            }
+                        }
+                    },
+                    "_global_object_id": "52@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+                    "_sort": {
+                        "de-DE": "Fungarium ID                                                    Fungarium ID {48} ",
+                        "en-US": "Fungarium ID                                                    Fungarium ID {48} "
+                    }
+                }
+            }
+        ],
+        "_reverse_nested:bestimmung:fungarium": [
+            {
+                "_version": 1,
+                "_uuid": "822bccd3-e67d-4b9f-b2d5-487dfe705190",
+                "bestimmertrans": "R. Berndt",
+                "_system_object_id": 4280467,
+                "genustrans": "Microbotryum",
+                "autor": {
+                    "_objecttype": "authors",
+                    "_mask": "author__all_fields",
+                    "_system_object_id": 25000,
+                    "_uuid": "cc37677e-1240-48f5-bc4f-eac8f2b2e594",
+                    "_format": "standard",
+                    "_standard": {
+                        "1": {
+                            "text": {
+                                "de-DE": "(Pers.) G. Deml & Oberw.",
+                                "en-US": "(Pers.) G. Deml & Oberw."
+                            },
+                            "html": {
+                                "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">(Pers.) G. Deml &amp; Oberw.</span></span>",
+                                "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">(Pers.) G. Deml &amp; Oberw.</span></span>"
+                            }
+                        }
+                    },
+                    "_global_object_id": "25000@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+                    "_sort": {
+                        "de-DE": "(Pers.) G. Deml & Oberw.                                        (Pers.) G. Deml & Oberw. {5377} ",
+                        "en-US": "(Pers.) G. Deml & Oberw.                                        (Pers.) G. Deml & Oberw. {5377} "
+                    },
+                    "authors": {
+                        "_id": 5377,
+                        "_version": 1
+                    }
+                },
+                "_objecttype": "bestimmung",
+                "genus": {
+                    "_objecttype": "genus",
+                    "genus": {
+                        "_id": 830,
+                        "_pool": {
+                            "pool": {
+                                "_id": 6,
+                                "name": {
+                                    "de-DE": "Systematiken Pflanzenkunde"
+                                },
+                                "_id_parent": 1
+                            },
+                            "_path": [
+                                {
+                                    "pool": {
+                                        "_id": 1,
+                                        "name": {
+                                            "de-DE": "Alle Pools",
+                                            "en-US": "All pools"
+                                        }
+                                    },
+                                    "_basetype": "pool"
+                                },
+                                {
+                                    "pool": {
+                                        "_id": 6,
+                                        "name": {
+                                            "de-DE": "Systematiken Pflanzenkunde"
+                                        },
+                                        "_id_parent": 1
+                                    },
+                                    "_basetype": "pool"
+                                }
+                            ],
+                            "_level": 2,
+                            "_basetype": "pool"
+                        },
+                        "_version": 2
+                    },
+                    "_mask": "genus_all_fields",
+                    "_system_object_id": 35105,
+                    "_uuid": "01fa852b-9926-4050-ad00-fa1d60c2da21",
+                    "_format": "standard",
+                    "_standard": {
+                        "1": {
+                            "text": {
+                                "de-DE": "Microbotryum",
+                                "en-US": "Microbotryum"
+                            },
+                            "html": {
+                                "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Microbotryum</span></span>",
+                                "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Microbotryum</span></span>"
+                            }
+                        }
+                    },
+                    "_global_object_id": "35105@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+                    "_sort": {
+                        "de-DE": "Microbotryum                                                    Microbotryum {830} ",
+                        "en-US": "Microbotryum                                                    Microbotryum {830} "
+                    }
+                },
+                "arttrans": "violaceum",
+                "taxonnametrans": "Microbotryum violaceum",
+                "_pool": {
+                    "pool": {
+                        "_id": 10,
+                        "name": {
+                            "de-DE": "Fungarium",
+                            "en-US": "Fungal Collection"
+                        },
+                        "_id_parent": 8
+                    },
+                    "_path": [
+                        {
+                            "pool": {
+                                "_id": 1,
+                                "name": {
+                                    "de-DE": "Alle Pools",
+                                    "en-US": "All pools"
+                                }
+                            },
+                            "_basetype": "pool"
+                        },
+                        {
+                            "pool": {
+                                "_id": 8,
+                                "name": {
+                                    "de-DE": "Vereinigte Herbarien Z + ZT",
+                                    "en-US": "United Herbaria Z + ZT"
+                                },
+                                "_id_parent": 1
+                            },
+                            "_basetype": "pool"
+                        },
+                        {
+                            "pool": {
+                                "_id": 10,
+                                "name": {
+                                    "de-DE": "Fungarium",
+                                    "en-US": "Fungal Collection"
+                                },
+                                "_id_parent": 8
+                            },
+                            "_basetype": "pool"
+                        }
+                    ],
+                    "_level": 3,
+                    "_basetype": "pool"
+                },
+                "typus": false,
+                "_id": 762283,
+                "_nested:bestimmung__kommentarezurbestimmung": [
+                    {
+                        "_standard": {},
+                        "kommentarzurbestimmung": "Smut Fungi (Microbotryomycetes, Ustilaginomycetes, Exobasidiomycetes)"
+                    }
+                ],
+                "_global_object_id": "4280467@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+                "taxonname": {
+                    "_objecttype": "taxonnamen",
+                    "_mask": "taxonnamen__all_fields",
+                    "_system_object_id": 100232,
+                    "_uuid": "e0baca30-e88b-4c65-bb0e-a8885449aa32",
+                    "_format": "standard",
+                    "_standard": {
+                        "1": {
+                            "text": {
+                                "de-DE": "Microbotryum violaceum",
+                                "en-US": "Microbotryum violaceum"
+                            },
+                            "html": {
+                                "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Microbotryum violaceum</span></span>",
+                                "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Microbotryum violaceum</span></span>"
+                            }
+                        }
+                    },
+                    "_global_object_id": "100232@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+                    "_sort": {
+                        "de-DE": "Microbotryum violaceum                                          Microbotryum violaceum {1016} ",
+                        "en-US": "Microbotryum violaceum                                          Microbotryum violaceum {1016} "
+                    },
+                    "taxonnamen": {
+                        "_id": 1016,
+                        "_pool": {
+                            "pool": {
+                                "_id": 6,
+                                "name": {
+                                    "de-DE": "Systematiken Pflanzenkunde"
+                                },
+                                "_id_parent": 1
+                            },
+                            "_path": [
+                                {
+                                    "pool": {
+                                        "_id": 1,
+                                        "name": {
+                                            "de-DE": "Alle Pools",
+                                            "en-US": "All pools"
+                                        }
+                                    },
+                                    "_basetype": "pool"
+                                },
+                                {
+                                    "pool": {
+                                        "_id": 6,
+                                        "name": {
+                                            "de-DE": "Systematiken Pflanzenkunde"
+                                        },
+                                        "_id_parent": 1
+                                    },
+                                    "_basetype": "pool"
+                                }
+                            ],
+                            "_level": 2,
+                            "_basetype": "pool"
+                        },
+                        "_version": 1
+                    }
+                }
+            }
+        ],
+        "_version": 157,
+        "source_reference": "scope--fung_praep_1-fungarium-migreferenz-0023447",
+        "_reverse_nested:aufsammlung:fungarium": [
+            {
+                "_objecttype": "aufsammlung",
+                "traegerorganismustrans": "Petrorhagia saxifraga",
+                "habitattrans": "auf Petrorhagia saxifraga",
+                "_id": 626961,
+                "sammelort": {
+                    "_mask": "gazetteer__all_fields",
+                    "_format": "standard",
+                    "_objecttype": "gazetteer",
+                    "gazetteer": {
+                        "_id": 573,
+                        "_id_parent": 127,
+                        "_version": 1
+                    },
+                    "_system_object_id": 2406,
+                    "_has_children": false,
+                    "_level": 3,
+                    "_path": [
+                        {
+                            "gazetteer": {
+                                "_id": 4,
+                                "_id_parent": null,
+                                "_version": 1
+                            },
+                            "_objecttype": "gazetteer",
+                            "_mask": "gazetteer__all_fields",
+                            "_format": "standard",
+                            "_system_object_id": 1837,
+                            "_uuid": "ee078676-91f8-421b-a8b0-631cbb100cc1",
+                            "_has_children": true,
+                            "_standard": {
+                                "1": {
+                                    "text": {
+                                        "de-DE": "Europa (Kontinent)",
+                                        "en-US": "Europe (Kontinent)"
+                                    },
+                                    "html": {
+                                        "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-space\">Europa</span><span class=\"ez-format-round-parentheses\">Kontinent</span></span>",
+                                        "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-space\">Europe</span><span class=\"ez-format-round-parentheses\">Kontinent</span></span>"
+                                    }
+                                }
+                            },
+                            "_global_object_id": "1837@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a"
+                        },
+                        {
+                            "gazetteer": {
+                                "_id": 127,
+                                "_id_parent": 4,
+                                "_version": 1
+                            },
+                            "_objecttype": "gazetteer",
+                            "_mask": "gazetteer__all_fields",
+                            "_format": "standard",
+                            "_system_object_id": 1960,
+                            "_uuid": "ea6f2cf0-6401-43d6-bf0c-c2765bdff98f",
+                            "_has_children": true,
+                            "_standard": {
+                                "1": {
+                                    "text": {
+                                        "de-DE": "Italien (Land)",
+                                        "en-US": "Italy (Land)"
+                                    },
+                                    "html": {
+                                        "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-space\">Italien</span><span class=\"ez-format-round-parentheses\">Land</span></span>",
+                                        "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-space\">Italy</span><span class=\"ez-format-round-parentheses\">Land</span></span>"
+                                    }
+                                }
+                            },
+                            "_global_object_id": "1960@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a"
+                        },
+                        {
+                            "gazetteer": {
+                                "_id": 573,
+                                "_id_parent": 127,
+                                "_version": 1
+                            },
+                            "_objecttype": "gazetteer",
+                            "_mask": "gazetteer__all_fields",
+                            "_format": "standard",
+                            "_system_object_id": 2406,
+                            "_uuid": "9be9d4cd-bc66-4884-996a-5c9b02e308d1",
+                            "_has_children": false,
+                            "_standard": {
+                                "1": {
+                                    "text": {
+                                        "de-DE": "Trentino-Südtirol (Kanton/Provinz/Bundesland)",
+                                        "en-US": "Trentino-South Tyrol (Kanton/Provinz/Bundesland)"
+                                    },
+                                    "html": {
+                                        "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-space\">Trentino-S&#xFC;dtirol</span><span class=\"ez-format-round-parentheses\">Kanton/Provinz/Bundesland</span></span>",
+                                        "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-space\">Trentino-South Tyrol</span><span class=\"ez-format-round-parentheses\">Kanton/Provinz/Bundesland</span></span>"
+                                    }
+                                }
+                            },
+                            "_global_object_id": "2406@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a"
+                        }
+                    ],
+                    "_uuid": "9be9d4cd-bc66-4884-996a-5c9b02e308d1",
+                    "_standard": {
+                        "1": {
+                            "text": {
+                                "de-DE": "Trentino-Südtirol (Kanton/Provinz/Bundesland)",
+                                "en-US": "Trentino-South Tyrol (Kanton/Provinz/Bundesland)"
+                            },
+                            "html": {
+                                "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-space\">Trentino-S&#xFC;dtirol</span><span class=\"ez-format-round-parentheses\">Kanton/Provinz/Bundesland</span></span>",
+                                "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-space\">Trentino-South Tyrol</span><span class=\"ez-format-round-parentheses\">Kanton/Provinz/Bundesland</span></span>"
+                            }
+                        }
+                    },
+                    "_global_object_id": "2406@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+                    "_sort": {
+                        "de-DE": "Trentino-Südtirol (Kanton/Provinz/Bundesland)                  Europa (Kontinent) {4} Italien (Land) {127} Trentino-Südtirol (Kanton/Provinz/Bundesland) {573} ",
+                        "en-US": "Trentino-South Tyrol (Kanton/Provinz/Bundesland)                Europe (Kontinent) {4} Italy (Land) {127} Trentino-South Tyrol (Kanton/Provinz/Bundesland) {573} "
+                    }
+                },
+                "lokalitaettrans": "Provinz Bozen, Vinschgau, Schludernser Waalweg, Kalvarienberg",
+                "sammeldatumtrans": "20 Oct 2012",
+                "_uuid": "d2ce264f-40c0-4405-964a-2a2c861b99c8",
+                "sammlertrans": "R. Berndt",
+                "traegerorganismus": {
+                    "de-DE": "Petrorhagia saxifraga (L.) Link"
+                },
+                "_pool": {
+                    "pool": {
+                        "_id": 10,
+                        "name": {
+                            "de-DE": "Fungarium",
+                            "en-US": "Fungal Collection"
+                        },
+                        "_id_parent": 8
+                    },
+                    "_path": [
+                        {
+                            "pool": {
+                                "_id": 1,
+                                "name": {
+                                    "de-DE": "Alle Pools",
+                                    "en-US": "All pools"
+                                }
+                            },
+                            "_basetype": "pool"
+                        },
+                        {
+                            "pool": {
+                                "_id": 8,
+                                "name": {
+                                    "de-DE": "Vereinigte Herbarien Z + ZT",
+                                    "en-US": "United Herbaria Z + ZT"
+                                },
+                                "_id_parent": 1
+                            },
+                            "_basetype": "pool"
+                        },
+                        {
+                            "pool": {
+                                "_id": 10,
+                                "name": {
+                                    "de-DE": "Fungarium",
+                                    "en-US": "Fungal Collection"
+                                },
+                                "_id_parent": 8
+                            },
+                            "_basetype": "pool"
+                        }
+                    ],
+                    "_level": 3,
+                    "_basetype": "pool"
+                },
+                "_version": 1,
+                "sammelorttrans": "ITALY//",
+                "_system_object_id": 4280697,
+                "_global_object_id": "4280697@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a"
+            }
+        ]
+    },
+    "_published_count": 0,
+    "_mask": "fungarium__public__unrestricted",
+    "_global_object_id": "1410465@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+    "_published": [],
+    "_uuid": "96756d2c-7969-4267-b838-01f1906bcd59",
+    "_created": "2021-05-08T04:35:53Z",
+    "_standard": {
+        "eas": {
+            "1": [
+                {
+                    "filesize": 3529481,
+                    "date_inserted": "2023-01-23T18:13:42Z",
+                    "class_extension": "image.jpg",
+                    "original_filename_basename": "ZT Myc 30429",
+                    "class_version_status": [
+                        "image.preview.done",
+                        "image.small.done",
+                        "image.original.done",
+                        "image.huge.done",
+                        "image.full.done"
+                    ],
+                    "date_uploaded": "2022-10-26T08:23:34Z",
+                    "eas_parent_id": null,
+                    "extension": "jpg",
+                    "original_filepath": "ZT Myc 30429.JPG",
+                    "technical_metadata": {
+                        "orientation": 1,
+                        "file_sha224_checksum": "4815f71e8a77867750d199216df25c4f15f6945112edbac2a6548de3",
+                        "camera_scanner": "NIKON D7000",
+                        "width": 4928,
+                        "height": 3264,
+                        "dpi": 300,
+                        "max_dimension": 4928,
+                        "format": "landscape",
+                        "aspect_ratio": 1.5098039215686274,
+                        "colordepth": 24,
+                        "colorspace": "rgb"
+                    },
+                    "class": "image",
+                    "original_filename": "ZT Myc 30429.JPG",
+                    "class_version_extension": [
+                        "image.preview.jpg",
+                        "image.small.jpg",
+                        "image.original.jpg",
+                        "image.huge.jpg",
+                        "image.full.jpg"
+                    ],
+                    "versions": {
+                        "small": {
+                            "class": "image",
+                            "url": "https://www.nahima.ethz.ch/eas/partitions-inline/2/0/494000/494961/5c945d047eae5f440efdd8c9d27a9141774e682f/image/jpeg",
+                            "width": 377,
+                            "status": "done",
+                            "has_more_jobs": false,
+                            "height": 250,
+                            "filesize": 15970,
+                            "aspect_ratio": 1.5080000162124634,
+                            "extension": "jpg",
+                            "dpi": 300,
+                            "download_url": "https://www.nahima.ethz.ch/eas/partitions/2/0/494000/494961/5c945d047eae5f440efdd8c9d27a9141774e682f/image/jpeg/ZT%20Myc%2030429-small.jpg",
+                            "_download_allowed": false
+                        }
+                    },
+                    "_id": 494961,
+                    "preferred": true,
+                    "status": "done",
+                    "pages_allowed": false
+                }
+            ]
+        },
+        "1": {
+            "text": {
+                "de-DE": "ZT Myc 30429"
+            },
+            "html": {
+                "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">ZT Myc 30429</span></span>"
+            }
+        },
+        "2": {
+            "text": {
+                "de-DE": "Microbotryum violaceum"
+            },
+            "html": {
+                "de-DE": "<span class=\"ez-format-comma\">Microbotryum violaceum</span>"
+            }
+        }
+    },
+    "_format": "long",
+    "_score": 2.0
+}

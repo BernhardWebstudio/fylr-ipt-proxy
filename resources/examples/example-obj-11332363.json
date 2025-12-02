@@ -1,0 +1,684 @@
+{
+    "_system_object_id": 11332363,
+    "_tags": [],
+    "_collections": [
+        {
+            "_id": 92
+        },
+        {
+            "_id": 174
+        }
+    ],
+    "_objecttype": "fungarium",
+    "_last_modified": "2025-07-03T15:23:20Z",
+    "fungarium": {
+        "_id": 129656,
+        "_pool": {
+            "pool": {
+                "_id": 10,
+                "name": {
+                    "de-DE": "Fungarium",
+                    "en-US": "Fungal Collection"
+                },
+                "_id_parent": 8
+            },
+            "_path": [
+                {
+                    "pool": {
+                        "_id": 1,
+                        "name": {
+                            "de-DE": "Alle Pools",
+                            "en-US": "All pools"
+                        }
+                    },
+                    "_basetype": "pool"
+                },
+                {
+                    "pool": {
+                        "_id": 8,
+                        "name": {
+                            "de-DE": "Vereinigte Herbarien Z + ZT",
+                            "en-US": "United Herbaria Z + ZT"
+                        },
+                        "_id_parent": 1
+                    },
+                    "_basetype": "pool"
+                },
+                {
+                    "pool": {
+                        "_id": 10,
+                        "name": {
+                            "de-DE": "Fungarium",
+                            "en-US": "Fungal Collection"
+                        },
+                        "_id_parent": 8
+                    },
+                    "_basetype": "pool"
+                }
+            ],
+            "_level": 3,
+            "_basetype": "pool"
+        },
+        "zugangsnummer": "ZT Myc 0105806",
+        "_reverse_nested:fungarium_mediaassetpublic:fungarium": [
+            {
+                "mediaassetpublic": {
+                    "_mask": "mediaasset__fungarium",
+                    "_system_object_id": 11332366,
+                    "mediaasset": {
+                        "_id": 892532,
+                        "_pool": {
+                            "pool": {
+                                "_id": 10,
+                                "name": {
+                                    "de-DE": "Fungarium",
+                                    "en-US": "Fungal Collection"
+                                },
+                                "_id_parent": 8
+                            },
+                            "_path": [
+                                {
+                                    "pool": {
+                                        "_id": 1,
+                                        "name": {
+                                            "de-DE": "Alle Pools",
+                                            "en-US": "All pools"
+                                        }
+                                    },
+                                    "_basetype": "pool"
+                                },
+                                {
+                                    "pool": {
+                                        "_id": 8,
+                                        "name": {
+                                            "de-DE": "Vereinigte Herbarien Z + ZT",
+                                            "en-US": "United Herbaria Z + ZT"
+                                        },
+                                        "_id_parent": 1
+                                    },
+                                    "_basetype": "pool"
+                                },
+                                {
+                                    "pool": {
+                                        "_id": 10,
+                                        "name": {
+                                            "de-DE": "Fungarium",
+                                            "en-US": "Fungal Collection"
+                                        },
+                                        "_id_parent": 8
+                                    },
+                                    "_basetype": "pool"
+                                }
+                            ],
+                            "_level": 3,
+                            "_basetype": "pool"
+                        },
+                        "_version": 2
+                    },
+                    "_tags": [],
+                    "_format": "standard",
+                    "_uuid": "b7fe09b5-cca6-4f05-9a94-93cad680fc76",
+                    "_objecttype": "mediaasset",
+                    "_standard": {
+                        "eas": {
+                            "1": [
+                                {
+                                    "filesize": 6128752,
+                                    "date_inserted": "2025-07-03T15:24:07Z",
+                                    "class_extension": "image.jpg",
+                                    "original_filename_basename": "ZT Myc 0105806",
+                                    "class_version_status": [
+                                        "image.small.done",
+                                        "image.preview.done",
+                                        "image.original.done",
+                                        "image.full.done",
+                                        "image.huge.done"
+                                    ],
+                                    "date_uploaded": "2025-07-03T15:23:19Z",
+                                    "eas_parent_id": null,
+                                    "extension": "jpg",
+                                    "original_filepath": "ZT Myc 0105806.JPG",
+                                    "technical_metadata": {
+                                        "orientation": 1,
+                                        "file_sha224_checksum": "bc3e9cc101e13a75433f09fa93b2194950b0868b62fba56934361557",
+                                        "camera_scanner": "NIKON Z 7_2",
+                                        "width": 4048,
+                                        "height": 2696,
+                                        "dpi": 300,
+                                        "max_dimension": 4048,
+                                        "format": "landscape",
+                                        "aspect_ratio": 1.5014836795252227,
+                                        "colordepth": 24,
+                                        "colorspace": "rgb"
+                                    },
+                                    "class": "image",
+                                    "original_filename": "ZT Myc 0105806.JPG",
+                                    "class_version_extension": [
+                                        "image.small.jpg",
+                                        "image.preview.jpg",
+                                        "image.original.jpg",
+                                        "image.full.jpg",
+                                        "image.huge.jpg"
+                                    ],
+                                    "versions": {
+                                        "small": {
+                                            "class": "image",
+                                            "url": "https://www.nahima.ethz.ch/eas/partitions-inline/2/0/952000/952850/5c3fc781668f6a868643f7f301a12d048ef972c2/image/jpeg",
+                                            "width": 375,
+                                            "status": "done",
+                                            "has_more_jobs": false,
+                                            "height": 250,
+                                            "filesize": 61567,
+                                            "aspect_ratio": 1.5,
+                                            "extension": "jpg",
+                                            "dpi": 300,
+                                            "download_url": "https://www.nahima.ethz.ch/eas/partitions/2/0/952000/952850/5c3fc781668f6a868643f7f301a12d048ef972c2/image/jpeg/ZT%20Myc%200105806-small.jpg",
+                                            "_download_allowed": false
+                                        }
+                                    },
+                                    "_id": 952850,
+                                    "preferred": true,
+                                    "status": "done",
+                                    "pages_allowed": false
+                                }
+                            ]
+                        },
+                        "1": {
+                            "text": {
+                                "de-DE": "ZT Myc 0105806",
+                                "en-US": "ZT Myc 0105806"
+                            },
+                            "html": {
+                                "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">ZT Myc 0105806</span></span>",
+                                "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">ZT Myc 0105806</span></span>"
+                            }
+                        }
+                    },
+                    "_global_object_id": "11332366@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+                    "_sort": {
+                        "de-DE": "ZT Myc 0105806                                                  ZT Myc 0105806 {892532} ",
+                        "en-US": "ZT Myc 0105806                                                  ZT Myc 0105806 {892532} "
+                    }
+                },
+                "_id": 113889,
+                "_system_object_id": 11332367,
+                "_version": 1,
+                "_uuid": "1d76d489-56eb-4cd1-8615-6ff16757ef3c",
+                "_objecttype": "fungarium_mediaassetpublic",
+                "_global_object_id": "11332367@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a"
+            }
+        ],
+        "_reverse_nested:bestimmung:fungarium": [
+            {
+                "typus": false,
+                "_system_object_id": 11332364,
+                "_pool": {
+                    "pool": {
+                        "_id": 10,
+                        "name": {
+                            "de-DE": "Fungarium",
+                            "en-US": "Fungal Collection"
+                        },
+                        "_id_parent": 8
+                    },
+                    "_path": [
+                        {
+                            "pool": {
+                                "_id": 1,
+                                "name": {
+                                    "de-DE": "Alle Pools",
+                                    "en-US": "All pools"
+                                }
+                            },
+                            "_basetype": "pool"
+                        },
+                        {
+                            "pool": {
+                                "_id": 8,
+                                "name": {
+                                    "de-DE": "Vereinigte Herbarien Z + ZT",
+                                    "en-US": "United Herbaria Z + ZT"
+                                },
+                                "_id_parent": 1
+                            },
+                            "_basetype": "pool"
+                        },
+                        {
+                            "pool": {
+                                "_id": 10,
+                                "name": {
+                                    "de-DE": "Fungarium",
+                                    "en-US": "Fungal Collection"
+                                },
+                                "_id_parent": 8
+                            },
+                            "_basetype": "pool"
+                        }
+                    ],
+                    "_level": 3,
+                    "_basetype": "pool"
+                },
+                "_objecttype": "bestimmung",
+                "genus": {
+                    "_objecttype": "genus",
+                    "genus": {
+                        "_id": 23480,
+                        "_pool": {
+                            "pool": {
+                                "_id": 6,
+                                "name": {
+                                    "de-DE": "Systematiken Pflanzenkunde"
+                                },
+                                "_id_parent": 1
+                            },
+                            "_path": [
+                                {
+                                    "pool": {
+                                        "_id": 1,
+                                        "name": {
+                                            "de-DE": "Alle Pools",
+                                            "en-US": "All pools"
+                                        }
+                                    },
+                                    "_basetype": "pool"
+                                },
+                                {
+                                    "pool": {
+                                        "_id": 6,
+                                        "name": {
+                                            "de-DE": "Systematiken Pflanzenkunde"
+                                        },
+                                        "_id_parent": 1
+                                    },
+                                    "_basetype": "pool"
+                                }
+                            ],
+                            "_level": 2,
+                            "_basetype": "pool"
+                        },
+                        "_version": 2
+                    },
+                    "_mask": "genus_all_fields",
+                    "_system_object_id": 57755,
+                    "_uuid": "c5fbd06a-c192-45b9-b4b5-30ae5497ba10",
+                    "_format": "standard",
+                    "_standard": {
+                        "1": {
+                            "text": {
+                                "de-DE": "Leptosphaeria",
+                                "en-US": "Leptosphaeria"
+                            },
+                            "html": {
+                                "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Leptosphaeria</span></span>",
+                                "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Leptosphaeria</span></span>"
+                            }
+                        }
+                    },
+                    "_global_object_id": "57755@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+                    "_sort": {
+                        "de-DE": "Leptosphaeria                                                   Leptosphaeria {23480} ",
+                        "en-US": "Leptosphaeria                                                   Leptosphaeria {23480} "
+                    }
+                },
+                "taxonnametrans": "Leptosphaeria modesta (Desm.) Sacc.",
+                "_id": 1839669,
+                "taxonname": {
+                    "_objecttype": "taxonnamen",
+                    "_mask": "taxonnamen__all_fields",
+                    "_system_object_id": 4002692,
+                    "_uuid": "8b97c132-127a-47b1-a770-7f484176e8c0",
+                    "_format": "standard",
+                    "_standard": {
+                        "1": {
+                            "text": {
+                                "de-DE": "Leptosphaeria modesta Rabenh.",
+                                "en-US": "Leptosphaeria modesta Rabenh."
+                            },
+                            "html": {
+                                "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Leptosphaeria modesta Rabenh.</span></span>",
+                                "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Leptosphaeria modesta Rabenh.</span></span>"
+                            }
+                        }
+                    },
+                    "_global_object_id": "4002692@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+                    "_sort": {
+                        "de-DE": "Leptosphaeria modesta Rabenh.                                   Leptosphaeria modesta Rabenh. {1002998} ",
+                        "en-US": "Leptosphaeria modesta Rabenh.                                   Leptosphaeria modesta Rabenh. {1002998} "
+                    },
+                    "taxonnamen": {
+                        "_id": 1002998,
+                        "_pool": {
+                            "pool": {
+                                "_id": 10,
+                                "name": {
+                                    "de-DE": "Fungarium",
+                                    "en-US": "Fungal Collection"
+                                },
+                                "_id_parent": 8
+                            },
+                            "_path": [
+                                {
+                                    "pool": {
+                                        "_id": 1,
+                                        "name": {
+                                            "de-DE": "Alle Pools",
+                                            "en-US": "All pools"
+                                        }
+                                    },
+                                    "_basetype": "pool"
+                                },
+                                {
+                                    "pool": {
+                                        "_id": 8,
+                                        "name": {
+                                            "de-DE": "Vereinigte Herbarien Z + ZT",
+                                            "en-US": "United Herbaria Z + ZT"
+                                        },
+                                        "_id_parent": 1
+                                    },
+                                    "_basetype": "pool"
+                                },
+                                {
+                                    "pool": {
+                                        "_id": 10,
+                                        "name": {
+                                            "de-DE": "Fungarium",
+                                            "en-US": "Fungal Collection"
+                                        },
+                                        "_id_parent": 8
+                                    },
+                                    "_basetype": "pool"
+                                }
+                            ],
+                            "_level": 3,
+                            "_basetype": "pool"
+                        },
+                        "_version": 2
+                    }
+                },
+                "_version": 1,
+                "_uuid": "f8024a4d-fea8-40ab-bb2e-5e9990568631",
+                "_global_object_id": "11332364@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a"
+            }
+        ],
+        "_version": 2,
+        "_reverse_nested:aufsammlung:fungarium": [
+            {
+                "_id": 973575,
+                "habitattrans": "Solidago virgaurea L.",
+                "sammelort": {
+                    "_mask": "gazetteer__all_fields",
+                    "_format": "standard",
+                    "_objecttype": "gazetteer",
+                    "gazetteer": {
+                        "_id": 143,
+                        "_id_parent": 4,
+                        "_version": 1
+                    },
+                    "_system_object_id": 1976,
+                    "_has_children": true,
+                    "_level": 2,
+                    "_path": [
+                        {
+                            "gazetteer": {
+                                "_id": 4,
+                                "_id_parent": null,
+                                "_version": 1
+                            },
+                            "_objecttype": "gazetteer",
+                            "_mask": "gazetteer__all_fields",
+                            "_format": "standard",
+                            "_system_object_id": 1837,
+                            "_uuid": "ee078676-91f8-421b-a8b0-631cbb100cc1",
+                            "_has_children": true,
+                            "_standard": {
+                                "1": {
+                                    "text": {
+                                        "de-DE": "Europa (Kontinent)",
+                                        "en-US": "Europe (Kontinent)"
+                                    },
+                                    "html": {
+                                        "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-space\">Europa</span><span class=\"ez-format-round-parentheses\">Kontinent</span></span>",
+                                        "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-space\">Europe</span><span class=\"ez-format-round-parentheses\">Kontinent</span></span>"
+                                    }
+                                }
+                            },
+                            "_global_object_id": "1837@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a"
+                        },
+                        {
+                            "gazetteer": {
+                                "_id": 143,
+                                "_id_parent": 4,
+                                "_version": 1
+                            },
+                            "_objecttype": "gazetteer",
+                            "_mask": "gazetteer__all_fields",
+                            "_format": "standard",
+                            "_system_object_id": 1976,
+                            "_uuid": "93dffaba-7893-4fd0-b2c3-a017fe17d59d",
+                            "_has_children": true,
+                            "_standard": {
+                                "1": {
+                                    "text": {
+                                        "de-DE": "Schweden (Land)",
+                                        "en-US": "Sweden (Land)"
+                                    },
+                                    "html": {
+                                        "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-space\">Schweden</span><span class=\"ez-format-round-parentheses\">Land</span></span>",
+                                        "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-space\">Sweden</span><span class=\"ez-format-round-parentheses\">Land</span></span>"
+                                    }
+                                }
+                            },
+                            "_global_object_id": "1976@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a"
+                        }
+                    ],
+                    "_uuid": "93dffaba-7893-4fd0-b2c3-a017fe17d59d",
+                    "_standard": {
+                        "1": {
+                            "text": {
+                                "de-DE": "Schweden (Land)",
+                                "en-US": "Sweden (Land)"
+                            },
+                            "html": {
+                                "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-space\">Schweden</span><span class=\"ez-format-round-parentheses\">Land</span></span>",
+                                "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-space\">Sweden</span><span class=\"ez-format-round-parentheses\">Land</span></span>"
+                            }
+                        }
+                    },
+                    "_global_object_id": "1976@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+                    "_sort": {
+                        "de-DE": "Schweden (Land)                                                 Europa (Kontinent) {4} Schweden (Land) {143} ",
+                        "en-US": "Sweden (Land)                                                   Europe (Kontinent) {4} Sweden (Land) {143} "
+                    }
+                },
+                "lokalitaettrans": "Jemtlandia, Are",
+                "_objecttype": "aufsammlung",
+                "_nested:aufsammlung__sammler": [
+                    {
+                        "_id": 506234,
+                        "sammler": {
+                            "_mask": "person__public",
+                            "_system_object_id": 4228861,
+                            "person": {
+                                "_id": 7408,
+                                "_version": 1
+                            },
+                            "_uuid": "77bf08ca-5662-4369-99e2-17b036ab9f2e",
+                            "_format": "standard",
+                            "_objecttype": "person",
+                            "_standard": {
+                                "1": {
+                                    "text": {
+                                        "de-DE": "A. G. Eliasson",
+                                        "en-US": "A. G. Eliasson"
+                                    },
+                                    "html": {
+                                        "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">A. G. Eliasson</span></span>",
+                                        "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">A. G. Eliasson</span></span>"
+                                    }
+                                }
+                            },
+                            "_global_object_id": "4228861@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+                            "_sort": {
+                                "de-DE": "A. G. Eliasson                                                  A. G. Eliasson {7408} ",
+                                "en-US": "A. G. Eliasson                                                  A. G. Eliasson {7408} "
+                            }
+                        },
+                        "_standard": {}
+                    }
+                ],
+                "sammeldatum": {
+                    "_from": "1931-07-01T00:00:00Z",
+                    "_to": "1931-07-31T23:59:59Z",
+                    "value": "1931-07"
+                },
+                "_version": 1,
+                "_uuid": "efe8b907-0d12-4908-ba32-d850bad7d4d6",
+                "_pool": {
+                    "pool": {
+                        "_id": 10,
+                        "name": {
+                            "de-DE": "Fungarium",
+                            "en-US": "Fungal Collection"
+                        },
+                        "_id_parent": 8
+                    },
+                    "_path": [
+                        {
+                            "pool": {
+                                "_id": 1,
+                                "name": {
+                                    "de-DE": "Alle Pools",
+                                    "en-US": "All pools"
+                                }
+                            },
+                            "_basetype": "pool"
+                        },
+                        {
+                            "pool": {
+                                "_id": 8,
+                                "name": {
+                                    "de-DE": "Vereinigte Herbarien Z + ZT",
+                                    "en-US": "United Herbaria Z + ZT"
+                                },
+                                "_id_parent": 1
+                            },
+                            "_basetype": "pool"
+                        },
+                        {
+                            "pool": {
+                                "_id": 10,
+                                "name": {
+                                    "de-DE": "Fungarium",
+                                    "en-US": "Fungal Collection"
+                                },
+                                "_id_parent": 8
+                            },
+                            "_basetype": "pool"
+                        }
+                    ],
+                    "_level": 3,
+                    "_basetype": "pool"
+                },
+                "_system_object_id": 11332365,
+                "neuhabitat": {
+                    "de-DE": "Solidago virgaurea L."
+                },
+                "lokalitaet": "Jemtlandia, Are",
+                "_global_object_id": "11332365@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a"
+            }
+        ]
+    },
+    "_published_count": 0,
+    "_mask": "fungarium__public__unrestricted",
+    "_global_object_id": "11332363@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+    "_published": [],
+    "_uuid": "c4ba7eff-dad9-4dea-9266-dffb95ef61dd",
+    "_created": "2025-07-03T15:22:49Z",
+    "_standard": {
+        "eas": {
+            "1": [
+                {
+                    "filesize": 6128752,
+                    "date_inserted": "2025-07-03T15:24:07Z",
+                    "class_extension": "image.jpg",
+                    "original_filename_basename": "ZT Myc 0105806",
+                    "class_version_status": [
+                        "image.small.done",
+                        "image.preview.done",
+                        "image.original.done",
+                        "image.full.done",
+                        "image.huge.done"
+                    ],
+                    "date_uploaded": "2025-07-03T15:23:19Z",
+                    "eas_parent_id": null,
+                    "extension": "jpg",
+                    "original_filepath": "ZT Myc 0105806.JPG",
+                    "technical_metadata": {
+                        "orientation": 1,
+                        "file_sha224_checksum": "bc3e9cc101e13a75433f09fa93b2194950b0868b62fba56934361557",
+                        "camera_scanner": "NIKON Z 7_2",
+                        "width": 4048,
+                        "height": 2696,
+                        "dpi": 300,
+                        "max_dimension": 4048,
+                        "format": "landscape",
+                        "aspect_ratio": 1.5014836795252227,
+                        "colordepth": 24,
+                        "colorspace": "rgb"
+                    },
+                    "class": "image",
+                    "original_filename": "ZT Myc 0105806.JPG",
+                    "class_version_extension": [
+                        "image.small.jpg",
+                        "image.preview.jpg",
+                        "image.original.jpg",
+                        "image.full.jpg",
+                        "image.huge.jpg"
+                    ],
+                    "versions": {
+                        "small": {
+                            "class": "image",
+                            "url": "https://www.nahima.ethz.ch/eas/partitions-inline/2/0/952000/952850/5c3fc781668f6a868643f7f301a12d048ef972c2/image/jpeg",
+                            "width": 375,
+                            "status": "done",
+                            "has_more_jobs": false,
+                            "height": 250,
+                            "filesize": 61567,
+                            "aspect_ratio": 1.5,
+                            "extension": "jpg",
+                            "dpi": 300,
+                            "download_url": "https://www.nahima.ethz.ch/eas/partitions/2/0/952000/952850/5c3fc781668f6a868643f7f301a12d048ef972c2/image/jpeg/ZT%20Myc%200105806-small.jpg",
+                            "_download_allowed": false
+                        }
+                    },
+                    "_id": 952850,
+                    "preferred": true,
+                    "status": "done",
+                    "pages_allowed": false
+                }
+            ]
+        },
+        "1": {
+            "text": {
+                "de-DE": "ZT Myc 0105806"
+            },
+            "html": {
+                "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">ZT Myc 0105806</span></span>"
+            }
+        },
+        "2": {
+            "text": {
+                "de-DE": "Leptosphaeria modesta Rabenh."
+            },
+            "html": {
+                "de-DE": "<span class=\"ez-format-comma\">Leptosphaeria modesta Rabenh.</span>"
+            }
+        }
+    },
+    "_format": "long",
+    "_sort": [
+        11332363
+    ],
+    "_generated_rights": {}
+}

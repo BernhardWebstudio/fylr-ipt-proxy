@@ -1,0 +1,845 @@
+{
+  "_system_object_id": 1408175,
+  "_tags": [],
+  "_collections": [],
+  "_objecttype": "fungarium",
+  "_last_modified": "2024-06-13T14:37:31Z",
+  "fungarium": {
+    "_id": 22657,
+    "_pool": {
+      "pool": {
+        "_id": 10,
+        "name": {
+          "de-DE": "Fungarium",
+          "en-US": "Fungal Collection"
+        },
+        "_id_parent": 8
+      },
+      "_path": [
+        {
+          "pool": {
+            "_id": 1,
+            "name": {
+              "de-DE": "Alle Pools",
+              "en-US": "All pools"
+            }
+          },
+          "_basetype": "pool"
+        },
+        {
+          "pool": {
+            "_id": 8,
+            "name": {
+              "de-DE": "Vereinigte Herbarien Z + ZT",
+              "en-US": "United Herbaria Z + ZT"
+            },
+            "_id_parent": 1
+          },
+          "_basetype": "pool"
+        },
+        {
+          "pool": {
+            "_id": 10,
+            "name": {
+              "de-DE": "Fungarium",
+              "en-US": "Fungal Collection"
+            },
+            "_id_parent": 8
+          },
+          "_basetype": "pool"
+        }
+      ],
+      "_level": 3,
+      "_basetype": "pool"
+    },
+    "zugangsnummer": "ZT Myc 3549",
+    "migreferenz": "Fungarium ID Neu-022-658_Fungarium ID-23252_zugangsnummer-ZT Myc 3549",
+    "_reverse_nested:fungarium_mediaassetpublic:fungarium": [
+      {
+        "mediaassetpublic": {
+          "_mask": "mediaasset__fungarium",
+          "_system_object_id": 8887407,
+          "mediaasset": {
+            "_id": 772057,
+            "_pool": {
+              "pool": {
+                "_id": 10,
+                "name": {
+                  "de-DE": "Fungarium",
+                  "en-US": "Fungal Collection"
+                },
+                "_id_parent": 8
+              },
+              "_path": [
+                {
+                  "pool": {
+                    "_id": 1,
+                    "name": {
+                      "de-DE": "Alle Pools",
+                      "en-US": "All pools"
+                    }
+                  },
+                  "_basetype": "pool"
+                },
+                {
+                  "pool": {
+                    "_id": 8,
+                    "name": {
+                      "de-DE": "Vereinigte Herbarien Z + ZT",
+                      "en-US": "United Herbaria Z + ZT"
+                    },
+                    "_id_parent": 1
+                  },
+                  "_basetype": "pool"
+                },
+                {
+                  "pool": {
+                    "_id": 10,
+                    "name": {
+                      "de-DE": "Fungarium",
+                      "en-US": "Fungal Collection"
+                    },
+                    "_id_parent": 8
+                  },
+                  "_basetype": "pool"
+                }
+              ],
+              "_level": 3,
+              "_basetype": "pool"
+            },
+            "_version": 1
+          },
+          "_tags": [
+            {
+              "_id": 1
+            }
+          ],
+          "_format": "standard",
+          "_uuid": "3abb575a-b768-40c0-8bcf-cb549cc62acc",
+          "_objecttype": "mediaasset",
+          "_standard": {
+            "eas": {
+              "1": [
+                {
+                  "filesize": 507472,
+                  "date_inserted": "2024-06-13T14:37:03Z",
+                  "class_extension": "image.jpg",
+                  "original_filename_basename": "ZT Myc 3549",
+                  "class_version_status": [
+                    "image.small.done",
+                    "image.preview.done",
+                    "image.original.done",
+                    "image.full.done",
+                    "image.huge.done"
+                  ],
+                  "date_uploaded": "2024-06-13T14:36:58Z",
+                  "eas_parent_id": null,
+                  "extension": "jpg",
+                  "original_filepath": "ZT Myc 3549.JPG",
+                  "technical_metadata": {
+                    "file_sha224_checksum": "8f777c845feaf6e84c1f8c94be3106363cce004bf84911af8577b656",
+                    "camera_scanner": "NIKON D7000",
+                    "width": 3151,
+                    "height": 1585,
+                    "max_dimension": 3151,
+                    "dpi": 300,
+                    "format": "landscape",
+                    "aspect_ratio": 1.9880126182965299,
+                    "colordepth": 24,
+                    "colorspace": "rgb"
+                  },
+                  "class": "image",
+                  "original_filename": "ZT Myc 3549.JPG",
+                  "class_version_extension": [
+                    "image.small.jpg",
+                    "image.preview.jpg",
+                    "image.original.jpg",
+                    "image.full.jpg",
+                    "image.huge.jpg"
+                  ],
+                  "versions": {
+                    "small": {
+                      "class": "image",
+                      "url": "https://www.nahima.ethz.ch/eas/partitions-inline/2/0/820000/820004/10f5c38289dd1dd18db1dba72be4dbf72c4b38b2/image/jpeg",
+                      "width": 497,
+                      "status": "done",
+                      "has_more_jobs": false,
+                      "height": 250,
+                      "filesize": 18733,
+                      "aspect_ratio": 1.9880000352859497,
+                      "extension": "jpg",
+                      "dpi": 300,
+                      "download_url": "https://www.nahima.ethz.ch/eas/partitions/2/0/820000/820004/10f5c38289dd1dd18db1dba72be4dbf72c4b38b2/image/jpeg/ZT%20Myc%203549-small.jpg",
+                      "_download_allowed": false
+                    }
+                  },
+                  "_id": 820004,
+                  "preferred": true,
+                  "status": "done",
+                  "pages_allowed": false
+                }
+              ]
+            },
+            "1": {
+              "text": {
+                "de-DE": "ZT Myc 3549",
+                "en-US": "ZT Myc 3549"
+              },
+              "html": {
+                "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">ZT Myc 3549</span></span>",
+                "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">ZT Myc 3549</span></span>"
+              }
+            }
+          },
+          "_global_object_id": "8887407@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+          "_sort": {
+            "de-DE": "ZT Myc 3549                                                     ZT Myc 3549 {772057} ",
+            "en-US": "ZT Myc 3549                                                     ZT Myc 3549 {772057} "
+          }
+        },
+        "_id": 106921,
+        "_system_object_id": 8887408,
+        "_version": 1,
+        "_uuid": "8e3b0fa0-4048-4bdb-b074-63c883c8f655",
+        "_objecttype": "fungarium_mediaassetpublic",
+        "_global_object_id": "8887408@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a"
+      }
+    ],
+    "_nested:fungarium__andereids": [
+      {
+        "andereid": "022-658",
+        "typ": {
+          "_uuid": "6dbcc4af-5098-442d-8bd0-15c5bc620df8",
+          "_format": "standard",
+          "_objecttype": "id_typen",
+          "id_typen": {
+            "_id": 49,
+            "_version": 1
+          },
+          "_mask": "id_typen_all_fields",
+          "_system_object_id": 53,
+          "_standard": {
+            "1": {
+              "text": {
+                "de-DE": "Fungarium ID Neu",
+                "en-US": "Fungarium ID Neu"
+              },
+              "html": {
+                "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Fungarium ID Neu</span></span>",
+                "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Fungarium ID Neu</span></span>"
+              }
+            }
+          },
+          "_global_object_id": "53@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+          "_sort": {
+            "de-DE": "Fungarium ID Neu                                                Fungarium ID Neu {49} ",
+            "en-US": "Fungarium ID Neu                                                Fungarium ID Neu {49} "
+          }
+        }
+      },
+      {
+        "andereid": "23252",
+        "typ": {
+          "_uuid": "5ae409c9-1e75-450f-8504-7bfd28cae008",
+          "_format": "standard",
+          "_objecttype": "id_typen",
+          "id_typen": {
+            "_id": 48,
+            "_version": 1
+          },
+          "_mask": "id_typen_all_fields",
+          "_system_object_id": 52,
+          "_standard": {
+            "1": {
+              "text": {
+                "de-DE": "Fungarium ID",
+                "en-US": "Fungarium ID"
+              },
+              "html": {
+                "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Fungarium ID</span></span>",
+                "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Fungarium ID</span></span>"
+              }
+            }
+          },
+          "_global_object_id": "52@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+          "_sort": {
+            "de-DE": "Fungarium ID                                                    Fungarium ID {48} ",
+            "en-US": "Fungarium ID                                                    Fungarium ID {48} "
+          }
+        }
+      }
+    ],
+    "_reverse_nested:bestimmung:fungarium": [
+      {
+        "arttrans": "guttata",
+        "ordnung": {
+          "_system_object_id": 4630232,
+          "ordnungen": {
+            "_id": 88,
+            "_pool": {
+              "pool": {
+                "_id": 6,
+                "name": {
+                  "de-DE": "Systematiken Pflanzenkunde"
+                },
+                "_id_parent": 1
+              },
+              "_path": [
+                {
+                  "pool": {
+                    "_id": 1,
+                    "name": {
+                      "de-DE": "Alle Pools",
+                      "en-US": "All pools"
+                    }
+                  },
+                  "_basetype": "pool"
+                },
+                {
+                  "pool": {
+                    "_id": 6,
+                    "name": {
+                      "de-DE": "Systematiken Pflanzenkunde"
+                    },
+                    "_id_parent": 1
+                  },
+                  "_basetype": "pool"
+                }
+              ],
+              "_level": 2,
+              "_basetype": "pool"
+            },
+            "_version": 1
+          },
+          "_mask": "ordnungen_all_fields",
+          "_uuid": "cf61d8e9-425b-4f04-9d47-328100f4aa59",
+          "_format": "standard",
+          "_objecttype": "ordnungen",
+          "_standard": {
+            "1": {
+              "text": {
+                "de-DE": "Erysiphales",
+                "en-US": "Erysiphales"
+              },
+              "html": {
+                "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Erysiphales</span></span>",
+                "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Erysiphales</span></span>"
+              }
+            }
+          },
+          "_global_object_id": "4630232@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+          "_sort": {
+            "de-DE": "Erysiphales                                                     Erysiphales {88} ",
+            "en-US": "Erysiphales                                                     Erysiphales {88} "
+          }
+        },
+        "_uuid": "944c6777-24e9-4b00-a50d-ee9ee542900d",
+        "bestimmertrans": "J. Schneller",
+        "_system_object_id": 1408425,
+        "genustrans": "Phyllactinia",
+        "taxonnametrans": "Phyllactinia guttata",
+        "autor": {
+          "_objecttype": "authors",
+          "_mask": "author__all_fields",
+          "_system_object_id": 26901,
+          "_uuid": "b912c4a8-b5db-431a-827a-64d52ccc7a12",
+          "_format": "standard",
+          "_standard": {
+            "1": {
+              "text": {
+                "de-DE": "(Wallr.) Lév.",
+                "en-US": "(Wallr.) Lév."
+              },
+              "html": {
+                "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">(Wallr.) L&#xE9;v.</span></span>",
+                "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">(Wallr.) L&#xE9;v.</span></span>"
+              }
+            }
+          },
+          "_global_object_id": "26901@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+          "_sort": {
+            "de-DE": "(Wallr.) Lév.                                                  (Wallr.) Lév. {7278} ",
+            "en-US": "(Wallr.) Lév.                                                  (Wallr.) Lév. {7278} "
+          },
+          "authors": {
+            "_id": 7278,
+            "_version": 1
+          }
+        },
+        "_objecttype": "bestimmung",
+        "genus": {
+          "_objecttype": "genus",
+          "genus": {
+            "_id": 16361,
+            "_pool": {
+              "pool": {
+                "_id": 6,
+                "name": {
+                  "de-DE": "Systematiken Pflanzenkunde"
+                },
+                "_id_parent": 1
+              },
+              "_path": [
+                {
+                  "pool": {
+                    "_id": 1,
+                    "name": {
+                      "de-DE": "Alle Pools",
+                      "en-US": "All pools"
+                    }
+                  },
+                  "_basetype": "pool"
+                },
+                {
+                  "pool": {
+                    "_id": 6,
+                    "name": {
+                      "de-DE": "Systematiken Pflanzenkunde"
+                    },
+                    "_id_parent": 1
+                  },
+                  "_basetype": "pool"
+                }
+              ],
+              "_level": 2,
+              "_basetype": "pool"
+            },
+            "_version": 2
+          },
+          "_mask": "genus_all_fields",
+          "_system_object_id": 50636,
+          "_uuid": "d1861804-bf2a-4197-be11-ad75ac3cee3b",
+          "_format": "standard",
+          "_standard": {
+            "1": {
+              "text": {
+                "de-DE": "Phyllactinia",
+                "en-US": "Phyllactinia"
+              },
+              "html": {
+                "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Phyllactinia</span></span>",
+                "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Phyllactinia</span></span>"
+              }
+            }
+          },
+          "_global_object_id": "50636@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+          "_sort": {
+            "de-DE": "Phyllactinia                                                    Phyllactinia {16361} ",
+            "en-US": "Phyllactinia                                                    Phyllactinia {16361} "
+          }
+        },
+        "_pool": {
+          "pool": {
+            "_id": 10,
+            "name": {
+              "de-DE": "Fungarium",
+              "en-US": "Fungal Collection"
+            },
+            "_id_parent": 8
+          },
+          "_path": [
+            {
+              "pool": {
+                "_id": 1,
+                "name": {
+                  "de-DE": "Alle Pools",
+                  "en-US": "All pools"
+                }
+              },
+              "_basetype": "pool"
+            },
+            {
+              "pool": {
+                "_id": 8,
+                "name": {
+                  "de-DE": "Vereinigte Herbarien Z + ZT",
+                  "en-US": "United Herbaria Z + ZT"
+                },
+                "_id_parent": 1
+              },
+              "_basetype": "pool"
+            },
+            {
+              "pool": {
+                "_id": 10,
+                "name": {
+                  "de-DE": "Fungarium",
+                  "en-US": "Fungal Collection"
+                },
+                "_id_parent": 8
+              },
+              "_basetype": "pool"
+            }
+          ],
+          "_level": 3,
+          "_basetype": "pool"
+        },
+        "typus": false,
+        "_id": 295835,
+        "_version": 3,
+        "_global_object_id": "1408425@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+        "taxonname": {
+          "_objecttype": "taxonnamen",
+          "_mask": "taxonnamen__all_fields",
+          "_system_object_id": 122673,
+          "_uuid": "4b3f498f-c872-4097-bb17-9587fa53c5ac",
+          "_format": "standard",
+          "_standard": {
+            "1": {
+              "text": {
+                "de-DE": "Phyllactinia guttata",
+                "en-US": "Phyllactinia guttata"
+              },
+              "html": {
+                "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Phyllactinia guttata</span></span>",
+                "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Phyllactinia guttata</span></span>"
+              }
+            }
+          },
+          "_global_object_id": "122673@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+          "_sort": {
+            "de-DE": "Phyllactinia guttata                                            Phyllactinia guttata {23457} ",
+            "en-US": "Phyllactinia guttata                                            Phyllactinia guttata {23457} "
+          },
+          "taxonnamen": {
+            "_id": 23457,
+            "_pool": {
+              "pool": {
+                "_id": 6,
+                "name": {
+                  "de-DE": "Systematiken Pflanzenkunde"
+                },
+                "_id_parent": 1
+              },
+              "_path": [
+                {
+                  "pool": {
+                    "_id": 1,
+                    "name": {
+                      "de-DE": "Alle Pools",
+                      "en-US": "All pools"
+                    }
+                  },
+                  "_basetype": "pool"
+                },
+                {
+                  "pool": {
+                    "_id": 6,
+                    "name": {
+                      "de-DE": "Systematiken Pflanzenkunde"
+                    },
+                    "_id_parent": 1
+                  },
+                  "_basetype": "pool"
+                }
+              ],
+              "_level": 2,
+              "_basetype": "pool"
+            },
+            "_version": 1
+          }
+        }
+      }
+    ],
+    "_version": 141,
+    "source_reference": "scope--fung_praep_1-fungarium-migreferenz-0022657",
+    "_reverse_nested:aufsammlung:fungarium": [
+      {
+        "_id": 222112,
+        "habitattrans": "auf Blatt von Hasel",
+        "laengengrad_grad_minute_sekunden": "E 8° 39' 36.66''",
+        "laengengradch1903": "2692400",
+        "sammelort": {
+          "_mask": "gazetteer__all_fields",
+          "_format": "standard",
+          "_objecttype": "gazetteer",
+          "gazetteer": {
+            "_id": 317,
+            "_id_parent": 111,
+            "_version": 1
+          },
+          "_system_object_id": 2150,
+          "_has_children": false,
+          "_level": 3,
+          "_path": [
+            {
+              "gazetteer": {
+                "_id": 4,
+                "_id_parent": null,
+                "_version": 1
+              },
+              "_objecttype": "gazetteer",
+              "_mask": "gazetteer__all_fields",
+              "_format": "standard",
+              "_system_object_id": 1837,
+              "_uuid": "ee078676-91f8-421b-a8b0-631cbb100cc1",
+              "_has_children": true,
+              "_standard": {
+                "1": {
+                  "text": {
+                    "de-DE": "Europa (Kontinent)",
+                    "en-US": "Europe (Kontinent)"
+                  },
+                  "html": {
+                    "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-space\">Europa</span><span class=\"ez-format-round-parentheses\">Kontinent</span></span>",
+                    "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-space\">Europe</span><span class=\"ez-format-round-parentheses\">Kontinent</span></span>"
+                  }
+                }
+              },
+              "_global_object_id": "1837@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a"
+            },
+            {
+              "gazetteer": {
+                "_id": 111,
+                "_id_parent": 4,
+                "_version": 1
+              },
+              "_objecttype": "gazetteer",
+              "_mask": "gazetteer__all_fields",
+              "_format": "standard",
+              "_system_object_id": 1944,
+              "_uuid": "14d1fdb2-f2f3-41e3-9627-80c9a409c8ad",
+              "_has_children": true,
+              "_standard": {
+                "1": {
+                  "text": {
+                    "de-DE": "Schweiz (Land)",
+                    "en-US": "Switzerland (Land)"
+                  },
+                  "html": {
+                    "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-space\">Schweiz</span><span class=\"ez-format-round-parentheses\">Land</span></span>",
+                    "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-space\">Switzerland</span><span class=\"ez-format-round-parentheses\">Land</span></span>"
+                  }
+                }
+              },
+              "_global_object_id": "1944@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a"
+            },
+            {
+              "gazetteer": {
+                "_id": 317,
+                "_id_parent": 111,
+                "_version": 1
+              },
+              "_objecttype": "gazetteer",
+              "_mask": "gazetteer__all_fields",
+              "_format": "standard",
+              "_system_object_id": 2150,
+              "_uuid": "c28fe937-0fac-4dbe-824b-b9a92d4248c9",
+              "_has_children": false,
+              "_standard": {
+                "1": {
+                  "text": {
+                    "de-DE": "Zürich (Kanton/Provinz/Bundesland)",
+                    "en-US": "Zürich (Kanton/Provinz/Bundesland)"
+                  },
+                  "html": {
+                    "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-space\">Z&#xFC;rich</span><span class=\"ez-format-round-parentheses\">Kanton/Provinz/Bundesland</span></span>",
+                    "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-space\">Z&#xFC;rich</span><span class=\"ez-format-round-parentheses\">Kanton/Provinz/Bundesland</span></span>"
+                  }
+                }
+              },
+              "_global_object_id": "2150@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a"
+            }
+          ],
+          "_uuid": "c28fe937-0fac-4dbe-824b-b9a92d4248c9",
+          "_standard": {
+            "1": {
+              "text": {
+                "de-DE": "Zürich (Kanton/Provinz/Bundesland)",
+                "en-US": "Zürich (Kanton/Provinz/Bundesland)"
+              },
+              "html": {
+                "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-space\">Z&#xFC;rich</span><span class=\"ez-format-round-parentheses\">Kanton/Provinz/Bundesland</span></span>",
+                "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-space\">Z&#xFC;rich</span><span class=\"ez-format-round-parentheses\">Kanton/Provinz/Bundesland</span></span>"
+              }
+            }
+          },
+          "_global_object_id": "2150@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+          "_sort": {
+            "de-DE": "Zürich (Kanton/Provinz/Bundesland)                             Europa (Kontinent) {4} Schweiz (Land) {111} Zürich (Kanton/Provinz/Bundesland) {317} ",
+            "en-US": "Zürich (Kanton/Provinz/Bundesland)                             Europe (Kontinent) {4} Switzerland (Land) {111} Zürich (Kanton/Provinz/Bundesland) {317} "
+          }
+        },
+        "lokalitaettrans": "Meilen, Rappentobel",
+        "fehlerradius": 2,
+        "breitengraddezimal": "N 47.290916°",
+        "breitengradch1903": "1238500",
+        "sammeldatumtrans": "12 Oct 2010",
+        "einheitderhoehe": {
+          "_objecttype": "einheitenfuerhoehe",
+          "_mask": "einheitenfuerhoehe_all_fields",
+          "_system_object_id": 33361,
+          "einheitenfuerhoehe": {
+            "_id": 4,
+            "_version": 1
+          },
+          "_uuid": "e8de65cd-efa7-4fdc-bb96-202e4bf5eeda",
+          "_format": "standard",
+          "_standard": {
+            "1": {
+              "text": {
+                "de-DE": "m",
+                "en-US": "m"
+              },
+              "html": {
+                "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">m</span></span>",
+                "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">m</span></span>"
+              }
+            }
+          },
+          "_global_object_id": "33361@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+          "_sort": {
+            "de-DE": "m                                                               m {4} ",
+            "en-US": "m                                                               m {4} "
+          }
+        },
+        "hoehe": "740",
+        "laengengraddezimal": "E 8.660184°",
+        "breitengrad_grad_minute_sekunden": "N 47° 17' 27.29''",
+        "sammelorttrans": "SWITZERLAND/ZH/",
+        "laengengrad": "692400",
+        "_uuid": "d1b794fb-9f8f-4ea5-bb57-166b4125df7e",
+        "sammlertrans": "J. Schneller",
+        "_objecttype": "aufsammlung",
+        "breitengrad": "238500",
+        "_pool": {
+          "pool": {
+            "_id": 10,
+            "name": {
+              "de-DE": "Fungarium",
+              "en-US": "Fungal Collection"
+            },
+            "_id_parent": 8
+          },
+          "_path": [
+            {
+              "pool": {
+                "_id": 1,
+                "name": {
+                  "de-DE": "Alle Pools",
+                  "en-US": "All pools"
+                }
+              },
+              "_basetype": "pool"
+            },
+            {
+              "pool": {
+                "_id": 8,
+                "name": {
+                  "de-DE": "Vereinigte Herbarien Z + ZT",
+                  "en-US": "United Herbaria Z + ZT"
+                },
+                "_id_parent": 1
+              },
+              "_basetype": "pool"
+            },
+            {
+              "pool": {
+                "_id": 10,
+                "name": {
+                  "de-DE": "Fungarium",
+                  "en-US": "Fungal Collection"
+                },
+                "_id_parent": 8
+              },
+              "_basetype": "pool"
+            }
+          ],
+          "_level": 3,
+          "_basetype": "pool"
+        },
+        "_system_object_id": 1408675,
+        "_global_object_id": "1408675@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+        "_version": 3
+      }
+    ]
+  },
+  "_published_count": 0,
+  "_mask": "fungarium__public__unrestricted",
+  "_global_object_id": "1408175@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+  "_published": [],
+  "_uuid": "f673ec26-15f0-4730-99cf-c419d39a4b4d",
+  "_created": "2021-05-08T04:35:06Z",
+  "_standard": {
+    "eas": {
+      "1": [
+        {
+          "filesize": 507472,
+          "date_inserted": "2024-06-13T14:37:03Z",
+          "class_extension": "image.jpg",
+          "original_filename_basename": "ZT Myc 3549",
+          "class_version_status": [
+            "image.small.done",
+            "image.preview.done",
+            "image.original.done",
+            "image.full.done",
+            "image.huge.done"
+          ],
+          "date_uploaded": "2024-06-13T14:36:58Z",
+          "eas_parent_id": null,
+          "extension": "jpg",
+          "original_filepath": "ZT Myc 3549.JPG",
+          "technical_metadata": {
+            "file_sha224_checksum": "8f777c845feaf6e84c1f8c94be3106363cce004bf84911af8577b656",
+            "camera_scanner": "NIKON D7000",
+            "width": 3151,
+            "height": 1585,
+            "max_dimension": 3151,
+            "dpi": 300,
+            "format": "landscape",
+            "aspect_ratio": 1.9880126182965299,
+            "colordepth": 24,
+            "colorspace": "rgb"
+          },
+          "class": "image",
+          "original_filename": "ZT Myc 3549.JPG",
+          "class_version_extension": [
+            "image.small.jpg",
+            "image.preview.jpg",
+            "image.original.jpg",
+            "image.full.jpg",
+            "image.huge.jpg"
+          ],
+          "versions": {
+            "small": {
+              "class": "image",
+              "url": "https://www.nahima.ethz.ch/eas/partitions-inline/2/0/820000/820004/10f5c38289dd1dd18db1dba72be4dbf72c4b38b2/image/jpeg",
+              "width": 497,
+              "status": "done",
+              "has_more_jobs": false,
+              "height": 250,
+              "filesize": 18733,
+              "aspect_ratio": 1.9880000352859497,
+              "extension": "jpg",
+              "dpi": 300,
+              "download_url": "https://www.nahima.ethz.ch/eas/partitions/2/0/820000/820004/10f5c38289dd1dd18db1dba72be4dbf72c4b38b2/image/jpeg/ZT%20Myc%203549-small.jpg",
+              "_download_allowed": false
+            }
+          },
+          "_id": 820004,
+          "preferred": true,
+          "status": "done",
+          "pages_allowed": false
+        }
+      ]
+    },
+    "1": {
+      "text": {
+        "de-DE": "ZT Myc 3549"
+      },
+      "html": {
+        "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">ZT Myc 3549</span></span>"
+      }
+    },
+    "2": {
+      "text": {
+        "de-DE": "Phyllactinia guttata"
+      },
+      "html": {
+        "de-DE": "<span class=\"ez-format-comma\">Phyllactinia guttata</span>"
+      }
+    }
+  },
+  "_format": "long",
+  "_score": 2.0
+}

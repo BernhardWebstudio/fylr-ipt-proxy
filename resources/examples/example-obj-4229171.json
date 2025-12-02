@@ -1,0 +1,157 @@
+{
+    "_tags": [],
+    "_objecttype": "fungarium",
+    "fungarium": {
+        "_id": 38064,
+        "_pool": {
+            "pool": {
+                "_id": 10,
+                "name": {
+                    "de-DE": "Fungarium",
+                    "en-US": "Fungal Collection"
+                },
+                "_id_parent": 8
+            },
+            "_path": [
+                {
+                    "pool": {
+                        "_id": 1,
+                        "name": {
+                            "de-DE": "Alle Pools",
+                            "en-US": "All pools"
+                        }
+                    },
+                    "_basetype": "pool"
+                },
+                {
+                    "pool": {
+                        "_id": 8,
+                        "name": {
+                            "de-DE": "Vereinigte Herbarien Z + ZT",
+                            "en-US": "United Herbaria Z + ZT"
+                        },
+                        "_id_parent": 1
+                    },
+                    "_basetype": "pool"
+                },
+                {
+                    "pool": {
+                        "_id": 10,
+                        "name": {
+                            "de-DE": "Fungarium",
+                            "en-US": "Fungal Collection"
+                        },
+                        "_id_parent": 8
+                    },
+                    "_basetype": "pool"
+                }
+            ],
+            "_level": 3,
+            "_basetype": "pool"
+        },
+        "_version": 266
+    },
+    "_created": "2022-07-13T08:45:38Z",
+    "_mask": "fungarium__public__unrestricted",
+    "_system_object_id": 4229171,
+    "_collections": [
+        {
+            "_id": 74
+        },
+        {
+            "_id": 78
+        }
+    ],
+    "_uuid": "7168d802-ac45-40f1-b8d3-9688446c2a42",
+    "_standard": {
+        "1": {
+            "text": {
+                "de-DE": "Z Myc 0008423",
+                "en-US": "Z Myc 0008423"
+            },
+            "html": {
+                "de-DE": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Z Myc 0008423</span></span>",
+                "en-US": "<span class=\"ez-output-1\"><span class=\"ez-format-comma\">Z Myc 0008423</span></span>"
+            }
+        },
+        "2": {
+            "text": {
+                "de-DE": "Cintractia montagnei Tul. & C. Tul.) Magnus, Ustanciosporium montagnei (Tul. & C. Tul.) M. Piepenbr., Begerow & Oberw.",
+                "en-US": "Cintractia montagnei Tul. & C. Tul.) Magnus, Ustanciosporium montagnei (Tul. & C. Tul.) M. Piepenbr., Begerow & Oberw."
+            },
+            "html": {
+                "de-DE": "<span class=\"ez-format-comma\">Cintractia montagnei Tul. &amp; C. Tul.) Magnus</span><span class=\"ez-format-comma\">Ustanciosporium montagnei (Tul. &amp; C. Tul.) M. Piepenbr., Begerow &amp; Oberw.</span>",
+                "en-US": "<span class=\"ez-format-comma\">Cintractia montagnei Tul. &amp; C. Tul.) Magnus</span><span class=\"ez-format-comma\">Ustanciosporium montagnei (Tul. &amp; C. Tul.) M. Piepenbr., Begerow &amp; Oberw.</span>"
+            }
+        },
+        "eas": {
+            "1": [
+                {
+                    "filesize": 4869981,
+                    "date_inserted": "2023-01-23T18:07:10Z",
+                    "class_extension": "image.jpg",
+                    "original_filename_basename": "Z Myc 0008423",
+                    "class_version_status": [
+                        "image.small.done",
+                        "image.preview.done",
+                        "image.original.done",
+                        "image.full.done",
+                        "image.huge.done"
+                    ],
+                    "date_uploaded": "2022-07-18T11:41:25Z",
+                    "eas_parent_id": null,
+                    "extension": "jpg",
+                    "original_filepath": "Z Myc 0008423.JPG",
+                    "technical_metadata": {
+                        "orientation": 1,
+                        "file_sha224_checksum": "c0e0b39e3f1785714450fa0224ad9be63661087bf75e221e14d69f40",
+                        "camera_scanner": "NIKON D7000",
+                        "width": 3696,
+                        "height": 2448,
+                        "dpi": 300,
+                        "max_dimension": 3696,
+                        "format": "landscape",
+                        "aspect_ratio": 1.5098039215686274,
+                        "colordepth": 24,
+                        "colorspace": "rgb"
+                    },
+                    "class": "image",
+                    "original_filename": "Z Myc 0008423.JPG",
+                    "class_version_extension": [
+                        "image.small.jpg",
+                        "image.preview.jpg",
+                        "image.original.jpg",
+                        "image.full.jpg",
+                        "image.huge.jpg"
+                    ],
+                    "versions": {
+                        "small": {
+                            "class": "image",
+                            "url": "https://www.nahima.ethz.ch/eas/partitions-inline/2/0/490000/490201/3b8fbd70e283d86c7c6827227c2e2a4a5bdd104a/image/jpeg",
+                            "width": 377,
+                            "status": "done",
+                            "has_more_jobs": false,
+                            "height": 250,
+                            "filesize": 23514,
+                            "aspect_ratio": 1.5080000162124634,
+                            "extension": "jpg",
+                            "dpi": 300,
+                            "download_url": "https://www.nahima.ethz.ch/eas/partitions/2/0/490000/490201/3b8fbd70e283d86c7c6827227c2e2a4a5bdd104a/image/jpeg/Z%20Myc%200008423-small.jpg",
+                            "_download_allowed": false
+                        }
+                    },
+                    "_id": 490201,
+                    "preferred": true,
+                    "status": "done",
+                    "pages_allowed": false
+                }
+            ]
+        }
+    },
+    "_global_object_id": "4229171@9e515c7f-7a1b-4d14-b3a3-1af60c3ce46a",
+    "_last_modified": "2022-11-14T22:49:27Z",
+    "_format": "standard",
+    "_sort": [
+        4229171
+    ]
+}
