@@ -29,6 +29,8 @@ class SpecimenImportService
      * @param User|null $user The user triggering the import (optional)
      * @param bool $flush Whether to flush changes to the database (default: true)
      * @param bool $force Force re-mapping even if remote data hasn't changed (default: false)
+     *
+     * @return bool True if the specimen was imported/updated, false if no changes were made
      * @throws \RuntimeException If import fails
      */
     public function importByGlobalObjectId(
@@ -36,7 +38,7 @@ class SpecimenImportService
         ?User $user = null,
         bool $flush = true,
         bool $force = false
-    ): void {
+    ): bool {
         $this->logger->info('Starting import by global object ID', [
             'globalObjectId' => $globalObjectId,
             'userId' => $user?->getId(),
@@ -59,7 +61,16 @@ class SpecimenImportService
             }
 
             // Process the entity using the import processing service
-            $this->importProcessingService->processEntity($entityData, $mapping, $user);
+            $entity = $this->importProcessingService->processEntity($entityData, $mapping, $user, [], $force);
+
+            // check if entity was updated longer ago than the last few seconds
+            // i.e., not updated during this import call
+            if (
+                $entity->getLastUpdatedAt() !== null &&
+                $entity->getLastUpdatedAt() < (new \DateTimeImmutable())->modify('-10 seconds')
+            ) {
+                return false;
+            }
 
             // Flush changes to database if requested
             if ($flush) {
@@ -70,6 +81,8 @@ class SpecimenImportService
                 'globalObjectId' => $globalObjectId,
                 'type' => $type,
             ]);
+
+            return true;
         } catch (\Exception $e) {
             $this->logger->error('Failed to import specimen', [
                 'globalObjectId' => $globalObjectId,

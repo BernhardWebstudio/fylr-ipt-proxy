@@ -35,7 +35,6 @@ class RefreshAllImportedSpecimenCommand extends Command
         $this
             ->addOption('login', 'l', InputOption::VALUE_OPTIONAL, 'EasyDB login username')
             ->addOption('password', 'p', InputOption::VALUE_OPTIONAL, 'EasyDB login password')
-            ->addOption('batch-size', 'b', InputOption::VALUE_OPTIONAL, 'Number of specimens to process before flushing to database', 10)
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Run without making any changes to the database')
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Force re-mapping even if remote data has not changed (useful after fixing mapping code)')
         ;
@@ -46,7 +45,6 @@ class RefreshAllImportedSpecimenCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $login = $input->getOption('login') ?? getenv('EASYDB_LOGIN');
         $password = $input->getOption('password') ?? getenv('EASYDB_PASSWORD');
-        $batchSize = (int) ($input->getOption('batch-size') ?? 10);
         $dryRun = $input->getOption('dry-run');
         $force = $input->getOption('force');
 
@@ -98,22 +96,18 @@ class RefreshAllImportedSpecimenCommand extends Command
 
             try {
                 // Re-import the specimen using the service
-                $this->specimenImportService->importByGlobalObjectId(
+                $wasUpdated = $this->specimenImportService->importByGlobalObjectId(
                     $globalObjectId,
                     null, // no specific user
-                    false, // don't flush yet - we'll batch flush
+                    true, // don't flush yet - we'll batch flush
                     $force // force re-mapping even if remote hasn't changed
                 );
 
-                $successCount++;
-
-                // Batch flush to improve performance
-                if (!$dryRun && ($index + 1) % $batchSize === 0) {
-                    $this->entityManager->flush();
-                    $this->entityManager->clear(); // Clear to free memory
-                    // Re-fetch the remaining imports as we cleared the EntityManager
+                if ($wasUpdated) {
+                    $successCount++;
+                } else {
+                    $skippedCount++;
                 }
-
             } catch (\Exception $e) {
                 $errorCount++;
                 $errorMessage = sprintf(

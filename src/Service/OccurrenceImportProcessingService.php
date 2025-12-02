@@ -84,7 +84,7 @@ class OccurrenceImportProcessingService
         if ($force || $lastModified > $existingImport->getRemoteLastUpdatedAt()) {
             $occurrence = $existingImport->getOccurrence();
             $oldMedia = $occurrence?->getAssociatedMedia();
-            
+
             $mapping->mapOccurrence($entityData, $existingImport);
 
             if ($user) {
@@ -112,11 +112,11 @@ class OccurrenceImportProcessingService
                 'globalObjectId' => $globalObjectId,
                 'forced' => $force
             ]);
+
+            $existingImport->setLastUpdatedAt(new \DateTimeImmutable());
         } else {
             $this->logger->debug('Skipping entity - no changes', ['globalObjectId' => $globalObjectId]);
         }
-
-        $existingImport->setLastUpdatedAt(new \DateTimeImmutable());
 
         return $existingImport;
     }
@@ -136,10 +136,6 @@ class OccurrenceImportProcessingService
         array $criteria
     ): OccurrenceImport {
         $import = new OccurrenceImport();
-        $now = new \DateTimeImmutable();
-
-        $import->setFirstImportedAt($now);
-        $import->setLastUpdatedAt($now);
 
         // Set identifiers and metadata required for future lookups/updates
         $globalObjectId = $entityData['_global_object_id'];
@@ -155,6 +151,11 @@ class OccurrenceImportProcessingService
         $import->setObjectType($entityData['_objecttype'] ?? null);
 
         $mapping->mapOccurrence($entityData, $import);
+        
+        $now = new \DateTimeImmutable();
+
+        $import->setFirstImportedAt($now);
+        $import->setLastUpdatedAt($now);
 
         $this->entityManager->persist($import);
 
