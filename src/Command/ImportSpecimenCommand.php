@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Service\EasydbApiService;
+use App\Service\SpecimenImportService;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -11,9 +12,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Question\ChoiceQuestion;
-use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 
 #[AsCommand(
@@ -23,8 +21,7 @@ use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 class ImportSpecimenCommand extends Command
 {
     public function __construct(
-        private readonly RouterInterface $router,
-        private readonly HttpKernelInterface $httpKernel,
+        private readonly SpecimenImportService $specimenImportService,
         private readonly EasydbApiService $easydbApiService,
         #[AutowireIterator("app.easydb_dwc_mapping")] private readonly iterable $mappings,
     ) {
@@ -88,21 +85,7 @@ class ImportSpecimenCommand extends Command
         foreach ($globalObjectIds as $goi) {
             $io->section(sprintf('Importing: %s', $goi));
             try {
-                $path = $this->router->generate('app_import_management_one_goi', [
-                    'globalObjectId' => $goi,
-                ]);
-
-                $request = Request::create($path, 'POST');
-                $response = $this->httpKernel->handle($request, HttpKernelInterface::SUB_REQUEST);
-
-                $statusCode = $response->getStatusCode();
-                if ($statusCode >= 300) {
-                    $bodyExcerpt = substr($response->getContent(), 0, 500);
-                    $io->error(sprintf('Failed importing %s. Status %d. Response: %s', $goi, $statusCode, $bodyExcerpt));
-                    $io->writeln(sprintf('Successful imports before failure: %d', $successCount));
-                    return Command::FAILURE;
-                }
-
+                $this->specimenImportService->importByGlobalObjectId($goi);
                 $successCount++;
                 $io->success(sprintf('Successfully imported %s', $goi));
             } catch (\Throwable $e) {

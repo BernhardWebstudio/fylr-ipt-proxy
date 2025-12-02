@@ -11,6 +11,7 @@ use App\Service\EasydbApiService;
 use App\Service\DataExportService;
 use App\Service\JobStatusService;
 use App\Service\OccurrenceImportProcessingService;
+use App\Service\SpecimenImportService;
 use App\Service\TableConfigurationService;
 use App\Entity\DarwinCore\Occurrence;
 use App\Form\ImportSelectionType;
@@ -199,11 +200,9 @@ final class ImportExportManagementController extends AbstractController
     public function importWebhook(
         Request $request,
         LoggerInterface $logger,
-        EntityManagerInterface $entityManager,
         EasydbApiService $easydbApiService,
-        OccurrenceImportProcessingService $importProcessingService,
-        TranslatorInterface $translator,
-        #[AutowireIterator("app.easydb_dwc_mapping")] iterable $mappings
+        SpecimenImportService $specimenImportService,
+        TranslatorInterface $translator
     ): Response {
         try {
             $content = $request->getContent();
@@ -238,30 +237,15 @@ final class ImportExportManagementController extends AbstractController
                 }
 
                 try {
-                    // Forward to the existing importOneByUUID method
-                    $response = $this->importOneByUUID(
-                        $request,
-                        $type,
-                        $uuid,
-                        $systemObjectId,
-                        $entityManager,
-                        $easydbApiService,
-                        $importProcessingService,
-                        $logger,
-                        $translator,
-                        $mappings
-                    );
+                    // Use the specimen import service directly
+                    $specimenImportService->importByUuid($type, $uuid, $systemObjectId);
 
-                    if ($response->getStatusCode() === 200) {
-                        $successCount++;
-                        $logger->info('Successfully imported object from webhook', [
-                            'type' => $type,
-                            'uuid' => $uuid,
-                            'systemObjectId' => $systemObjectId,
-                        ]);
-                    } else {
-                        $errors[] = "Failed to import $type/$uuid: " . $response->getContent();
-                    }
+                    $successCount++;
+                    $logger->info('Successfully imported object from webhook', [
+                        'type' => $type,
+                        'uuid' => $uuid,
+                        'systemObjectId' => $systemObjectId,
+                    ]);
                 } catch (\Exception $e) {
                     $logger->error('Error processing webhook object', [
                         'type' => $type,
@@ -304,12 +288,10 @@ final class ImportExportManagementController extends AbstractController
     public function importOneByGlobalObjectID(
         Request $request,
         string $globalObjectId,
-        EntityManagerInterface $entityManager,
         EasydbApiService $easydbApiService,
-        OccurrenceImportProcessingService $importProcessingService,
+        SpecimenImportService $specimenImportService,
         LoggerInterface $logger,
-        TranslatorInterface $translator,
-        #[AutowireIterator("app.easydb_dwc_mapping")] iterable $mappings
+        TranslatorInterface $translator
     ): Response {
 
         // Ensure EasyDB credentials are available: try HTTP session first,
@@ -325,111 +307,11 @@ final class ImportExportManagementController extends AbstractController
             }
         }
 
-        $entityData = $easydbApiService->loadEntityByGlobalObjectID($globalObjectId);
-        return $this->importOne(
-            $request,
-            $entityData['_objecttype'] ?? null,
-            $globalObjectId,
-            $entityManager,
-            $easydbApiService,
-            $importProcessingService,
-            $logger,
-            $translator,
-            $mappings
-        );
-    }
-
-
-    #[Route('/import/{type}/{uuid}/{systemObjectId}', name: 'app_import_management_one_uuid', methods: ['POST'])]
-    public function importOneByUUID(
-        Request $request,
-        string $type,
-        string $uuid,
-        int $systemObjectId,
-        EntityManagerInterface $entityManager,
-        EasydbApiService $easydbApiService,
-        OccurrenceImportProcessingService $importProcessingService,
-        LoggerInterface $logger,
-        TranslatorInterface $translator,
-        #[AutowireIterator("app.easydb_dwc_mapping")] iterable $mappings
-    ): Response {
-        // Implementation for importing a single object by its UUID and systemObjectId.
-        // Useful as Webhook endpoint.
-
-        // Ensure EasyDB credentials are available: try HTTP session first,
-        // then fall back to environment variables (for webhook/no-user contexts).
-        if (!$easydbApiService->hasValidSession()) {
-            // Prefer login/password from env to create a fresh authenticated session
-            $envLogin = $_ENV['EASYDB_LOGIN'] ?? getenv('EASYDB_LOGIN') ?: null;
-            $envPassword = $_ENV['EASYDB_PASSWORD'] ?? getenv('EASYDB_PASSWORD') ?: null;
-
-            if (!$envLogin || !$envPassword || !$easydbApiService->initializeFromLoginPassword($envLogin, $envPassword)) {
-                $logger->error('No EasyDB login/password available for webhook import or authentication failed');
-                return new Response('Missing EasyDB credentials (login/password).', 401);
-            }
-        }
-
-        $entityData = $easydbApiService->loadEntityByUUIDAndSystemObjectID($uuid, $systemObjectId);
-
-        $globalObjectId = $entityData['_global_object_id'] ?? null;
-        if (!$globalObjectId) {
-            $logger->error('Entity without global object ID, skipping', ['entityData' => $entityData]);
-            return new Response('Entity must have a global object ID', 400);
-        }
-
-        return $this->importOne(
-            $request,
-            $type,
-            $globalObjectId,
-            $entityManager,
-            $easydbApiService,
-            $importProcessingService,
-            $logger,
-            $translator,
-            $mappings
-        );
-    }
-
-
-    #[Route('/import/{type}/{globalObjectId}', name: 'app_import_management_one', methods: ['POST'])]
-    #[IsGranted('ROLE_USER')]
-    public function importOne(
-        Request $request,
-        string $type,
-        string $globalObjectId,
-        EntityManagerInterface $entityManager,
-        EasydbApiService $easydbApiService,
-        OccurrenceImportProcessingService $importProcessingService,
-        LoggerInterface $logger,
-        TranslatorInterface $translator,
-        #[AutowireIterator("app.easydb_dwc_mapping")] iterable $mappings
-    ): Response {
-        // Implementation for importing a single object by its global ID.
-        // Useful as Webhook endpoint.
         try {
-            $entityData = $easydbApiService->loadEntityByGlobalObjectID($globalObjectId);
-            $type = $type ?? $entityData['_objecttype'] ?? null;
+            $user = $this->getUser();
+            $specimenImportService->importByGlobalObjectId($globalObjectId, $user);
 
-            $mapping = null;
-            foreach ($mappings as $map) {
-                if (in_array($type, $map->supportsPools())) {
-                    $mapping = $map;
-                    break;
-                }
-            }
-
-            if (!$mapping) {
-                $logger->error('No mapping found for type', ['type' => $type, 'globalObjectId' => $globalObjectId]);
-                return new Response('No mapping found for type: ' . $type, 400);
-            }
-
-            // Process the entity using the service
-            $importProcessingService->processEntity($entityData, $mapping);
-
-            // Flush changes to database
-            $entityManager->flush();
-
-            $logger->info('Successfully imported single entity', ['globalObjectId' => $globalObjectId, 'type' => $type]);
+            $logger->info('Successfully imported single entity', ['globalObjectId' => $globalObjectId]);
             $this->addFlash('success', $translator->trans('flash.import_successful', ['%globalObjectId%' => $globalObjectId]));
 
             // Preserve the current view state by extracting query params from referer
@@ -447,7 +329,6 @@ final class ImportExportManagementController extends AbstractController
         } catch (\Exception $e) {
             $logger->error('Failed to import single entity', [
                 'globalObjectId' => $globalObjectId,
-                'type' => $type ?? 'unknown',
                 'error' => $e->getMessage()
             ]);
             $this->addFlash('error', 'Import of Specimen with ID ' . $globalObjectId . ' failed: ' . $e->getMessage());
@@ -464,6 +345,56 @@ final class ImportExportManagementController extends AbstractController
 
             // Redirect back to import page with preserved query params
             return $this->redirectToRoute('app_import_management', $queryParams);
+        }
+    }
+
+
+    #[Route('/import/{type}/{uuid}/{systemObjectId}', name: 'app_import_management_one_uuid', methods: ['POST'])]
+    public function importOneByUUID(
+        Request $request,
+        string $type,
+        string $uuid,
+        int $systemObjectId,
+        EasydbApiService $easydbApiService,
+        SpecimenImportService $specimenImportService,
+        LoggerInterface $logger,
+        TranslatorInterface $translator
+    ): Response {
+        // Implementation for importing a single object by its UUID and systemObjectId.
+        // Useful as Webhook endpoint.
+
+        // Ensure EasyDB credentials are available: try HTTP session first,
+        // then fall back to environment variables (for webhook/no-user contexts).
+        if (!$easydbApiService->hasValidSession()) {
+            // Prefer login/password from env to create a fresh authenticated session
+            $envLogin = $_ENV['EASYDB_LOGIN'] ?? getenv('EASYDB_LOGIN') ?: null;
+            $envPassword = $_ENV['EASYDB_PASSWORD'] ?? getenv('EASYDB_PASSWORD') ?: null;
+
+            if (!$envLogin || !$envPassword || !$easydbApiService->initializeFromLoginPassword($envLogin, $envPassword)) {
+                $logger->error('No EasyDB login/password available for webhook import or authentication failed');
+                return new Response('Missing EasyDB credentials (login/password).', 401);
+            }
+        }
+
+        try {
+            $user = $this->getUser();
+            $specimenImportService->importByUuid($type, $uuid, $systemObjectId, $user);
+
+            $logger->info('Successfully imported object from webhook', [
+                'type' => $type,
+                'uuid' => $uuid,
+                'systemObjectId' => $systemObjectId,
+            ]);
+
+            return new Response('Import successful', 200);
+        } catch (\Exception $e) {
+            $logger->error('Error processing webhook object', [
+                'type' => $type,
+                'uuid' => $uuid,
+                'systemObjectId' => $systemObjectId,
+                'error' => $e->getMessage(),
+            ]);
+            return new Response('Import failed: ' . $e->getMessage(), 500);
         }
     }
 
