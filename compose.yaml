@@ -82,19 +82,14 @@ services:
     volumes:
       # Database data
       - ./docker/db/data:/var/lib/postgresql/data:rw
-      # Initialization scripts (run only on first start)
-      - ./docker/db/init:/docker-entrypoint-initdb.d:ro
-      # SSL certificates (auto-generated on first start if missing)
+      # SSL certificates (auto-generated if missing)
       - ./docker/db/ssl:/var/lib/postgresql/ssl:rw
       # Custom PostgreSQL configuration
       - ./docker/db/conf/custom-postgresql.conf:/etc/postgresql/postgresql.conf:ro
       - ./docker/db/conf/pg_hba.conf:/var/lib/postgresql/pg_hba.conf:ro
-    command:
-      - "postgres"
-      - "-c"
-      - "config_file=/etc/postgresql/postgresql.conf"
-      - "-c"
-      - "hba_file=/var/lib/postgresql/pg_hba.conf"
+      # Custom startup script (runs on every start)
+      - ./docker/db/docker-entrypoint.sh:/usr/local/bin/custom-entrypoint.sh:ro
+    entrypoint: /usr/local/bin/custom-entrypoint.sh
 ###< doctrine/doctrine-bundle ###
 
 volumes:

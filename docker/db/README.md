@@ -9,6 +9,7 @@ The PostgreSQL container is configured to:
 - Require SSL encryption for all external connections
 - Provide a read-only user account with SELECT privileges only
 - Use certificate-based SSL authentication
+- **Automatically initialize and update all components** (SSL certs, config, users) on every start
 
 ## Quick Setup
 
@@ -33,33 +34,39 @@ By default, PostgreSQL is exposed on port 5432. To use a different port:
 POSTGRES_PORT=15432
 ```
 
-### 3. Start the Database
+### 3. Start (or Restart) the Database
 
 ```bash
 docker compose up -d database
 ```
 
-On first start, the initialization scripts will automatically:
+On every start, the startup script will automatically:
 - Generate SSL certificates (if they don't exist)
-- Create the read-only user with the configured credentials
+- Configure SSL and authentication settings
+- Create the read-only user (if it doesn't exist)
+- Update the read-only user password (if it already exists)
+- Apply all permissions
 
-### SSL Certificates
+**This works with existing databases** - no data will be lost.
 
-SSL certificates are **automatically generated** on first start if they don't exist in `docker/db/ssl/`. The generated certificates include:
+## How It Works
+
+Unlike typical PostgreSQL Docker images that only run init scripts on first start, this setup uses a custom entrypoint that runs on **every container start**. This allows:
+
+- ✅ Existing databases to be enhanced with SSL and read-only user automatically
+- ✅ Password updates without manual SQL commands
+- ✅ Idempotent setup - safe to restart containers
+- ✅ Configuration changes to take effect on restart
+
+#### SSL Certificates
+
+SSL certificates are **automatically generated** on first container start if they don't exist in `docker/db/ssl/`. The generated certificates include:
 - `ca.crt` - CA certificate (distribute to clients for verification)
 - `ca.key` - CA private key (kept on server)
 - `server.crt` - Server certificate
 - `server.key` - Server private key
 
-If you need to use your own certificates, place them in `docker/db/ssl/` before starting the database:
-```bash
-# Copy your certificates
-cp your-ca.crt docker/db/ssl/ca.crt
-cp your-server.crt docker/db/ssl/server.crt
-cp your-server.key docker/db/ssl/server.key
-chmod 600 docker/db/ssl/server.key docker/db/ssl/ca.key
-chmod 644 docker/db/ssl/server.crt docker/db/ssl/ca.crt
-```
+Subsequent container starts will detect and reuse the existing certificates.
 
 ## Connecting from External Clients
 
@@ -174,11 +181,12 @@ chmod 600 docker/db/ssl/server.key
 
 ## Files in this Directory
 
+- `docker-entrypoint.sh` - Custom startup script (runs on every container start)
 - `conf/custom-postgresql.conf` - SSL and connection settings
 - `conf/pg_hba.conf` - Host-based authentication rules
-- `init/01-create-readonly-user.sh` - Automatic read-only user creation
-- `ssl/` - SSL certificates (generated manually)
-- `data/` - PostgreSQL data directory (created automatically)
+- `ssl/` - SSL certificates (auto-generated if missing)
+- `data/` - PostgreSQL data directory
+- `init/` - (Deprecated) Legacy init scripts - no longer used
 
 ## Resetting the Database
 
@@ -190,4 +198,13 @@ rm -rf docker/db/data/*
 docker compose up -d database
 ```
 
-The read-only user will be recreated automatically from the init script.
+The read-only user and SSL certificates will be recreated automatically.
+
+## Upgrading from Manual SSL Setup
+
+If you previously generated SSL certificates manually, the new setup will:
+1. Detect your existing certificates in `docker/db/ssl/`
+2. Reuse them automatically (no regeneration)
+3. Continue to work as before
+
+No migration needed - just restart the container with the new setup.
