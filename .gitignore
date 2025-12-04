@@ -21,6 +21,10 @@
 
 resources/queries
 resources/examples/*.xlsx
-docker/db
+docker/db/data
+docker/db/ssl/*.csr
+docker/db/ssl/*.key
+docker/db/ssl/*.srl
+docker/db/ssl/*.crt
 docker/supervisor
 docker/var

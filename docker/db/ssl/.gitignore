@@ -1,0 +1,8 @@
+# SSL certificates are generated manually
+# See README.md for instructions
+
+*.crt
+*.key
+*.csr
+*.srl
+!.gitkeep

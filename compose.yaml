@@ -66,15 +66,35 @@ services:
       # You should definitely change the password in production
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!EX2sW3HREKmm6aHU!}
       POSTGRES_USER: ${POSTGRES_USER:-app}
+      # Read-only user credentials
+      POSTGRES_READONLY_USER: ${POSTGRES_READONLY_USER:-readonly}
+      POSTGRES_READONLY_PASSWORD: ${POSTGRES_READONLY_PASSWORD:-}
     healthcheck:
       test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB:-app}", "-U", "${POSTGRES_USER:-app}"]
       timeout: 5s
       retries: 5
       start_period: 60s
+    ports:
+      # Expose PostgreSQL port for external read-only access
+      - target: 5432
+        published: ${POSTGRES_PORT:-5432}
+        protocol: tcp
     volumes:
-      # - database_data:/var/lib/postgresql/data:rw
-      # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
+      # Database data
       - ./docker/db/data:/var/lib/postgresql/data:rw
+      # Initialization scripts (run only on first start)
+      - ./docker/db/init:/docker-entrypoint-initdb.d:ro
+      # SSL certificates (auto-generated on first start if missing)
+      - ./docker/db/ssl:/var/lib/postgresql/ssl:rw
+      # Custom PostgreSQL configuration
+      - ./docker/db/conf/custom-postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      - ./docker/db/conf/pg_hba.conf:/var/lib/postgresql/pg_hba.conf:ro
+    command:
+      - "postgres"
+      - "-c"
+      - "config_file=/etc/postgresql/postgresql.conf"
+      - "-c"
+      - "hba_file=/var/lib/postgresql/pg_hba.conf"
 ###< doctrine/doctrine-bundle ###
 
 volumes:
