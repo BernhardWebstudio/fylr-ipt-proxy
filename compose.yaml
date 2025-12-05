@@ -9,7 +9,7 @@ services:
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
       MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
       # Run "composer require symfony/orm-pack" to install and configure Doctrine ORM
-      DATABASE_URL: postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-!EX2sW3HREKmm6aHU!}@database:5432/${POSTGRES_DB:-app}?serverVersion=${POSTGRES_VERSION:-15}&charset=${POSTGRES_CHARSET:-utf8}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-!EX2sW3HREKmm6aHU!}@database:5432/${POSTGRES_DB:-app}?serverVersion=${POSTGRES_VERSION:-16}&charset=${POSTGRES_CHARSET:-utf8}
       # Run "composer require symfony/mercure-bundle" to install and configure the Mercure integration
       MERCURE_URL: ${CADDY_MERCURE_URL:-http://php/.well-known/mercure}
       MERCURE_PUBLIC_URL: ${CADDY_MERCURE_PUBLIC_URL:-https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}/.well-known/mercure}
@@ -43,7 +43,7 @@ services:
     command: ["php", "bin/console", "messenger:consume", "async", "--limit=100", "--memory-limit=128M", "--time-limit=3600"]
     environment:
       # Run "composer require symfony/orm-pack" to install and configure Doctrine ORM
-      DATABASE_URL: postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-!EX2sW3HREKmm6aHU!}@database:5432/${POSTGRES_DB:-app}?serverVersion=${POSTGRES_VERSION:-15}&charset=${POSTGRES_CHARSET:-utf8}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-!EX2sW3HREKmm6aHU!}@database:5432/${POSTGRES_DB:-app}?serverVersion=${POSTGRES_VERSION:-16}&charset=${POSTGRES_CHARSET:-utf8}
       # The two next lines can be removed after initial installation
       SYMFONY_VERSION: ${SYMFONY_VERSION:-}
       STABILITY: ${STABILITY:-stable}
@@ -86,7 +86,7 @@ services:
       # SSL certificates (auto-generated if missing)
       - ./docker/db/ssl:/var/lib/postgresql/ssl:rw
       # Custom PostgreSQL configuration
-      - ./docker/db/conf/custom-postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      - ./docker/db/conf/custom-postgresql.conf:/etc/postgresql/postgresql.conf.d/custom.conf:ro
       - ./docker/db/conf/pg_hba.conf:/var/lib/postgresql/pg_hba.conf:ro
       # Init scripts for database setup
       - ./docker/db/init-scripts:/docker-entrypoint-initdb.d:ro
