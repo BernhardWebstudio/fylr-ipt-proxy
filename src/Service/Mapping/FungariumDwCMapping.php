@@ -12,6 +12,16 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class FungariumDwCMapping implements EasydbDwCMappingInterface
 {
+    private const ETHZ_INSTITUTION_CODE = 'ETHZ';
+    private const ETHZ_INSTITUTION_ID = 'adee7883-8290-4050-b643-8e2816f92e9a';
+    private const ETHZ_COLLECTION_CODE = 'ZT';
+    private const ETHZ_COLLECTION_ID = 'bdb3660d-2a20-4bad-8993-af16c5fbf502';
+
+    private const UZH_INSTITUTION_CODE = 'UZH:Z';
+    private const UZH_INSTITUTION_ID = '5b487a79-76ef-4615-93d9-f4ea25a40c33';
+    private const UZH_COLLECTION_CODE = 'Z';
+    private const UZH_COLLECTION_ID = '322ce107-3156-4420-8a2b-7f17efeaa472';
+
     public function __construct(private EntityManagerInterface $entityManager) {}
     public function mapOccurrence(array $source, OccurrenceImport $target): void
     {
@@ -357,17 +367,34 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
 
     private function mapInstitutionalInfo(array $source, Occurrence $occurrence): void
     {
-        // Set institution information
-        $occurrence->setInstitutionCode("ETHZ");
+        $barcode = $source["fungarium"]["zugangsnummer"] ?? null;
 
-        // Set collection information
-        $occurrence->setCollectionCode("ETHZ-ZT");
+        $institutionCode = self::ETHZ_INSTITUTION_CODE;
+        $institutionId = self::ETHZ_INSTITUTION_ID;
+        $collectionCode = self::ETHZ_COLLECTION_CODE;
+        $collectionId = self::ETHZ_COLLECTION_ID;
 
-        // same on the organism level
+        if ($barcode) {
+            $normalizedBarcode = strtoupper(trim($barcode));
+            if (str_starts_with($normalizedBarcode, 'Z MYC')) {
+                $institutionCode = self::UZH_INSTITUTION_CODE;
+                $institutionId = self::UZH_INSTITUTION_ID;
+                $collectionCode = self::UZH_COLLECTION_CODE;
+                $collectionId = self::UZH_COLLECTION_ID;
+            }
+        }
+
+        $occurrence->setInstitutionCode($institutionCode);
+        $occurrence->setInstitutionID($institutionId);
+        $occurrence->setCollectionCode($collectionCode);
+        $occurrence->setCollectionID($collectionId);
+
         $organism = $occurrence->getOrganism();
         if ($organism) {
-            $organism->setInstitutionCode("ETHZ");
-            $organism->setCollectionCode("ETHZ-ZT");
+            $organism->setInstitutionCode($institutionCode);
+            $organism->setInstitutionID($institutionId);
+            $organism->setCollectionCode($collectionCode);
+            $organism->setCollectionID($collectionId);
         }
     }
 
