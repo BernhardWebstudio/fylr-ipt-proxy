@@ -17,6 +17,8 @@ services:
       # The two next lines can be removed after initial installation
       SYMFONY_VERSION: ${SYMFONY_VERSION:-}
       STABILITY: ${STABILITY:-stable}
+      MYSQL_MIRROR_URL: ${MYSQL_MIRROR_URL:-}
+      MYSQL_MIRROR_SERVER_VERSION: ${MYSQL_MIRROR_SERVER_VERSION:-8.0}
     volumes:
       - caddy_data:/data
       - caddy_config:/config
@@ -47,10 +49,29 @@ services:
       # The two next lines can be removed after initial installation
       SYMFONY_VERSION: ${SYMFONY_VERSION:-}
       STABILITY: ${STABILITY:-stable}
+      MYSQL_MIRROR_URL: ${MYSQL_MIRROR_URL:-}
+      MYSQL_MIRROR_SERVER_VERSION: ${MYSQL_MIRROR_SERVER_VERSION:-8.0}
     depends_on:
       - database
     healthcheck:
       disable: true
+
+  mysql_mirror_cron:
+    env_file:
+      - .env.local
+    image: ${IMAGES_PREFIX:-}app-php
+    restart: unless-stopped
+    command: ["/bin/sh", "-c", "crontab /etc/cron.d/mysql-mirror && touch /app/var/log/mysql-mirror.log && cron -f"]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-!EX2sW3HREKmm6aHU!}@database:5432/${POSTGRES_DB:-app}?serverVersion=${POSTGRES_VERSION:-16}&charset=${POSTGRES_CHARSET:-utf8}
+      MYSQL_MIRROR_URL: ${MYSQL_MIRROR_URL:-}
+      MYSQL_MIRROR_SERVER_VERSION: ${MYSQL_MIRROR_SERVER_VERSION:-8.0}
+    volumes:
+      - ./docker/cron/mysql-mirror:/etc/cron.d/mysql-mirror:ro
+      - ./var:/app/var
+    depends_on:
+      - database
+      - php
 
 # Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
 ###> symfony/mercure-bundle ###

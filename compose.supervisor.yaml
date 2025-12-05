@@ -18,6 +18,8 @@ services:
       MERCURE_URL: ${CADDY_MERCURE_URL:-http://app/.well-known/mercure}
       MERCURE_PUBLIC_URL: ${CADDY_MERCURE_PUBLIC_URL:-https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}/.well-known/mercure}
       MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
+      MYSQL_MIRROR_URL: ${MYSQL_MIRROR_URL:-}
+      MYSQL_MIRROR_SERVER_VERSION: ${MYSQL_MIRROR_SERVER_VERSION:-8.0}
     volumes:
       - caddy_data:/data
       - caddy_config:/config

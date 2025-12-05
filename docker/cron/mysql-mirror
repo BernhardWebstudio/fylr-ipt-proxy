@@ -1,0 +1,4 @@
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+*/30 * * * * root cd /app && php bin/console app:mirror:mysql --truncate-first --chunk-size=500 >> /app/var/log/mysql-mirror.log 2>&1
