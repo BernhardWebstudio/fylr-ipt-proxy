@@ -602,8 +602,8 @@ final class ImportExportManagementController extends AbstractController
             return $this->redirectToRoute('app_import_management');
         }
 
-        $repository = $entityManager->getRepository(Occurrence::class);
-        $data = $repository->findBy(['type' => $type]);
+        $repository = $entityManager->getRepository(OccurrenceImport::class);
+        $data = $repository->findBy(['objectType' => $type]);
         if (!$data) {
             $this->addFlash('error', 'No data found for type: ' . $type);
             return $this->redirectToRoute('app_import_management');
