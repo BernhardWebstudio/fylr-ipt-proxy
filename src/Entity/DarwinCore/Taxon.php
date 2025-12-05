@@ -20,13 +20,16 @@ class Taxon
     #[ORM\Column(name: 'taxonID', type: 'string', unique: true)]
     private string $taxonID;
 
-    #[ORM\OneToMany(mappedBy: 'taxon', targetEntity: Occurrence::class, cascade: ['persist'])]
+    /**
+     * Reverse relationship from Occurrence
+     */
+    #[ORM\OneToMany(mappedBy: 'occurrence', targetEntity: Occurrence::class, cascade: ['persist'])]
     private Collection $occurrences;
 
-    #[ORM\OneToMany(mappedBy: 'taxon', targetEntity: Identification::class, cascade: ['persist'])]
-    private Collection $identifications;
-
-    #[ORM\OneToMany(mappedBy: 'taxon', targetEntity: MeasurementOrFact::class, cascade: ['persist'])]
+    /**
+     * Reverse relationship from MeasurementOrFact
+     */
+    #[ORM\OneToMany(mappedBy: 'measurementOrFact', targetEntity: MeasurementOrFact::class, cascade: ['persist'])]
     private Collection $measurementOrFacts;
 
     #[ORM\Column(name: 'scientificNameID', type: 'string', nullable: true)]
@@ -182,7 +185,6 @@ class Taxon
     public function __construct()
     {
         $this->occurrences = new ArrayCollection();
-        $this->identifications = new ArrayCollection();
         $this->measurementOrFacts = new ArrayCollection();
     }
 
@@ -771,28 +773,6 @@ class Taxon
     public function removeOccurrence(Occurrence $occurrence): static
     {
         $this->occurrences->removeElement($occurrence);
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Identification>
-     */
-    public function getIdentifications(): Collection
-    {
-        return $this->identifications;
-    }
-
-    public function addIdentification(Identification $identification): static
-    {
-        if (!$this->identifications->contains($identification)) {
-            $this->identifications->add($identification);
-        }
-        return $this;
-    }
-
-    public function removeIdentification(Identification $identification): static
-    {
-        $this->identifications->removeElement($identification);
         return $this;
     }
 

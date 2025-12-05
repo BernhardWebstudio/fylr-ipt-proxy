@@ -20,16 +20,21 @@ class ResourceRelationship
     #[ORM\Column(name: 'resourceRelationshipID', type: 'string', unique: true)]
     private string $resourceRelationshipID;
 
-    #[ORM\ManyToOne(targetEntity: Occurrence::class)]
-    #[ORM\JoinColumn(name: 'resourceID', referencedColumnName: 'id', nullable: true)]
-    private ?Occurrence $resource = null;
+    /**
+     * Reference to Occurrence
+     */
+    #[ORM\ManyToOne(targetEntity: Occurrence::class, inversedBy: 'resourceRelationships', cascade: ['persist'])]
+    #[ORM\JoinColumn(name: 'occurrenceID', referencedColumnName: 'id', nullable: true)]
+    private ?Occurrence $occurrence = null;
 
-    #[ORM\ManyToOne(targetEntity: Occurrence::class)]
-    #[ORM\JoinColumn(name: 'relatedResourceID', referencedColumnName: 'id', nullable: true)]
-    private ?Occurrence $relatedResource = null;
+    #[ORM\Column(name: 'resourceID', type: 'string', nullable: true)]
+    private ?string $resourceID = null;
 
     #[ORM\Column(name: 'relationshipOfResourceID', type: 'string', nullable: true)]
     private ?string $relationshipOfResourceID = null;
+
+    #[ORM\Column(name: 'relatedResourceID', type: 'string', nullable: true)]
+    private ?string $relatedResourceID = null;
 
     #[ORM\Column(name: 'relationshipOfResource', type: 'string', nullable: true)]
     private ?string $relationshipOfResource = null;
@@ -92,6 +97,17 @@ class ResourceRelationship
         return $this;
     }
 
+    public function getResourceID(): ?string
+    {
+        return $this->resourceID;
+    }
+
+    public function setResourceID(?string $resourceID): static
+    {
+        $this->resourceID = $resourceID;
+        return $this;
+    }
+
     public function getRelationshipOfResourceID(): ?string
     {
         return $this->relationshipOfResourceID;
@@ -100,6 +116,17 @@ class ResourceRelationship
     public function setRelationshipOfResourceID(?string $relationshipOfResourceID): static
     {
         $this->relationshipOfResourceID = $relationshipOfResourceID;
+        return $this;
+    }
+
+    public function getRelatedResourceID(): ?string
+    {
+        return $this->relatedResourceID;
+    }
+
+    public function setRelatedResourceID(?string $relatedResourceID): static
+    {
+        $this->relatedResourceID = $relatedResourceID;
         return $this;
     }
 
@@ -268,25 +295,14 @@ class ResourceRelationship
         return $this;
     }
 
-    public function getResource(): ?Occurrence
+    public function getOccurrence(): ?Occurrence
     {
-        return $this->resource;
+        return $this->occurrence;
     }
 
-    public function setResource(?Occurrence $resource): static
+    public function setOccurrence(?Occurrence $occurrence): static
     {
-        $this->resource = $resource;
-        return $this;
-    }
-
-    public function getRelatedResource(): ?Occurrence
-    {
-        return $this->relatedResource;
-    }
-
-    public function setRelatedResource(?Occurrence $relatedResource): static
-    {
-        $this->relatedResource = $relatedResource;
+        $this->occurrence = $occurrence;
         return $this;
     }
 

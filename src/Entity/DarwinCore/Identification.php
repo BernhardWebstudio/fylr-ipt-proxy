@@ -21,13 +21,9 @@ class Identification
     private string $identificationID;
 
     /**
-     * Reference to Taxon
+     * Reverse relationship from Occurrence
      */
-    #[ORM\ManyToOne(targetEntity: Taxon::class, inversedBy: 'identifications')]
-    #[ORM\JoinColumn(name: 'taxonID', referencedColumnName: 'id', nullable: true)]
-    private ?Taxon $taxon = null;
-
-    #[ORM\OneToMany(mappedBy: 'identification', targetEntity: Occurrence::class, cascade: ['persist'])]
+    #[ORM\OneToMany(mappedBy: 'occurrence', targetEntity: Occurrence::class, cascade: ['persist'])]
     private Collection $occurrences;
 
     #[ORM\Column(name: 'verbatimIdentification', type: 'string', nullable: true)]
@@ -328,17 +324,6 @@ class Identification
     public function setDynamicProperties(?string $dynamicProperties): static
     {
         $this->dynamicProperties = $dynamicProperties;
-        return $this;
-    }
-
-    public function getTaxon(): ?Taxon
-    {
-        return $this->taxon;
-    }
-
-    public function setTaxon(?Taxon $taxon): static
-    {
-        $this->taxon = $taxon;
         return $this;
     }
 

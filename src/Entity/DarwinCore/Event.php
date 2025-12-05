@@ -23,12 +23,21 @@ class Event
     /**
      * Reference to Location
      */
-    #[ORM\ManyToOne(targetEntity: Location::class, inversedBy: 'events')]
+    #[ORM\ManyToOne(targetEntity: Location::class, inversedBy: 'events', cascade: ['persist'])]
     #[ORM\JoinColumn(name: 'locationID', referencedColumnName: 'id', nullable: true)]
     private ?Location $location = null;
 
-    #[ORM\OneToMany(mappedBy: 'event', targetEntity: Occurrence::class, cascade: ['persist'])]
+    /**
+     * Reverse relationship from Occurrence
+     */
+    #[ORM\OneToMany(mappedBy: 'occurrence', targetEntity: Occurrence::class, cascade: ['persist'])]
     private Collection $occurrences;
+
+    /**
+     * Reverse relationship from MeasurementOrFact
+     */
+    #[ORM\OneToMany(mappedBy: 'measurementOrFact', targetEntity: MeasurementOrFact::class, cascade: ['persist'])]
+    private Collection $measurementOrFacts;
 
     #[ORM\Column(name: 'parentEventID', type: 'string', nullable: true)]
     private ?string $parentEventID = null;
@@ -120,6 +129,7 @@ class Event
     public function __construct()
     {
         $this->occurrences = new ArrayCollection();
+        $this->measurementOrFacts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -487,6 +497,28 @@ class Event
     public function removeOccurrence(Occurrence $occurrence): static
     {
         $this->occurrences->removeElement($occurrence);
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MeasurementOrFact>
+     */
+    public function getMeasurementOrFacts(): Collection
+    {
+        return $this->measurementOrFacts;
+    }
+
+    public function addMeasurementOrFact(MeasurementOrFact $measurementOrFact): static
+    {
+        if (!$this->measurementOrFacts->contains($measurementOrFact)) {
+            $this->measurementOrFacts->add($measurementOrFact);
+        }
+        return $this;
+    }
+
+    public function removeMeasurementOrFact(MeasurementOrFact $measurementOrFact): static
+    {
+        $this->measurementOrFacts->removeElement($measurementOrFact);
         return $this;
     }
 

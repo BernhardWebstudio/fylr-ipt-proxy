@@ -42,56 +42,25 @@ class DwcSchemeToEntityCommand extends Command
         'order', 'class', 'table', 'column', 'select', 'from', 'where', 'group', 'having', 'limit', 'offset'
     ];
 
-    private array $entityRelationships = [
-        'Occurrence' => [
-            'taxonID' => ['target' => 'Taxon', 'type' => 'ManyToOne', 'mappedBy' => 'occurrences', 'cascade' => ['persist']],
-            'eventID' => ['target' => 'Event', 'type' => 'ManyToOne', 'mappedBy' => 'occurrences', 'cascade' => ['persist']],
-            'organismID' => ['target' => 'Organism', 'type' => 'ManyToOne', 'mappedBy' => 'occurrences', 'cascade' => ['persist']],
-            'materialEntityID' => ['target' => 'MaterialEntity', 'type' => 'ManyToOne', 'mappedBy' => 'occurrences', 'cascade' => ['persist']],
-            'locationID' => ['target' => 'Location', 'type' => 'ManyToOne', 'mappedBy' => 'occurrences', 'cascade' => ['persist']],
-            'identificationID' => ['target' => 'Identification', 'type' => 'ManyToOne', 'mappedBy' => 'occurrences', 'cascade' => ['persist']],
-        ],
-        'Event' => [
-            'locationID' => ['target' => 'Location', 'type' => 'ManyToOne', 'mappedBy' => 'events'],
-            'occurrences' => ['target' => 'Occurrence', 'type' => 'OneToMany', 'mappedBy' => 'event'],
-        ],
-        'Identification' => [
-            'taxonID' => ['target' => 'Taxon', 'type' => 'ManyToOne', 'mappedBy' => 'identifications'],
-            'occurrences' => ['target' => 'Occurrence', 'type' => 'OneToMany', 'mappedBy' => 'identification'],
-        ],
-        'MaterialEntity' => [
-            'materialSampleID' => ['target' => 'MaterialSample', 'type' => 'ManyToOne', 'mappedBy' => 'materialEntities'],
-            'occurrences' => ['target' => 'Occurrence', 'type' => 'OneToMany', 'mappedBy' => 'materialEntity'],
-        ],
-        'Location' => [
-            'geologicalContextID' => ['target' => 'GeologicalContext', 'type' => 'ManyToOne', 'mappedBy' => 'locations'],
-            'events' => ['target' => 'Event', 'type' => 'OneToMany', 'mappedBy' => 'location'],
-            'occurrences' => ['target' => 'Occurrence', 'type' => 'OneToMany', 'mappedBy' => 'location'],
-        ],
-        'Taxon' => [
-            'occurrences' => ['target' => 'Occurrence', 'type' => 'OneToMany', 'mappedBy' => 'taxon'],
-            'identifications' => ['target' => 'Identification', 'type' => 'OneToMany', 'mappedBy' => 'taxon'],
-            'measurementOrFacts' => ['target' => 'MeasurementOrFact', 'type' => 'OneToMany', 'mappedBy' => 'taxon'],
-        ],
-        'Organism' => [
-            'occurrences' => ['target' => 'Occurrence', 'type' => 'OneToMany', 'mappedBy' => 'organism'],
-        ],
-        'GeologicalContext' => [
-            'locations' => ['target' => 'Location', 'type' => 'OneToMany', 'mappedBy' => 'geologicalContext'],
-        ],
-        'MaterialSample' => [
-            'materialEntities' => ['target' => 'MaterialEntity', 'type' => 'OneToMany', 'mappedBy' => 'materialSample'],
-        ],
-        'MeasurementOrFact' => [
-            'occurrenceID' => ['target' => 'Occurrence', 'type' => 'ManyToOne'],
-            'eventID' => ['target' => 'Event', 'type' => 'ManyToOne'],
-            'taxonID' => ['target' => 'Taxon', 'type' => 'ManyToOne', 'mappedBy' => 'measurementOrFacts'],
-            'locationID' => ['target' => 'Location', 'type' => 'ManyToOne'],
-        ],
-        'ResourceRelationship' => [
-            'resourceID' => ['target' => 'Occurrence', 'type' => 'ManyToOne', 'property' => 'occurrenceID'],
-            'relatedResourceID' => ['target' => 'Occurrence', 'type' => 'ManyToOne', 'property' => 'occurrenceID'],
-        ],
+    // This will be populated dynamically from XML parsing
+    private array $entityRelationships = [];
+
+    // Mapping of which identifiers belong to which domains (will be populated from XML)
+    private array $domainIdentifiers = [];
+
+    // Mapping of identifier names to their target entity names
+    private array $identifierToEntity = [
+        'occurrenceID' => 'Occurrence',
+        'organismID' => 'Organism',
+        'materialEntityID' => 'MaterialEntity',
+        'materialSampleID' => 'MaterialSample',
+        'eventID' => 'Event',
+        'locationID' => 'Location',
+        'geologicalContextID' => 'GeologicalContext',
+        'identificationID' => 'Identification',
+        'taxonID' => 'Taxon',
+        'measurementID' => 'MeasurementOrFact',
+        'resourceRelationshipID' => 'ResourceRelationship'
     ];
 
     public function __construct()
@@ -159,6 +128,101 @@ class DwcSchemeToEntityCommand extends Command
                     $this->io->note("Loaded schema: $file");
                 } else {
                     $this->io->warning("Failed to load schema: $file");
+                }
+            }
+        }
+
+        // Parse domain identifiers from class definitions
+        $this->parseDomainIdentifiers();
+    }
+
+    /**
+     * Parse which identifiers belong to each domain by analyzing term groups
+     * and applying Darwin Core semantic relationships
+     */
+    private function parseDomainIdentifiers(): void
+    {
+        // Based on Darwin Core specification, each identifier belongs to a specific domain
+        $this->domainIdentifiers = [
+            'Occurrence' => ['occurrenceID'],
+            'Organism' => ['organismID'],
+            'MaterialEntity' => ['materialEntityID'],
+            'MaterialSample' => ['materialSampleID'],
+            'Event' => ['eventID'],
+            'Location' => ['locationID'],
+            'GeologicalContext' => ['geologicalContextID'],
+            'Identification' => ['identificationID'],
+            'Taxon' => ['taxonID'],
+            'MeasurementOrFact' => ['measurementID'],
+            'ResourceRelationship' => ['resourceRelationshipID'],
+            'ChronometricAge' => [],  // ChronometricAge doesn't have its own identifier in the standard
+        ];
+
+        // Parse which OTHER identifiers appear in domain-specific term groups
+        // This builds cross-references explicitly defined in Darwin Core
+        if (isset($this->xmlSchemas['tdwg_dwcterms.xsd'])) {
+            $xml = $this->xmlSchemas['tdwg_dwcterms.xsd'];
+
+            // Map domain term groups to entities
+            $domainTermGroups = [
+                'OccurrenceTerms' => 'Occurrence',
+                'OrganismTerms' => 'Organism',
+                'MaterialEntityTerms' => 'MaterialEntity',
+                'MaterialSampleTerms' => 'MaterialSample',
+                'EventTerms' => 'Event',
+                'LocationTerms' => 'Location',
+                'GeologicalContextTerms' => 'GeologicalContext',
+                'IdentificationTerms' => 'Identification',
+                'TaxonTerms' => 'Taxon',
+                'MeasurementOrFactTerms' => 'MeasurementOrFact',
+                'ResourceRelationshipTerms' => 'ResourceRelationship',
+            ];
+
+            // For each domain term group, check if it explicitly references any identifiers
+            foreach ($domainTermGroups as $groupName => $entityName) {
+                $group = $xml->xpath("//xs:group[@name='$groupName']");
+                if (!empty($group)) {
+                    $elements = $group[0]->xpath('.//xs:element[@ref]');
+                    foreach ($elements as $element) {
+                        $ref = (string) $element['ref'];
+                        if (strpos($ref, 'dwc:') === 0) {
+                            $fieldName = substr($ref, 4);
+                            // Check if this field is an identifier reference to a different domain
+                            foreach ($this->identifierToEntity as $idName => $idEntity) {
+                                if ($fieldName === $idName && $idEntity !== $entityName) {
+                                    // This domain explicitly references an identifier from another domain
+                                    if (!in_array($idName, $this->domainIdentifiers[$entityName] ?? [])) {
+                                        $this->domainIdentifiers[$entityName][] = $idName;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Apply implicit Darwin Core semantic relationships
+        // These are relationships that make semantic sense even if not explicitly in term groups
+        // They are based on the Darwin Core documentation and structure
+        $implicitRelationships = [
+            'Occurrence' => ['taxonID', 'eventID', 'organismID', 'materialEntityID', 'locationID', 'identificationID'],
+            'Event' => ['locationID'],
+            'MaterialEntity' => ['materialSampleID'],
+            'Location' => ['geologicalContextID'],
+            'MeasurementOrFact' => ['occurrenceID', 'eventID', 'taxonID', 'locationID'],
+            'ResourceRelationship' => ['occurrenceID'],
+        ];
+
+        foreach ($implicitRelationships as $entityName => $identifiers) {
+            if (isset($this->domainIdentifiers[$entityName])) {
+                foreach ($identifiers as $idName) {
+                    $targetEntity = $this->identifierToEntity[$idName] ?? null;
+                    // Only add if targeting a different entity and not already in the list
+                    if ($targetEntity && $targetEntity !== $entityName &&
+                        !in_array($idName, $this->domainIdentifiers[$entityName])) {
+                        $this->domainIdentifiers[$entityName][] = $idName;
+                    }
                 }
             }
         }
@@ -233,7 +297,7 @@ class DwcSchemeToEntityCommand extends Command
             $type = $this->mapXmlTypeToPhp((string) $element['type']);
 
             // Determine which entity this identifier belongs to
-            $entityName = $this->getEntityNameFromIdentifier($name);
+            $entityName = $this->identifierToEntity[$name] ?? null;
             if ($entityName && isset($entities[$entityName])) {
                 $entities[$entityName]['identifiers'][] = [
                     'name' => $name,
@@ -241,16 +305,6 @@ class DwcSchemeToEntityCommand extends Command
                     'description' => $this->extractDocumentation($element),
                     'nullable' => false
                 ];
-            }
-        }
-
-        // Parse all identifier references in IdentifierTerms group for potential relationships
-        $identifierTerms = $xml->xpath('//xs:group[@name="IdentifierTerms"]//xs:element');
-        $allIdentifierNames = [];
-        foreach ($identifierTerms as $element) {
-            $refName = (string) $element['ref'];
-            if (strpos($refName, 'dwc:') === 0) {
-                $allIdentifierNames[] = substr($refName, 4); // Remove 'dwc:' prefix
             }
         }
 
@@ -273,26 +327,6 @@ class DwcSchemeToEntityCommand extends Command
             }
         }
 
-        // Now process identifier terms that can be relationships
-        foreach ($entities as $entityName => &$entity) {
-            foreach ($allIdentifierNames as $identifierName) {
-                // Check if this identifier should be a relationship for this entity
-                if ($this->isRelationshipField($entityName, $identifierName)) {
-                    $relationshipInfo = $this->entityRelationships[$entityName][$identifierName];
-                    $entity['relationships'][] = [
-                        'name' => $identifierName,
-                        'type' => 'string',
-                        'target' => $relationshipInfo['target'],
-                        'relationshipType' => $relationshipInfo['type'],
-                        'targetProperty' => $relationshipInfo['property'] ?? $identifierName,
-                        'mappedBy' => $relationshipInfo['mappedBy'] ?? null,
-                        'cascade' => $relationshipInfo['cascade'] ?? null,
-                        'description' => 'Reference to ' . $relationshipInfo['target']
-                    ];
-                }
-            }
-        }
-
         // Parse domain-specific terms
         foreach ($domains as $substitutionGroup => $entityName) {
             if (!isset($entities[$entityName])) {
@@ -304,103 +338,153 @@ class DwcSchemeToEntityCommand extends Command
                 $name = (string) $element['name'];
                 $type = $this->mapXmlTypeToPhp((string) $element['type']);
 
-                // Check if this is a relationship field
-                if ($this->isRelationshipField($entityName, $name)) {
-                    $relationshipInfo = $this->entityRelationships[$entityName][$name];
-                    $entities[$entityName]['relationships'][] = [
-                        'name' => $name,
-                        'type' => $type,
-                        'target' => $relationshipInfo['target'],
-                        'relationshipType' => $relationshipInfo['type'],
-                        'targetProperty' => $relationshipInfo['property'] ?? $name,
-                        'mappedBy' => $relationshipInfo['mappedBy'] ?? null,
-                        'cascade' => $relationshipInfo['cascade'] ?? null,
-                        'description' => $this->extractDocumentation($element)
-                    ];
-                } else {
-                    $entities[$entityName]['properties'][] = [
-                        'name' => $name,
-                        'type' => $type,
-                        'description' => $this->extractDocumentation($element),
-                        'nullable' => true
-                    ];
-                }
+                $entities[$entityName]['properties'][] = [
+                    'name' => $name,
+                    'type' => $type,
+                    'description' => $this->extractDocumentation($element),
+                    'nullable' => true
+                ];
             }
         }
 
-        // Add record-level terms that might be relationships
+        // Add dynamically parsed relationships for identifiers
         foreach ($entities as $entityName => &$entity) {
-            foreach ($entity['recordLevelTerms'] as $key => $term) {
-                if ($this->isRelationshipField($entityName, $term['name'])) {
-                    $relationshipInfo = $this->entityRelationships[$entityName][$term['name']];
-                    $entity['relationships'][] = [
-                        'name' => $term['name'],
-                        'type' => $term['type'],
-                        'target' => $relationshipInfo['target'],
-                        'relationshipType' => $relationshipInfo['type'],
-                        'targetProperty' => $relationshipInfo['property'] ?? $term['name'],
-                        'mappedBy' => $relationshipInfo['mappedBy'] ?? null,
-                        'cascade' => $relationshipInfo['cascade'] ?? null,
-                        'description' => $term['description']
-                    ];
-                    // Remove from record level terms since it's now a relationship
-                    unset($entity['recordLevelTerms'][$key]);
-                }
-            }
-            // Re-index array after unsetting elements
-            $entity['recordLevelTerms'] = array_values($entity['recordLevelTerms']);
-
-            // Add configured relationships that are not from schema parsing (like OneToMany reverse relationships)
-            if (isset($this->entityRelationships[$entityName])) {
-                foreach ($this->entityRelationships[$entityName] as $relationshipName => $relationshipInfo) {
-                    // Check if this relationship is not already added from schema parsing
-                    $alreadyExists = false;
-                    foreach ($entity['relationships'] as $existingRel) {
-                        if ($existingRel['name'] === $relationshipName) {
-                            $alreadyExists = true;
-                            break;
-                        }
+            // Add ManyToOne relationships for identifiers that reference other entities
+            if (isset($this->domainIdentifiers[$entityName])) {
+                foreach ($this->domainIdentifiers[$entityName] as $identifierName) {
+                    // Skip self-references
+                    if ($this->identifierToEntity[$identifierName] === $entityName) {
+                        continue;
                     }
 
-                    if (!$alreadyExists && $relationshipInfo['type'] === 'OneToMany') {
+                    $targetEntity = $this->identifierToEntity[$identifierName];
+                    if ($targetEntity && $targetEntity !== $entityName && isset($entities[$targetEntity])) {
                         $entity['relationships'][] = [
-                            'name' => $relationshipName,
-                            'type' => 'Collection',
-                            'target' => $relationshipInfo['target'],
-                            'relationshipType' => $relationshipInfo['type'],
-                            'targetProperty' => $relationshipInfo['property'] ?? $relationshipName,
-                            'mappedBy' => $relationshipInfo['mappedBy'] ?? null,
-                            'description' => ''
+                            'name' => $identifierName,
+                            'type' => 'string',
+                            'target' => $targetEntity,
+                            'relationshipType' => 'ManyToOne',
+                            'targetProperty' => $identifierName,
+                            'mappedBy' => $this->getPluralForm($entityName),
+                            'cascade' => ['persist'],
+                            'description' => 'Reference to ' . $targetEntity
                         ];
                     }
                 }
             }
         }
+
+        // Add OneToMany reverse relationships based on ManyToOne relationships
+        $reverseRelationships = $this->buildReverseRelationships($entities);
+        foreach ($reverseRelationships as $entityName => $relationships) {
+            if (isset($entities[$entityName])) {
+                foreach ($relationships as $relationship) {
+                    $entities[$entityName]['relationships'][] = $relationship;
+                }
+            }
+        }
     }
 
-    private function getEntityNameFromIdentifier(string $identifier): ?string
+    /**
+     * Build reverse OneToMany relationships based on ManyToOne relationships
+     */
+    private function buildReverseRelationships(array &$entities): array
     {
-        $mapping = [
-            'occurrenceID' => 'Occurrence',
-            'organismID' => 'Organism',
-            'materialEntityID' => 'MaterialEntity',
-            'materialSampleID' => 'MaterialSample',
-            'eventID' => 'Event',
-            'locationID' => 'Location',
-            'geologicalContextID' => 'GeologicalContext',
-            'identificationID' => 'Identification',
-            'taxonID' => 'Taxon',
-            'measurementID' => 'MeasurementOrFact',
-            'resourceRelationshipID' => 'ResourceRelationship'
+        $reverseMap = [];
+
+        // Collect all ManyToOne relationships
+        foreach ($entities as $entityName => &$entity) {
+            foreach ($entity['relationships'] as $relationship) {
+                if ($relationship['relationshipType'] === 'ManyToOne') {
+                    $targetEntity = $relationship['target'];
+                    $propertyName = $relationship['mappedBy'] ?? null;
+
+                    if (!$propertyName) {
+                        continue;
+                    }
+
+                    if (!isset($reverseMap[$targetEntity])) {
+                        $reverseMap[$targetEntity] = [];
+                    }
+
+                    $reverseMap[$targetEntity][] = [
+                        'sourceEntity' => $entityName,
+                        'pluralProperty' => $propertyName
+                    ];
+                }
+            }
+        }
+
+        // Generate OneToMany relationships
+        $result = [];
+        foreach ($reverseMap as $targetEntity => $sources) {
+            if (!isset($result[$targetEntity])) {
+                $result[$targetEntity] = [];
+            }
+
+            foreach ($sources as $source) {
+                $propertyName = $source['pluralProperty'];
+                $sourceEntity = $source['sourceEntity'];
+
+                // Create OneToMany relationship
+                $result[$targetEntity][] = [
+                    'name' => $propertyName,
+                    'type' => 'Collection',
+                    'target' => $sourceEntity,
+                    'relationshipType' => 'OneToMany',
+                    'targetProperty' => $propertyName,
+                    'mappedBy' => $this->getSingularForm($propertyName),
+                    'description' => 'Reverse relationship from ' . $sourceEntity
+                ];
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get plural form of entity name for collection properties
+     */
+    private function getPluralForm(string $entityName): string
+    {
+        $plurals = [
+            'Occurrence' => 'occurrences',
+            'Organism' => 'organisms',
+            'MaterialEntity' => 'materialEntities',
+            'MaterialSample' => 'materialSamples',
+            'Event' => 'events',
+            'Location' => 'locations',
+            'GeologicalContext' => 'geologicalContexts',
+            'Identification' => 'identifications',
+            'Taxon' => 'taxa',
+            'MeasurementOrFact' => 'measurementOrFacts',
+            'ResourceRelationship' => 'resourceRelationships'
         ];
 
-        return $mapping[$identifier] ?? null;
+        return $plurals[$entityName] ?? strtolower($entityName) . 's';
     }
 
-    private function isRelationshipField(string $entityName, string $fieldName): bool
+    /**
+     * Get singular form from a plural property name
+     */
+    private function getSingularForm(string $propertyName): string
     {
-        return isset($this->entityRelationships[$entityName]) &&
-            isset($this->entityRelationships[$entityName][$fieldName]);
+        // Simple singularization - in practice might need more rules
+        $singulars = [
+            'occurrences' => 'occurrence',
+            'organisms' => 'organism',
+            'materialEntities' => 'materialEntity',
+            'materialSamples' => 'materialSample',
+            'events' => 'event',
+            'locations' => 'location',
+            'geologicalContexts' => 'geologicalContext',
+            'identifications' => 'identification',
+            'taxa' => 'taxon',
+            'measurementOrFacts' => 'measurementOrFact',
+            'resourceRelationships' => 'resourceRelationship'
+        ];
+
+        return $singulars[$propertyName] ?? rtrim($propertyName, 's');
     }
 
     private function mapXmlTypeToPhp(string $xmlType): string

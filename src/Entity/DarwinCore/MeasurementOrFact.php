@@ -23,30 +23,30 @@ class MeasurementOrFact
     /**
      * Reference to Occurrence
      */
-    #[ORM\ManyToOne(targetEntity: Occurrence::class)]
+    #[ORM\ManyToOne(targetEntity: Occurrence::class, inversedBy: 'measurementOrFacts', cascade: ['persist'])]
     #[ORM\JoinColumn(name: 'occurrenceID', referencedColumnName: 'id', nullable: true)]
     private ?Occurrence $occurrence = null;
 
     /**
      * Reference to Event
      */
-    #[ORM\ManyToOne(targetEntity: Event::class)]
+    #[ORM\ManyToOne(targetEntity: Event::class, inversedBy: 'measurementOrFacts', cascade: ['persist'])]
     #[ORM\JoinColumn(name: 'eventID', referencedColumnName: 'id', nullable: true)]
     private ?Event $event = null;
 
     /**
-     * Reference to Location
-     */
-    #[ORM\ManyToOne(targetEntity: Location::class)]
-    #[ORM\JoinColumn(name: 'locationID', referencedColumnName: 'id', nullable: true)]
-    private ?Location $location = null;
-
-    /**
      * Reference to Taxon
      */
-    #[ORM\ManyToOne(targetEntity: Taxon::class, inversedBy: 'measurementOrFacts')]
+    #[ORM\ManyToOne(targetEntity: Taxon::class, inversedBy: 'measurementOrFacts', cascade: ['persist'])]
     #[ORM\JoinColumn(name: 'taxonID', referencedColumnName: 'id', nullable: true)]
     private ?Taxon $taxon = null;
+
+    /**
+     * Reference to Location
+     */
+    #[ORM\ManyToOne(targetEntity: Location::class, inversedBy: 'measurementOrFacts', cascade: ['persist'])]
+    #[ORM\JoinColumn(name: 'locationID', referencedColumnName: 'id', nullable: true)]
+    private ?Location $location = null;
 
     #[ORM\Column(name: 'institutionID', type: 'string', nullable: true)]
     private ?string $institutionID = null;
@@ -240,17 +240,6 @@ class MeasurementOrFact
         return $this;
     }
 
-    public function getLocation(): ?Location
-    {
-        return $this->location;
-    }
-
-    public function setLocation(?Location $location): static
-    {
-        $this->location = $location;
-        return $this;
-    }
-
     public function getTaxon(): ?Taxon
     {
         return $this->taxon;
@@ -259,6 +248,17 @@ class MeasurementOrFact
     public function setTaxon(?Taxon $taxon): static
     {
         $this->taxon = $taxon;
+        return $this;
+    }
+
+    public function getLocation(): ?Location
+    {
+        return $this->location;
+    }
+
+    public function setLocation(?Location $location): static
+    {
+        $this->location = $location;
         return $this;
     }
 

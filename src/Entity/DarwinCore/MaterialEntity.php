@@ -23,11 +23,14 @@ class MaterialEntity
     /**
      * Reference to MaterialSample
      */
-    #[ORM\ManyToOne(targetEntity: MaterialSample::class, inversedBy: 'materialEntities')]
+    #[ORM\ManyToOne(targetEntity: MaterialSample::class, inversedBy: 'materialEntities', cascade: ['persist'])]
     #[ORM\JoinColumn(name: 'materialSampleID', referencedColumnName: 'id', nullable: true)]
     private ?MaterialSample $materialSample = null;
 
-    #[ORM\OneToMany(mappedBy: 'materialEntity', targetEntity: Occurrence::class, cascade: ['persist'])]
+    /**
+     * Reverse relationship from Occurrence
+     */
+    #[ORM\OneToMany(mappedBy: 'occurrence', targetEntity: Occurrence::class, cascade: ['persist'])]
     private Collection $occurrences;
 
     #[ORM\Column(name: 'preparations', type: 'string', nullable: true)]

@@ -20,7 +20,10 @@ class Organism
     #[ORM\Column(name: 'organismID', type: 'string', unique: true)]
     private string $organismID;
 
-    #[ORM\OneToMany(mappedBy: 'organism', targetEntity: Occurrence::class, cascade: ['persist'])]
+    /**
+     * Reverse relationship from Occurrence
+     */
+    #[ORM\OneToMany(mappedBy: 'occurrence', targetEntity: Occurrence::class, cascade: ['persist'])]
     private Collection $occurrences;
 
     #[ORM\Column(name: 'organismName', type: 'string', nullable: true)]

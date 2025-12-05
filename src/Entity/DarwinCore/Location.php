@@ -23,15 +23,27 @@ class Location
     /**
      * Reference to GeologicalContext
      */
-    #[ORM\ManyToOne(targetEntity: GeologicalContext::class, inversedBy: 'locations')]
+    #[ORM\ManyToOne(targetEntity: GeologicalContext::class, inversedBy: 'locations', cascade: ['persist'])]
     #[ORM\JoinColumn(name: 'geologicalContextID', referencedColumnName: 'id', nullable: true)]
     private ?GeologicalContext $geologicalContext = null;
 
-    #[ORM\OneToMany(mappedBy: 'location', targetEntity: Event::class, cascade: ['persist'])]
+    /**
+     * Reverse relationship from Occurrence
+     */
+    #[ORM\OneToMany(mappedBy: 'occurrence', targetEntity: Occurrence::class, cascade: ['persist'])]
+    private Collection $occurrences;
+
+    /**
+     * Reverse relationship from Event
+     */
+    #[ORM\OneToMany(mappedBy: 'event', targetEntity: Event::class, cascade: ['persist'])]
     private Collection $events;
 
-    #[ORM\OneToMany(mappedBy: 'location', targetEntity: Occurrence::class, cascade: ['persist'])]
-    private Collection $occurrences;
+    /**
+     * Reverse relationship from MeasurementOrFact
+     */
+    #[ORM\OneToMany(mappedBy: 'measurementOrFact', targetEntity: MeasurementOrFact::class, cascade: ['persist'])]
+    private Collection $measurementOrFacts;
 
     #[ORM\Column(name: 'higherGeographyID', type: 'string', nullable: true)]
     private ?string $higherGeographyID = null;
@@ -197,8 +209,9 @@ class Location
 
     public function __construct()
     {
-        $this->events = new ArrayCollection();
         $this->occurrences = new ArrayCollection();
+        $this->events = new ArrayCollection();
+        $this->measurementOrFacts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -823,6 +836,28 @@ class Location
     }
 
     /**
+     * @return Collection<int, Occurrence>
+     */
+    public function getOccurrences(): Collection
+    {
+        return $this->occurrences;
+    }
+
+    public function addOccurrence(Occurrence $occurrence): static
+    {
+        if (!$this->occurrences->contains($occurrence)) {
+            $this->occurrences->add($occurrence);
+        }
+        return $this;
+    }
+
+    public function removeOccurrence(Occurrence $occurrence): static
+    {
+        $this->occurrences->removeElement($occurrence);
+        return $this;
+    }
+
+    /**
      * @return Collection<int, Event>
      */
     public function getEvents(): Collection
@@ -845,24 +880,24 @@ class Location
     }
 
     /**
-     * @return Collection<int, Occurrence>
+     * @return Collection<int, MeasurementOrFact>
      */
-    public function getOccurrences(): Collection
+    public function getMeasurementOrFacts(): Collection
     {
-        return $this->occurrences;
+        return $this->measurementOrFacts;
     }
 
-    public function addOccurrence(Occurrence $occurrence): static
+    public function addMeasurementOrFact(MeasurementOrFact $measurementOrFact): static
     {
-        if (!$this->occurrences->contains($occurrence)) {
-            $this->occurrences->add($occurrence);
+        if (!$this->measurementOrFacts->contains($measurementOrFact)) {
+            $this->measurementOrFacts->add($measurementOrFact);
         }
         return $this;
     }
 
-    public function removeOccurrence(Occurrence $occurrence): static
+    public function removeMeasurementOrFact(MeasurementOrFact $measurementOrFact): static
     {
-        $this->occurrences->removeElement($occurrence);
+        $this->measurementOrFacts->removeElement($measurementOrFact);
         return $this;
     }
 

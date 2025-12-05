@@ -21,6 +21,20 @@ class Occurrence
     private string $occurrenceID;
 
     /**
+     * Reference to Taxon
+     */
+    #[ORM\ManyToOne(targetEntity: Taxon::class, inversedBy: 'occurrences', cascade: ['persist'])]
+    #[ORM\JoinColumn(name: 'taxonID', referencedColumnName: 'id', nullable: true)]
+    private ?Taxon $taxon = null;
+
+    /**
+     * Reference to Event
+     */
+    #[ORM\ManyToOne(targetEntity: Event::class, inversedBy: 'occurrences', cascade: ['persist'])]
+    #[ORM\JoinColumn(name: 'eventID', referencedColumnName: 'id', nullable: true)]
+    private ?Event $event = null;
+
+    /**
      * Reference to Organism
      */
     #[ORM\ManyToOne(targetEntity: Organism::class, inversedBy: 'occurrences', cascade: ['persist'])]
@@ -33,13 +47,6 @@ class Occurrence
     #[ORM\ManyToOne(targetEntity: MaterialEntity::class, inversedBy: 'occurrences', cascade: ['persist'])]
     #[ORM\JoinColumn(name: 'materialEntityID', referencedColumnName: 'id', nullable: true)]
     private ?MaterialEntity $materialEntity = null;
-
-    /**
-     * Reference to Event
-     */
-    #[ORM\ManyToOne(targetEntity: Event::class, inversedBy: 'occurrences', cascade: ['persist'])]
-    #[ORM\JoinColumn(name: 'eventID', referencedColumnName: 'id', nullable: true)]
-    private ?Event $event = null;
 
     /**
      * Reference to Location
@@ -56,11 +63,16 @@ class Occurrence
     private ?Identification $identification = null;
 
     /**
-     * Reference to Taxon
+     * Reverse relationship from MeasurementOrFact
      */
-    #[ORM\ManyToOne(targetEntity: Taxon::class, inversedBy: 'occurrences', cascade: ['persist'])]
-    #[ORM\JoinColumn(name: 'taxonID', referencedColumnName: 'id', nullable: true)]
-    private ?Taxon $taxon = null;
+    #[ORM\OneToMany(mappedBy: 'measurementOrFact', targetEntity: MeasurementOrFact::class, cascade: ['persist'])]
+    private Collection $measurementOrFacts;
+
+    /**
+     * Reverse relationship from ResourceRelationship
+     */
+    #[ORM\OneToMany(mappedBy: 'resourceRelationship', targetEntity: ResourceRelationship::class, cascade: ['persist'])]
+    private Collection $resourceRelationships;
 
     #[ORM\Column(name: 'catalogNumber', type: 'string', nullable: true)]
     private ?string $catalogNumber = null;
@@ -166,6 +178,12 @@ class Occurrence
 
     #[ORM\Column(name: 'dynamicProperties', type: 'text', nullable: true)]
     private ?string $dynamicProperties = null;
+
+    public function __construct()
+    {
+        $this->measurementOrFacts = new ArrayCollection();
+        $this->resourceRelationships = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -568,6 +586,28 @@ class Occurrence
         return $this;
     }
 
+    public function getTaxon(): ?Taxon
+    {
+        return $this->taxon;
+    }
+
+    public function setTaxon(?Taxon $taxon): static
+    {
+        $this->taxon = $taxon;
+        return $this;
+    }
+
+    public function getEvent(): ?Event
+    {
+        return $this->event;
+    }
+
+    public function setEvent(?Event $event): static
+    {
+        $this->event = $event;
+        return $this;
+    }
+
     public function getOrganism(): ?Organism
     {
         return $this->organism;
@@ -587,17 +627,6 @@ class Occurrence
     public function setMaterialEntity(?MaterialEntity $materialEntity): static
     {
         $this->materialEntity = $materialEntity;
-        return $this;
-    }
-
-    public function getEvent(): ?Event
-    {
-        return $this->event;
-    }
-
-    public function setEvent(?Event $event): static
-    {
-        $this->event = $event;
         return $this;
     }
 
@@ -623,14 +652,47 @@ class Occurrence
         return $this;
     }
 
-    public function getTaxon(): ?Taxon
+    /**
+     * @return Collection<int, MeasurementOrFact>
+     */
+    public function getMeasurementOrFacts(): Collection
     {
-        return $this->taxon;
+        return $this->measurementOrFacts;
     }
 
-    public function setTaxon(?Taxon $taxon): static
+    public function addMeasurementOrFact(MeasurementOrFact $measurementOrFact): static
     {
-        $this->taxon = $taxon;
+        if (!$this->measurementOrFacts->contains($measurementOrFact)) {
+            $this->measurementOrFacts->add($measurementOrFact);
+        }
+        return $this;
+    }
+
+    public function removeMeasurementOrFact(MeasurementOrFact $measurementOrFact): static
+    {
+        $this->measurementOrFacts->removeElement($measurementOrFact);
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ResourceRelationship>
+     */
+    public function getResourceRelationships(): Collection
+    {
+        return $this->resourceRelationships;
+    }
+
+    public function addResourceRelationship(ResourceRelationship $resourceRelationship): static
+    {
+        if (!$this->resourceRelationships->contains($resourceRelationship)) {
+            $this->resourceRelationships->add($resourceRelationship);
+        }
+        return $this;
+    }
+
+    public function removeResourceRelationship(ResourceRelationship $resourceRelationship): static
+    {
+        $this->resourceRelationships->removeElement($resourceRelationship);
         return $this;
     }
 

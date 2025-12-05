@@ -52,12 +52,6 @@ final class MirrorDatabaseToMysqlCommand extends Command
         $chunkSize = max(1, (int) $input->getOption('chunk-size'));
         $truncateFirst = (bool) $input->getOption('truncate-first');
 
-        $mirrorUrl = $this->mirrorConnection->getParams()['url'] ?? null;
-        if (!$mirrorUrl) {
-            $io->error('MYSQL_MIRROR_URL is not configured.');
-            return Command::FAILURE;
-        }
-
         if (!$this->ensureConnections($io)) {
             return Command::FAILURE;
         }

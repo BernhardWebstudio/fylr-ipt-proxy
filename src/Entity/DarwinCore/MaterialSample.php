@@ -20,7 +20,10 @@ class MaterialSample
     #[ORM\Column(name: 'materialSampleID', type: 'string', unique: true)]
     private string $materialSampleID;
 
-    #[ORM\OneToMany(mappedBy: 'materialSample', targetEntity: MaterialEntity::class, cascade: ['persist'])]
+    /**
+     * Reverse relationship from MaterialEntity
+     */
+    #[ORM\OneToMany(mappedBy: 'materialEntity', targetEntity: MaterialEntity::class, cascade: ['persist'])]
     private Collection $materialEntities;
 
     #[ORM\Column(name: 'institutionID', type: 'string', nullable: true)]

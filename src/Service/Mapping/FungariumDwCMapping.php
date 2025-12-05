@@ -110,7 +110,6 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
                     $identification->setIdentificationID($identificationId);
                 }
                 $identification->setTypeStatus("Type");
-                $identification->setTaxon($taxon);
                 $occurrence->setIdentification($identification);
             }
 
