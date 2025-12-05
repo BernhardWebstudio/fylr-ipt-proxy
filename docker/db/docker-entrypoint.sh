@@ -10,26 +10,8 @@ CA_KEY="$SSL_DIR/ca.key"
 SERVER_CERT="$SSL_DIR/server.crt"
 SERVER_KEY="$SSL_DIR/server.key"
 
+# Use the official PostgreSQL entrypoint
 POSTGRES_BIN="/usr/local/bin/docker-entrypoint.sh"
-
-# Function to wait for PostgreSQL to be ready
-wait_for_postgres() {
-    local max_attempts=30
-    local attempt=0
-
-    echo "Waiting for PostgreSQL to be ready..."
-    while [ $attempt -lt $max_attempts ]; do
-        if pg_isready -h localhost -U "$POSTGRES_USER" -d "$POSTGRES_DB" 2>/dev/null; then
-            echo "PostgreSQL is ready"
-            return 0
-        fi
-        attempt=$((attempt + 1))
-        sleep 1
-    done
-
-    echo "WARNING: PostgreSQL did not become ready within timeout"
-    return 1
-}
 
 # Function to generate SSL certificates
 generate_ssl_certs() {
@@ -76,20 +58,23 @@ generate_ssl_certs() {
     exit 1
 }
 
-# Function to setup read-only user and permissions
-setup_readonly_user() {
+# Function to create init script for read-only user
+create_readonly_init_script() {
     local readonly_user="${POSTGRES_READONLY_USER:-readonly}"
     local readonly_password="${POSTGRES_READONLY_PASSWORD}"
+    # Path to init scripts that will run when postgres starts
+    local init_script_dir="/docker-entrypoint-initdb.d"
 
     if [ -z "$readonly_password" ]; then
         echo "[DB] WARNING: POSTGRES_READONLY_PASSWORD not set. Skipping read-only user setup."
         return 0
     fi
 
-    echo "[DB] Setting up read-only user: $readonly_user"
+    # Create init script directory if it doesn't exist
+    mkdir -p "$init_script_dir"
 
-    # Create or update read-only user
-    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
+    # Create SQL init script for read-only user
+    cat > "$init_script_dir/01-create-readonly-user.sql" <<-EOSQL
         -- Create read-only user if it doesn't exist
         DO \$\$
         BEGIN
@@ -120,16 +105,9 @@ setup_readonly_user() {
 
         -- Grant USAGE on all future sequences
         ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE ON SEQUENCES TO $readonly_user;
-
-        -- Verify permissions
-        SELECT rolname, rolcanlogin, array_agg(privilege) as privileges
-        FROM (
-            SELECT rolname, rolcanlogin, 'CONNECT' as privilege FROM pg_roles WHERE rolname = '$readonly_user'
-        ) AS perms
-        GROUP BY rolname, rolcanlogin;
 EOSQL
 
-    echo "[DB] Read-only user setup complete"
+    echo "[DB] Created read-only user init script"
 }
 
 # Main execution
@@ -142,43 +120,12 @@ generate_ssl_certs
 
 echo ""
 
-# Start PostgreSQL in background
-echo "[STARTUP] Starting PostgreSQL..."
-echo "[STARTUP] Checking if PostgreSQL binary exists: $POSTGRES_BIN"
-if [ -f "$POSTGRES_BIN" ]; then
-    echo "[STARTUP] PostgreSQL binary found and is readable"
-    ls -la "$POSTGRES_BIN"
-else
-    echo "[STARTUP] ERROR: PostgreSQL binary not found at $POSTGRES_BIN"
-    exit 1
-fi
+# Create init script for read-only user
+create_readonly_init_script
 
-"$POSTGRES_BIN" 2>&1 &
-POSTGRES_PID=$!
-echo "[STARTUP] PostgreSQL PID: $POSTGRES_PID"
-
-# Give PostgreSQL a moment to start
-sleep 2
-
-# Check if process is still running
-if ! kill -0 $POSTGRES_PID 2>/dev/null; then
-    echo "[STARTUP] ERROR: PostgreSQL process exited immediately!"
-    exit 1
-fi
-
-# Wait for PostgreSQL to be ready
-if wait_for_postgres; then
-    echo ""
-    # Setup read-only user
-    setup_readonly_user
-    echo ""
-    echo "[STARTUP] Database initialization complete"
-else
-    echo "[STARTUP] WARNING: Could not verify PostgreSQL readiness"
-fi
-
-echo "===== PostgreSQL Ready ====="
 echo ""
+echo "[STARTUP] Starting PostgreSQL via official entrypoint..."
 
-# Wait for the PostgreSQL process
-wait $POSTGRES_PID
+# Pass control to the official PostgreSQL entrypoint
+# It will become PID 1 and handle all the PostgreSQL logic
+exec "$POSTGRES_BIN"
