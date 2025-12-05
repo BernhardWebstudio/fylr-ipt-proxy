@@ -86,8 +86,9 @@ services:
       # SSL certificates (auto-generated if missing)
       - ./docker/db/ssl:/var/lib/postgresql/ssl:rw
       # Custom PostgreSQL configuration (placed where the default postgresql.conf will include it)
-      - ./docker/db/conf/custom-postgresql.conf:/var/lib/postgresql/data/conf.d/custom-postgresql.conf:ro
-      - ./docker/db/conf/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf:ro
+      # Mounted read-write so the entrypoint can chown; files remain sourced from the repo
+      - ./docker/db/conf/custom-postgresql.conf:/var/lib/postgresql/data/conf.d/custom-postgresql.conf:rw
+      - ./docker/db/conf/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf:rw
       # Init scripts for database setup
       - ./docker/db/init-scripts:/docker-entrypoint-initdb.d:ro
 ###< doctrine/doctrine-bundle ###
