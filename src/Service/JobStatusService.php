@@ -79,7 +79,7 @@ class JobStatusService
     /**
      * Update job progress
      */
-    public function updateJobProgress(string $jobId, int $progress, int $totalItems = null): bool
+    public function updateJobProgress(string $jobId, int $progress, ?int $totalItems = null): bool
     {
         $jobStatus = $this->jobStatusRepository->findByJobId($jobId);
 
