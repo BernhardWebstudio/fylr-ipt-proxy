@@ -37,8 +37,16 @@ openssl x509 -req -in server.csr -text -days 3650 \
   -out server.crt
 
 # Set proper permissions (required by PostgreSQL)
+# PostgreSQL requires the server key to be owned by the postgres user (UID 70 in Alpine)
+# and have mode 600 to prevent unauthorized access
 chmod 600 server.key ca.key
 chmod 644 server.crt ca.crt
+
+# Set ownership to the postgres user (UID 70 in the postgres:alpine container)
+# This can be done using a temporary container with the same volume mount
+docker run --rm \
+  -v "$(pwd):/ssl" \
+  alpine sh -c "chown 70:70 /ssl/server.key /ssl/server.crt /ssl/ca.crt /ssl/ca.key"
 
 # Cleanup temporary files
 rm -f server.csr ca.srl
@@ -238,11 +246,26 @@ ls -la /path/to/ipt/WEB-INF/lib/ | grep postgresql
 
 ### Permission Denied on server.key
 
-If you see "permission denied" errors related to `server.key`:
+If you see "permission denied" or "must be owned by the database user or root" errors related to `server.key`:
+
+**Root Cause**: The PostgreSQL process runs as user `postgres` (UID 70 in Alpine images), but the SSL key files have incorrect ownership.
+
+**Solution**: Fix ownership using a temporary container (works even with user namespace remapping):
 
 ```bash
-chmod 600 docker/db/ssl/server.key
+# From the repository root
+docker run --rm \
+  -v "$(pwd)/docker/db/ssl:/ssl" \
+  alpine sh -c "\
+    chown 70:70 /ssl/server.key /ssl/server.crt /ssl/ca.crt /ssl/ca.key && \
+    chmod 600 /ssl/server.key /ssl/ca.key && \
+    chmod 644 /ssl/server.crt /ssl/ca.crt"
+
+# Then restart the database
+docker compose up -d --force-recreate database
 ```
+
+**Why this happens**: When you generate certificates on the host, they're owned by your user. The PostgreSQL container runs as UID 70 (`postgres` user in Alpine), so it can't read the key unless ownership matches.
 
 ### Connection Refused
 

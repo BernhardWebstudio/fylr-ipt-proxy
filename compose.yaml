@@ -105,7 +105,7 @@ services:
     volumes:
       # Database data
       - ./docker/db/data:/var/lib/postgresql/data:rw
-      # SSL certificates (auto-generated if missing)
+      # SSL certificates
       - ./docker/db/ssl:/var/lib/postgresql/ssl:rw
       # Custom PostgreSQL configuration (placed where the default postgresql.conf will include it)
       # Mounted read-write so the entrypoint can chown; files remain sourced from the repo
