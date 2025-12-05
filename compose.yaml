@@ -61,6 +61,7 @@ services:
     env_file:
       - .env.local
     image: postgres:${POSTGRES_VERSION:-16}-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-app}
       # You should definitely change the password in production
