@@ -144,7 +144,16 @@ echo ""
 
 # Start PostgreSQL in background
 echo "[STARTUP] Starting PostgreSQL..."
-"$POSTGRES_BIN" > /tmp/postgres.log 2>&1 &
+echo "[STARTUP] Checking if PostgreSQL binary exists: $POSTGRES_BIN"
+if [ -f "$POSTGRES_BIN" ]; then
+    echo "[STARTUP] PostgreSQL binary found and is readable"
+    ls -la "$POSTGRES_BIN"
+else
+    echo "[STARTUP] ERROR: PostgreSQL binary not found at $POSTGRES_BIN"
+    exit 1
+fi
+
+"$POSTGRES_BIN" 2>&1 &
 POSTGRES_PID=$!
 echo "[STARTUP] PostgreSQL PID: $POSTGRES_PID"
 
@@ -154,8 +163,6 @@ sleep 2
 # Check if process is still running
 if ! kill -0 $POSTGRES_PID 2>/dev/null; then
     echo "[STARTUP] ERROR: PostgreSQL process exited immediately!"
-    echo "[STARTUP] PostgreSQL logs:"
-    cat /tmp/postgres.log
     exit 1
 fi
 
@@ -168,8 +175,6 @@ if wait_for_postgres; then
     echo "[STARTUP] Database initialization complete"
 else
     echo "[STARTUP] WARNING: Could not verify PostgreSQL readiness"
-    echo "[STARTUP] PostgreSQL logs:"
-    cat /tmp/postgres.log
 fi
 
 echo "===== PostgreSQL Ready ====="
