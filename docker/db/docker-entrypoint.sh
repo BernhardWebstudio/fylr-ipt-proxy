@@ -74,7 +74,9 @@ generate_ssl_certs() {
 
     # Exit with error - container cannot proceed without SSL certs
     exit 1
-}# Function to setup read-only user and permissions
+}
+
+# Function to setup read-only user and permissions
 setup_readonly_user() {
     local readonly_user="${POSTGRES_READONLY_USER:-readonly}"
     local readonly_password="${POSTGRES_READONLY_PASSWORD}"
@@ -142,8 +144,20 @@ echo ""
 
 # Start PostgreSQL in background
 echo "[STARTUP] Starting PostgreSQL..."
-"$POSTGRES_BIN" &
+"$POSTGRES_BIN" > /tmp/postgres.log 2>&1 &
 POSTGRES_PID=$!
+echo "[STARTUP] PostgreSQL PID: $POSTGRES_PID"
+
+# Give PostgreSQL a moment to start
+sleep 2
+
+# Check if process is still running
+if ! kill -0 $POSTGRES_PID 2>/dev/null; then
+    echo "[STARTUP] ERROR: PostgreSQL process exited immediately!"
+    echo "[STARTUP] PostgreSQL logs:"
+    cat /tmp/postgres.log
+    exit 1
+fi
 
 # Wait for PostgreSQL to be ready
 if wait_for_postgres; then
@@ -154,6 +168,8 @@ if wait_for_postgres; then
     echo "[STARTUP] Database initialization complete"
 else
     echo "[STARTUP] WARNING: Could not verify PostgreSQL readiness"
+    echo "[STARTUP] PostgreSQL logs:"
+    cat /tmp/postgres.log
 fi
 
 echo "===== PostgreSQL Ready ====="
