@@ -577,13 +577,25 @@ final class ImportExportManagementController extends AbstractController
     }
 
     #[Route('/export/{type}/{format}', name: 'app_export_management_type')]
-    #[IsGranted('ROLE_USER')]
     public function exportType(
         string $type,
         string $format,
         EntityManagerInterface $entityManager,
-        DataExportService $dataExportService
+        DataExportService $dataExportService,
+        Request $request
     ): Response {
+        // Check access: either logged in user or valid secret parameter
+        $user = $this->getUser();
+        if (!$user) {
+            // No authenticated user, check for secret parameter
+            $providedSecret = $request->query->get('secret');
+            $validSecret = $_ENV['EXPORT_SECRET'] ?? getenv('EXPORT_SECRET') ?: null;
+
+            if (!$validSecret || !$providedSecret || $providedSecret !== $validSecret) {
+                throw $this->createAccessDeniedException('Access denied.');
+            }
+        }
+
         // export the database content of the given type in the specified format
         if (!in_array($format, ['csv', 'json', 'xml'])) {
             $this->addFlash('error', 'Unsupported export format: ' . $format);
@@ -604,22 +616,30 @@ final class ImportExportManagementController extends AbstractController
                 $response->headers->set('Content-Type', 'text/csv');
                 $response->setContent($dataExportService->convertToCsv($data));
                 $response->headers->set('Content-Disposition', 'attachment; filename="export_' . $type . '.csv"');
-                return $response;
+                break;
             case 'json':
-                return new Response($dataExportService->convertToJson($data), 200, [
+                $response = new Response($dataExportService->convertToJson($data), 200, [
                     'Content-Type' => 'application/json',
                     'Content-Disposition' => 'attachment; filename="export_' . $type . '.json"'
                 ]);
+                break;
             case 'xml':
                 $response = new Response();
                 $response->headers->set('Content-Type', 'application/xml');
                 $response->setContent($dataExportService->convertToXml($data));
                 $response->headers->set('Content-Disposition', 'attachment; filename="export_' . $type . '.xml"');
-                return $response;
+                break;
             default:
                 $this->addFlash('error', 'Unsupported export format: ' . $format);
                 return $this->redirectToRoute('app_import_management');
         }
+
+        // Set cache headers for HTTP caching
+        $response->setPublic();
+        $response->setMaxAge(3600); // Cache for 1 hour
+        $response->headers->addCacheControlDirective('must-revalidate');
+
+        return $response;
     }
 
     /**
