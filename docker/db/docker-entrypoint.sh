@@ -2,8 +2,6 @@
 # This script runs every time the database container starts
 # It handles dynamic initialization of SSL certs, config, and users
 
-set -e
-
 SSL_DIR="/var/lib/postgresql/ssl"
 CA_CERT="$SSL_DIR/ca.crt"
 CA_KEY="$SSL_DIR/ca.key"
@@ -125,6 +123,20 @@ create_readonly_init_script
 
 echo ""
 echo "[STARTUP] Starting PostgreSQL via official entrypoint..."
+
+# Verify the entrypoint exists before trying to exec it
+if [ ! -f "$POSTGRES_BIN" ]; then
+    echo "[ERROR] PostgreSQL entrypoint not found at: $POSTGRES_BIN"
+    exit 1
+fi
+
+if [ ! -x "$POSTGRES_BIN" ]; then
+    echo "[ERROR] PostgreSQL entrypoint is not executable: $POSTGRES_BIN"
+    exit 1
+fi
+
+echo "[STARTUP] PostgreSQL entrypoint found and executable"
+echo "[STARTUP] Executing: $POSTGRES_BIN"
 
 # Pass control to the official PostgreSQL entrypoint
 # It will become PID 1 and handle all the PostgreSQL logic
