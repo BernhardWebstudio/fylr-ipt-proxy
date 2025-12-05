@@ -40,40 +40,41 @@ generate_ssl_certs() {
         return 0
     fi
 
-    echo "[SSL] Certificates not found. Generating new certificates..."
-    mkdir -p "$SSL_DIR"
+    echo "[SSL] WARNING: SSL certificates not found at $SSL_DIR"
+    echo "[SSL] Certificates must be generated on the host machine before first start."
+    echo "[SSL]"
+    echo "[SSL] To generate certificates, run on your host machine:"
+    echo "[SSL]"
+    echo "[SSL]   mkdir -p docker/db/ssl"
+    echo "[SSL]   cd docker/db/ssl"
+    echo "[SSL]"
+    echo "[SSL]   # Generate CA certificate"
+    echo "[SSL]   openssl req -new -x509 -days 3650 -nodes -text \\"
+    echo "[SSL]     -out ca.crt -keyout ca.key -subj \"/CN=PostgreSQL CA\""
+    echo "[SSL]"
+    echo "[SSL]   # Generate server certificate"
+    echo "[SSL]   openssl req -new -nodes -text \\"
+    echo "[SSL]     -out server.csr -keyout server.key -subj \"/CN=postgres\""
+    echo "[SSL]"
+    echo "[SSL]   # Sign server certificate"
+    echo "[SSL]   openssl x509 -req -in server.csr -text -days 3650 \\"
+    echo "[SSL]     -CA ca.crt -CAkey ca.key -CAcreateserial -out server.crt"
+    echo "[SSL]"
+    echo "[SSL]   # Set permissions"
+    echo "[SSL]   chmod 600 server.key ca.key"
+    echo "[SSL]   chmod 644 server.crt ca.crt"
+    echo "[SSL]"
+    echo "[SSL]   # Cleanup"
+    echo "[SSL]   rm -f server.csr ca.srl"
+    echo "[SSL]   cd ../../.."
+    echo "[SSL]"
+    echo "[SSL] After generating certificates, restart the container:"
+    echo "[SSL]   docker compose restart database"
+    echo "[SSL]"
 
-    # Generate CA certificate (10 year validity)
-    echo "[SSL] Generating CA certificate..."
-    openssl req -new -x509 -days 3650 -nodes -text \
-        -out "$CA_CERT" \
-        -keyout "$CA_KEY" \
-        -subj "/CN=PostgreSQL CA" 2>&1 | grep -v "^$"
-
-    # Generate server certificate request
-    echo "[SSL] Generating server certificate request..."
-    openssl req -new -nodes -text \
-        -out "$SSL_DIR/server.csr" \
-        -keyout "$SERVER_KEY" \
-        -subj "/CN=postgres" 2>&1 | grep -v "^$"
-
-    # Sign server certificate with CA (10 year validity)
-    echo "[SSL] Signing server certificate..."
-    openssl x509 -req -in "$SSL_DIR/server.csr" -text -days 3650 \
-        -CA "$CA_CERT" -CAkey "$CA_KEY" -CAcreateserial \
-        -out "$SERVER_CERT" 2>&1 | grep -v "^$" | grep -v "^Signature ok"
-
-    # Set proper permissions (required by PostgreSQL)
-    chmod 600 "$SERVER_KEY" "$CA_KEY"
-    chmod 644 "$SERVER_CERT" "$CA_CERT"
-
-    # Clean up
-    rm -f "$SSL_DIR/server.csr" "$SSL_DIR/ca.srl"
-
-    echo "[SSL] SSL certificates generated successfully"
-}
-
-# Function to setup read-only user and permissions
+    # Exit with error - container cannot proceed without SSL certs
+    exit 1
+}# Function to setup read-only user and permissions
 setup_readonly_user() {
     local readonly_user="${POSTGRES_READONLY_USER:-readonly}"
     local readonly_password="${POSTGRES_READONLY_PASSWORD}"
@@ -141,7 +142,7 @@ echo ""
 
 # Start PostgreSQL in background
 echo "[STARTUP] Starting PostgreSQL..."
-exec "$POSTGRES_BIN" &
+"$POSTGRES_BIN" &
 POSTGRES_PID=$!
 
 # Wait for PostgreSQL to be ready
