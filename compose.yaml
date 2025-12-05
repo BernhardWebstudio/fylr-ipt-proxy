@@ -61,6 +61,12 @@ services:
     env_file:
       - .env.local
     image: postgres:${POSTGRES_VERSION:-16}-alpine
+    command:
+      ["postgres",
+       "-c", "config_file=/var/lib/postgresql/data/postgresql.conf",
+       "-c", "hba_file=/var/lib/postgresql/data/pg_hba.conf",
+       "-c", "include_dir=/var/lib/postgresql/data/conf.d"
+      ]
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-app}
