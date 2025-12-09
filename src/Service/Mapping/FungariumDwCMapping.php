@@ -463,7 +463,8 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
                 return [
                     'iso_date' => $startDate['iso'] . '/' . $endDate['iso'],
                     'year' => $startDate['year'],
-                    'month' => $startDate['month']
+                    'month' => $startDate['month'],
+                    'day' => $startDate['day']
                 ];
             }
         }
@@ -474,7 +475,8 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
             return [
                 'iso_date' => $singleDate['iso'],
                 'year' => $singleDate['year'],
-                'month' => $singleDate['month']
+                'month' => $singleDate['month'],
+                'day' => $singleDate['day']
             ];
         }
 
