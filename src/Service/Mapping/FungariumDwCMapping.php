@@ -241,6 +241,7 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
                         $event->setEventDate($parsedDate['iso_date']);
                         $event->setYear($parsedDate['year']);
                         $event->setMonth($parsedDate['month']);
+                        $event->setDay($parsedDate['day']);
                     }
                 }
             }
@@ -489,7 +490,8 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
             return [
                 'iso' => $dateValue,
                 'year' => $matches[1],
-                'month' => $matches[2]
+                'month' => $matches[2],
+                'day' => $matches[3]
             ];
         }
 
@@ -501,7 +503,8 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
             return [
                 'iso' => "$year-$month-$day",
                 'year' => $year,
-                'month' => $month
+                'month' => $month,
+                'day' => $day
             ];
         }
 
@@ -513,7 +516,8 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
             return [
                 'iso' => "$year-$month-$day",
                 'year' => $year,
-                'month' => $month
+                'month' => $month,
+                'day' => $day
             ];
         }
 
@@ -522,7 +526,8 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
             return [
                 'iso' => $dateValue,
                 'year' => $matches[1],
-                'month' => $matches[2]
+                'month' => $matches[2],
+                'day' => null
             ];
         }
 
@@ -532,7 +537,8 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
             return [
                 'iso' => "$year-$month",
                 'year' => $year,
-                'month' => $month
+                'month' => $month,
+                'day' => null
             ];
         }
 
@@ -541,7 +547,8 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
             return [
                 'iso' => $dateValue,
                 'year' => $matches[1],
-                'month' => null
+                'month' => null,
+                'day' => null
             ];
         }
 
@@ -551,7 +558,8 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
             return [
                 'iso' => $date->format('Y-m-d'),
                 'year' => $date->format('Y'),
-                'month' => $date->format('m')
+                'month' => $date->format('m'),
+                'day' => $date->format('d')
             ];
         } catch (\Exception $e) {
             // If all parsing fails, return null
