@@ -132,6 +132,13 @@ class EasydbApiService
             return;
         }
 
+        if ($this->initializeFromLoginPassword(
+            getenv('EASYDB_LOGIN') ?: null,
+            getenv('EASYDB_PASSWORD') ?: null
+        )) {
+            return;
+        }
+
         // If we couldn't initialize, throw exception
         throw new \RuntimeException('No valid EasyDB session available. The service must be initialized with credentials.');
     }
@@ -464,5 +471,23 @@ class EasydbApiService
     public function isInitialized(): bool
     {
         return $this->isInitialized;
+    }
+
+    /**
+     * Make a generic GET request to the EasyDB API.
+     * Useful for endpoints like EAS (asset) API.
+     *
+     * @param string $path The API path (e.g., 'eas?ids=[123,456]&format=short')
+     * @return array The parsed JSON response
+     */
+    public function requestUrl(string $path): array
+    {
+        $this->ensureInitialized();
+
+        $url = $this->sessionService->getUrl($path);
+        $response = $this->httpClient->request('GET', $url);
+
+        $this->sessionService->checkStatusCode($response);
+        return $response->toArray();
     }
 }

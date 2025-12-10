@@ -8,6 +8,7 @@ use App\Entity\DarwinCore\Event;
 use App\Entity\DarwinCore\Location;
 use App\Entity\DarwinCore\Identification;
 use App\Entity\OccurrenceImport;
+use App\Service\Asset\AssetResolutionService;
 use Doctrine\ORM\EntityManagerInterface;
 
 class FungariumDwCMapping implements EasydbDwCMappingInterface
@@ -22,7 +23,11 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
     private const UZH_COLLECTION_CODE = 'Z';
     private const UZH_COLLECTION_ID = '322ce107-3156-4420-8a2b-7f17efeaa472';
 
-    public function __construct(private EntityManagerInterface $entityManager) {}
+    public function __construct(
+        private EntityManagerInterface $entityManager,
+        private AssetResolutionService $assetResolutionService,
+    ) {}
+
     public function mapOccurrence(array $source, OccurrenceImport $target): void
     {
         // Set basic import metadata
@@ -403,7 +408,8 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
         // Look for media information in media reverse nested
         $mediaItems = $source["fungarium"]["_reverse_nested:fungarium_mediaassetpublic:fungarium"] ?? [];
 
-        $mediaUrls = [];
+        // Extract asset IDs from the embedded media data
+        $assetIds = [];
         foreach ($mediaItems as $mediaItem) {
             $publicEas = $mediaItem["mediaassetpublic"]["_standard"]["eas"] ?? [];
             if (empty($publicEas)) {
@@ -415,11 +421,20 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
                 continue; // Skip if no assets found
             }
 
+            // Extract the asset IDs for resolution
             foreach ($assets as $asset) {
-                $versions = $asset["versions"];
-                $mediaUrls[] = $versions["original"]["download_url"] ?? reset($versions)["download_url"];
+                if (isset($asset['_id'])) {
+                    $assetIds[] = $asset['_id'];
+                }
             }
         }
+
+        // Resolve original asset URLs using the asset resolution service
+        $mediaUrls = [];
+        if (!empty($assetIds)) {
+            $mediaUrls = $this->assetResolutionService->resolveOriginalAssetUrls($assetIds);
+        }
+
         $occurrence->setAssociatedMedia(implode(' | ', $mediaUrls));
 
         $occurrence->setAssociatedReferences("https://www.nahima.ethz.ch/#/detail/" . $source["_system_object_id"]);
