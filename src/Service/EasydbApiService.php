@@ -367,7 +367,7 @@ class EasydbApiService
     /**
      * Search entities by tag ID and optionally by object type
      */
-    public function searchByTag(?int $tagId = null, ?string $objectType = null, int $offset = 0, int $limit = 100): array
+    public function searchByTag(?int $tagId = null, ?string $objectType = null, int $offset = 0, int $limit = 100, bool $reduceToObjects = true): array
     {
         $this->ensureInitialized();
 
@@ -425,7 +425,7 @@ class EasydbApiService
 
         $this->sessionService->checkStatusCode($response);
         $content = $response->toArray();
-        return $content['objects'] ?? [];
+        return $reduceToObjects ? ($content['objects'] ?? []) : $content;
     }
 
     /**

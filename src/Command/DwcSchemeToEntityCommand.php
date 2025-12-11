@@ -39,7 +39,7 @@ class DwcSchemeToEntityCommand extends Command
     ];
 
     private array $reservedWords = [
-        'order', 'class', 'table', 'column', 'select', 'from', 'where', 'group', 'having', 'limit', 'offset'
+        'order', 'class', 'table', 'column', 'select', 'from', 'where', 'group', 'having', 'limit', 'offset', 'references'
     ];
 
     // This will be populated dynamically from XML parsing

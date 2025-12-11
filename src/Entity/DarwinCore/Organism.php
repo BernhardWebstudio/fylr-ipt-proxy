@@ -95,7 +95,7 @@ class Organism
     #[ORM\Column(name: 'bibliographicCitation', type: 'text', nullable: true)]
     private ?string $bibliographicCitation = null;
 
-    #[ORM\Column(name: 'references', type: 'text', nullable: true)]
+    #[ORM\Column(name: '"references"', type: 'text', nullable: true)]
     private ?string $references = null;
 
     public function __construct()
