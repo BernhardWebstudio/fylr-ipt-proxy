@@ -228,6 +228,7 @@ class EasydbApiService
                 'format' => 'long',
                 'search' => [
                     [
+                        'type' => 'complex',
                         "search" => [
                             [
                                 'fields' => ['_system_object_id'],
