@@ -12,6 +12,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
+use Symfony\Component\Lock\LockFactory;
 
 #[AsCommand(
     name: 'app:import-all-by-tag',
@@ -23,6 +24,7 @@ class ImportAllByTagCommand extends Command
         private readonly SpecimenImportService $specimenImportService,
         private readonly EasydbApiService $easydbApiService,
         #[AutowireIterator("app.easydb_dwc_mapping")] private readonly iterable $mappings,
+        private readonly LockFactory $lockFactory,
     ) {
         parent::__construct();
     }
@@ -33,7 +35,7 @@ class ImportAllByTagCommand extends Command
             ->addArgument('query', InputArgument::REQUIRED, 'Tag ID to find specimens')
             ->addOption('login', 'l', InputOption::VALUE_OPTIONAL, 'EasyDB login username')
             ->addOption('password', 'p', InputOption::VALUE_OPTIONAL, 'EasyDB login password')
-            ->addOption('force', 'f', InputOption::VALUE_NONE, 'Force re-mapping even if remote data has not changed', false)
+            ->addOption('force', 'f', InputOption::VALUE_NONE, 'Force re-mapping even if remote data has not changed')
         ;
     }
 
@@ -46,7 +48,13 @@ class ImportAllByTagCommand extends Command
         $password = $input->getOption('password') ?? getenv('EASYDB_PASSWORD');
         $force = (bool) $input->getOption('force');
 
-        // Initialize EasyDB session with credentials if provided
+        $lock = $this->lockFactory->createLock('import-all-by-tag-' . $tagId);
+        if (!$lock->acquire()) {
+            $io->error('Another instance of this command is already running for tag ' . $tagId);
+            return Command::FAILURE;
+        }
+
+        try {
         if ($login && $password) {
             if (!$this->easydbApiService->initializeFromLoginPassword($login, $password)) {
                 $io->error('Failed to initialize EasyDB session with provided credentials.');
@@ -158,5 +166,8 @@ class ImportAllByTagCommand extends Command
         $io->success(sprintf('Import completed. %d objects imported, %d skipped.', $successCount, $skippedCount));
 
         return Command::SUCCESS;
+        } finally {
+            $lock->release();
+        }
     }
 }
