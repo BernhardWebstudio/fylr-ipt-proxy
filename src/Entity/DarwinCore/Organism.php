@@ -74,6 +74,30 @@ class Organism
     #[ORM\Column(name: 'dynamicProperties', type: 'text', nullable: true)]
     private ?string $dynamicProperties = null;
 
+    #[ORM\Column(name: 'type', type: 'string', nullable: true)]
+    private ?string $type = null;
+
+    #[ORM\Column(name: 'modified', type: 'string', nullable: true)]
+    private ?string $modified = null;
+
+    #[ORM\Column(name: 'language', type: 'string', nullable: true)]
+    private ?string $language = null;
+
+    #[ORM\Column(name: 'license', type: 'text', nullable: true)]
+    private ?string $license = null;
+
+    #[ORM\Column(name: 'rightsHolder', type: 'text', nullable: true)]
+    private ?string $rightsHolder = null;
+
+    #[ORM\Column(name: 'accessRights', type: 'text', nullable: true)]
+    private ?string $accessRights = null;
+
+    #[ORM\Column(name: 'bibliographicCitation', type: 'text', nullable: true)]
+    private ?string $bibliographicCitation = null;
+
+    #[ORM\Column(name: 'references', type: 'text', nullable: true)]
+    private ?string $references = null;
+
     public function __construct()
     {
         $this->occurrences = new ArrayCollection();
@@ -268,6 +292,94 @@ class Organism
     public function setDynamicProperties(?string $dynamicProperties): static
     {
         $this->dynamicProperties = $dynamicProperties;
+        return $this;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(?string $type): static
+    {
+        $this->type = $type;
+        return $this;
+    }
+
+    public function getModified(): ?string
+    {
+        return $this->modified;
+    }
+
+    public function setModified(?string $modified): static
+    {
+        $this->modified = $modified;
+        return $this;
+    }
+
+    public function getLanguage(): ?string
+    {
+        return $this->language;
+    }
+
+    public function setLanguage(?string $language): static
+    {
+        $this->language = $language;
+        return $this;
+    }
+
+    public function getLicense(): ?string
+    {
+        return $this->license;
+    }
+
+    public function setLicense(?string $license): static
+    {
+        $this->license = $license;
+        return $this;
+    }
+
+    public function getRightsHolder(): ?string
+    {
+        return $this->rightsHolder;
+    }
+
+    public function setRightsHolder(?string $rightsHolder): static
+    {
+        $this->rightsHolder = $rightsHolder;
+        return $this;
+    }
+
+    public function getAccessRights(): ?string
+    {
+        return $this->accessRights;
+    }
+
+    public function setAccessRights(?string $accessRights): static
+    {
+        $this->accessRights = $accessRights;
+        return $this;
+    }
+
+    public function getBibliographicCitation(): ?string
+    {
+        return $this->bibliographicCitation;
+    }
+
+    public function setBibliographicCitation(?string $bibliographicCitation): static
+    {
+        $this->bibliographicCitation = $bibliographicCitation;
+        return $this;
+    }
+
+    public function getReferences(): ?string
+    {
+        return $this->references;
+    }
+
+    public function setReferences(?string $references): static
+    {
+        $this->references = $references;
         return $this;
     }
 

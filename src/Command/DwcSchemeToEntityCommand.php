@@ -309,6 +309,7 @@ class DwcSchemeToEntityCommand extends Command
         }
 
         // Parse record level terms
+        $recordLevelTermNames = [];
         $recordLevelTerms = $xml->xpath('//xs:element[@substitutionGroup="dwc:anyRecordLevelTerm"]');
         foreach ($recordLevelTerms as $element) {
             $name = (string) $element['name'];
@@ -325,6 +326,40 @@ class DwcSchemeToEntityCommand extends Command
             foreach ($entities as &$entity) {
                 $entity['recordLevelTerms'][] = $term;
             }
+
+            $recordLevelTermNames[] = $name;
+        }
+
+        // Parse record level terms included via the RecordLevelTerms group (e.g. dc/dcterms)
+        $recordLevelGroupElements = $xml->xpath('//xs:group[@name="RecordLevelTerms"]//xs:element');
+        foreach ($recordLevelGroupElements as $element) {
+            $rawName = (string) ($element['name'] ?? '');
+            $rawRef = (string) ($element['ref'] ?? '');
+            $name = $rawName !== '' ? $rawName : ($rawRef !== '' ? $this->stripNamespacePrefix($rawRef) : '');
+            if ($name === '') {
+                continue;
+            }
+
+            // Skip if already added from substitutionGroup parsing
+            if (in_array($name, $recordLevelTermNames, true)) {
+                continue;
+            }
+
+            $typeAttr = (string) ($element['type'] ?? '');
+            $type = $typeAttr !== '' ? $this->mapXmlTypeToPhp($typeAttr) : 'string';
+
+            $term = [
+                'name' => $name,
+                'type' => $type,
+                'description' => $this->extractDocumentation($element),
+                'nullable' => true
+            ];
+
+            foreach ($entities as &$entity) {
+                $entity['recordLevelTerms'][] = $term;
+            }
+
+            $recordLevelTermNames[] = $name;
         }
 
         // Parse domain-specific terms
@@ -799,30 +834,35 @@ class DwcSchemeToEntityCommand extends Command
     {
         // List of Darwin Core fields that should be mapped to Doctrine 'text' (unlimited length)
         $longTextFields = [
+            'accessRights',
             'associatedMedia',
-            'dynamicProperties',
-            'occurrenceRemarks',
             'associatedOccurrences',
             'associatedReferences',
             'associatedTaxa',
-            'otherCatalogNumbers',
+            'bibliographicCitation',
+            'dynamicProperties',
             'eventRemarks',
             'fieldNotes',
-            'verbatimEventDate',
-            'verbatimLocality',
-            'verbatimElevation',
+            'georeferenceRemarks',
+            'identificationRemarks',
+            'license',
+            'locationRemarks',
+            'measurementRemarks',
+            'occurrenceRemarks',
+            'otherCatalogNumbers',
+            'references',
+            'resourceRelationshipRemarks',
+            'rightsHolder',
+            'taxonRemarks',
+            'verbatimCoordinates',
+            'verbatimCoordinateSystem',
             'verbatimDepth',
+            'verbatimElevation',
+            'verbatimEventDate',
             'verbatimLatitude',
+            'verbatimLocality',
             'verbatimLongitude',
             'verbatimSRS',
-            'verbatimCoordinateSystem',
-            'verbatimCoordinates',
-            'identificationRemarks',
-            'taxonRemarks',
-            'locationRemarks',
-            'georeferenceRemarks',
-            'measurementRemarks',
-            'resourceRelationshipRemarks',
         ];
         if ($phpType === 'string' && in_array($propertyName, $longTextFields, true)) {
             return 'text';
@@ -855,5 +895,10 @@ class DwcSchemeToEntityCommand extends Command
     private function snakeCaseToCamelCase(string $string): string
     {
         return lcfirst(str_replace('_', '', ucwords($string, '_')));
+    }
+
+    private function stripNamespacePrefix(string $qualifiedName): string
+    {
+        return str_contains($qualifiedName, ':') ? substr($qualifiedName, strpos($qualifiedName, ':') + 1) : $qualifiedName;
     }
 }

@@ -437,7 +437,7 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
 
         $occurrence->setAssociatedMedia(implode(' | ', $mediaUrls));
 
-        $occurrence->setAssociatedReferences("https://www.nahima.ethz.ch/#/detail/" . $source["_system_object_id"]);
+        $occurrence->setReferences("https://www.nahima.ethz.ch/#/detail/" . $source["_system_object_id"]);
     }
 
     private function extractAuthorship(string $scientificName): string

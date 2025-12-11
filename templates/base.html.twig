@@ -172,7 +172,7 @@
 			<!-- Navbar end -->
 
 			<!-- Content wrapper start -->
-			<div class="content-wrapper">
+			<div class="content-wrapper p-2">
 				{% for label, messages in app.flashes %}
 					{% for message in messages %}
 						<div class="alert alert-{{ label == 'error' ? 'danger' : label }} alert-dismissible" role="alert">
