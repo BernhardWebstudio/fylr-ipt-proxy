@@ -69,10 +69,9 @@ class RefreshAllImportedSpecimenCommand extends Command
             $io->note('FORCE MODE - Re-mapping all specimens even if remote data has not changed');
         }
 
-        // Get all imported specimens
+        // Get total count first (without loading all entities)
         $io->section('Fetching all imported specimens from database...');
-        $allImports = $this->occurrenceImportRepository->findAll();
-        $totalCount = count($allImports);
+        $totalCount = $this->occurrenceImportRepository->getTotalCount();
 
         if ($totalCount === 0) {
             $io->warning('No imported specimens found in the database.');
@@ -81,7 +80,7 @@ class RefreshAllImportedSpecimenCommand extends Command
 
         $io->info(sprintf('Found %d specimens to refresh', $totalCount));
 
-        // Process each specimen
+        // Process each specimen using iteration to avoid memory issues
         $io->section('Refreshing specimens from EasyDB...');
         $progressBar = $io->createProgressBar($totalCount);
         $progressBar->start();
@@ -90,8 +89,14 @@ class RefreshAllImportedSpecimenCommand extends Command
         $errorCount = 0;
         $skippedCount = 0;
         $errors = [];
+        $batchSize = 50; // Process in batches to avoid memory exhaustion
+        $processedCount = 0;
 
-        foreach ($allImports as $index => $import) {
+        // Use Doctrine's iterate() method for memory-efficient processing
+        $queryBuilder = $this->occurrenceImportRepository->createQueryBuilder('oi');
+        $query = $queryBuilder->getQuery();
+
+        foreach ($query->toIterable() as $import) {
             $globalObjectId = $import->getGlobalObjectID();
 
             try {
@@ -126,13 +131,28 @@ class RefreshAllImportedSpecimenCommand extends Command
                 // Continue with next specimen even if this one fails
             }
 
+            $processedCount++;
             $progressBar->advance();
+
+            // Flush and clear EntityManager periodically to free memory
+            if ($processedCount % $batchSize === 0) {
+                if (!$dryRun) {
+                    $this->entityManager->flush();
+                }
+                $this->entityManager->clear();
+
+                // Force garbage collection to free memory
+                gc_collect_cycles();
+            }
         }
 
         // Final flush for remaining items
-        if (!$dryRun && $successCount > 0) {
+        if (!$dryRun && ($successCount % $batchSize !== 0)) {
             $this->entityManager->flush();
         }
+
+        // Final clear
+        $this->entityManager->clear();
 
         $progressBar->finish();
         $io->newLine(2);
