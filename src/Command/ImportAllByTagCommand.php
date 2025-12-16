@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Service\EasydbApiService;
 use App\Service\SpecimenImportService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -25,6 +26,7 @@ class ImportAllByTagCommand extends Command
         private readonly EasydbApiService $easydbApiService,
         #[AutowireIterator("app.easydb_dwc_mapping")] private readonly iterable $mappings,
         private readonly LockFactory $lockFactory,
+        private readonly EntityManagerInterface $entityManager,
     ) {
         parent::__construct();
     }
@@ -123,13 +125,22 @@ class ImportAllByTagCommand extends Command
                     }
                 } catch (\Throwable $e) {
                     $errorCount++;
-                    $errors[] = sprintf('Import failed for object: %s', $e->getMessage());
+                    // Limit error array to prevent memory issues
+                    if (count($errors) < 1000) {
+                        $errors[] = sprintf('Import failed for object: %s', $e->getMessage());
+                    }
                     $io->error(sprintf('Error importing object: %s', $e->getMessage()));
                     // Continue with next item
                 }
 
                 $processed++;
                 $progressBar->advance();
+
+                // Clear EntityManager periodically to prevent memory exhaustion
+                if ($processed % 50 === 0) {
+                    $this->entityManager->clear();
+                    gc_collect_cycles();
+                }
             }
 
             $offset += count($objects);
