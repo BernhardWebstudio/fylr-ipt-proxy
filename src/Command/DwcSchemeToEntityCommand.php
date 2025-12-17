@@ -846,6 +846,7 @@ class DwcSchemeToEntityCommand extends Command
             'georeferenceRemarks',
             'identificationRemarks',
             'license',
+            'locality',
             'locationRemarks',
             'measurementRemarks',
             'occurrenceRemarks',

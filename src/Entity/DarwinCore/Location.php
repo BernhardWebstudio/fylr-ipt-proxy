@@ -78,7 +78,7 @@ class Location
     #[ORM\Column(name: 'municipality', type: 'string', nullable: true)]
     private ?string $municipality = null;
 
-    #[ORM\Column(name: 'locality', type: 'string', nullable: true)]
+    #[ORM\Column(name: 'locality', type: 'text', nullable: true)]
     private ?string $locality = null;
 
     #[ORM\Column(name: 'verbatimLocality', type: 'text', nullable: true)]

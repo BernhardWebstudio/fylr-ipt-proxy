@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Service\EasydbApiService;
 use App\Service\SpecimenImportService;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\EntityManagerClosed;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -38,6 +39,8 @@ class ImportAllByTagCommand extends Command
             ->addOption('login', 'l', InputOption::VALUE_OPTIONAL, 'EasyDB login username')
             ->addOption('password', 'p', InputOption::VALUE_OPTIONAL, 'EasyDB login password')
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Force re-mapping even if remote data has not changed')
+            ->addOption('offset', null, InputOption::VALUE_OPTIONAL, 'Start at this offset (for resuming after errors)', 0)
+            ->addOption('retry-on-close', null, InputOption::VALUE_OPTIONAL, 'Number of times to retry the command if EntityManager closes', 3)
         ;
     }
 
@@ -49,6 +52,9 @@ class ImportAllByTagCommand extends Command
         $login = $input->getOption('login') ?? getenv('EASYDB_LOGIN');
         $password = $input->getOption('password') ?? getenv('EASYDB_PASSWORD');
         $force = (bool) $input->getOption('force');
+        $initialOffset = (int) $input->getOption('offset');
+        $retryOnClose = (int) $input->getOption('retry-on-close');
+        $retryCount = 0;
 
         $lock = $this->lockFactory->createLock('import-all-by-tag-' . $tagId);
         if (!$lock->acquire()) {
@@ -69,7 +75,7 @@ class ImportAllByTagCommand extends Command
         }
 
         $numPerPage = 50;
-        $offset = 0;
+        $offset = $initialOffset;
 
         // First request to get total count (we get full response by passing reduceToObjects=false)
         try {
@@ -86,16 +92,22 @@ class ImportAllByTagCommand extends Command
             return Command::SUCCESS;
         }
 
-        $io->section(sprintf('Found %d object(s) for tag %s', $totalNum, $tagId));
+        if ($initialOffset > 0) {
+            $io->section(sprintf('Resuming from offset %d. Found %d object(s) total for tag %s', $initialOffset, $totalNum, $tagId));
+        } else {
+            $io->section(sprintf('Found %d object(s) for tag %s', $totalNum, $tagId));
+        }
 
-        $progressBar = $io->createProgressBar($totalNum);
+        $progressBar = $io->createProgressBar($totalNum - $initialOffset);
         $progressBar->start();
 
         $processed = 0;
         $successCount = 0;
         $skippedCount = 0;
         $errorCount = 0;
+        $entityManagerClosedCount = 0;
         $errors = [];
+        $lastSuccessfulOffset = $initialOffset;
 
         // Paging loop
         while ($offset < $totalNum) {
@@ -123,6 +135,35 @@ class ImportAllByTagCommand extends Command
                     } else {
                         $skippedCount++;
                     }
+                    $lastSuccessfulOffset = $offset + $processed;
+                } catch (EntityManagerClosed $e) {
+                    // EntityManager was closed due to an error
+                    $entityManagerClosedCount++;
+                    $errorCount++;
+                    if (count($errors) < 1000) {
+                        $errors[] = sprintf('EntityManager closed during import: %s', $e->getMessage());
+                    }
+                    $io->error(sprintf('EntityManager closed at offset %d: %s', $offset + $processed, $e->getMessage()));
+
+                    // Close the EntityManager to reset it
+                    if ($this->entityManager->isOpen()) {
+                        $this->entityManager->close();
+                    }
+
+                    // If we've hit too many EntityManager closures, exit and let the command retry from this point
+                    if ($entityManagerClosedCount >= $retryOnClose) {
+                        $io->warning(sprintf('EntityManager closed %d times. Exiting to retry with fresh process.', $entityManagerClosedCount));
+                        $progressBar->finish();
+                        $io->newLine(2);
+
+                        // Output retry instruction
+                        $io->section('Resuming Import');
+                        $io->text(sprintf('To resume from where we left off, run:'));
+                        $io->text(sprintf('<info>bin/console app:import-all-by-tag %s --offset=%d --retry-on-close=%d</info>', $tagId, $lastSuccessfulOffset, $retryOnClose));
+
+                        // Still return failure because we didn't complete
+                        return Command::FAILURE;
+                    }
                 } catch (\Throwable $e) {
                     $errorCount++;
                     // Limit error array to prevent memory issues
@@ -138,7 +179,7 @@ class ImportAllByTagCommand extends Command
 
                 // Clear EntityManager periodically to prevent memory exhaustion
                 if ($processed % 50 === 0) {
-                    $this->entityManager->clear();
+                    $this->safeClearEntityManager();
                     gc_collect_cycles();
                 }
             }
@@ -158,6 +199,7 @@ class ImportAllByTagCommand extends Command
                 ['Successfully imported', $successCount],
                 ['Skipped', $skippedCount],
                 ['Errors', $errorCount],
+                ['EntityManager closures', $entityManagerClosedCount],
             ]
         );
 
@@ -179,6 +221,21 @@ class ImportAllByTagCommand extends Command
         return Command::SUCCESS;
         } finally {
             $lock->release();
+        }
+    }
+
+    /**
+     * Safely clear the EntityManager, closing it if it's already closed
+     */
+    private function safeClearEntityManager(): void
+    {
+        try {
+            if ($this->entityManager->isOpen()) {
+                $this->entityManager->clear();
+            }
+        } catch (EntityManagerClosed $e) {
+            // If it's already closed, just close it to reset the state
+            $this->entityManager->close();
         }
     }
 }
