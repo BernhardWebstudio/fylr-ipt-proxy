@@ -14,6 +14,7 @@ final class ImportDataMessage
         private int $userId,
         private ?string $easydbToken = null,
         private ?array $easydbSessionContent = null,
+        private bool $isFylr = false,
         private int $page = 1,
         private int $pageSize = 100
     ) {}
@@ -46,6 +47,11 @@ final class ImportDataMessage
     public function getEasydbSessionContent(): ?array
     {
         return $this->easydbSessionContent;
+    }
+
+    public function isFylr(): bool
+    {
+        return $this->isFylr;
     }
 
     public function getPage(): int

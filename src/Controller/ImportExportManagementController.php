@@ -114,8 +114,9 @@ final class ImportExportManagementController extends AbstractController
                 $session = $request->getSession();
                 $easydbToken = $session->get('easydb_token');
                 $easydbSessionContent = $session->get('easydb_session_content');
+                $isFylr = $session->get('easydb_is_fylr', false);
 
-                if (!$easydbToken || !$easydbSessionContent) {
+                if (!$easydbToken) {
                     $this->addFlash('error', $translator->trans('flash.no_easydb_session'));
                     return $this->redirectToRoute('app_import_management');
                 }
@@ -130,7 +131,8 @@ final class ImportExportManagementController extends AbstractController
                     $criteria,
                     $user->getId(),
                     $easydbToken,
-                    $easydbSessionContent
+                    $easydbSessionContent,
+                    $isFylr
                 );
                 $messageBus->dispatch($importMessage);
 

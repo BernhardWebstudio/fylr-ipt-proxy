@@ -56,7 +56,7 @@ final class ImportDataMessageHandler
 
         try {
             // Initialize EasyDB API service with credentials from the message
-            $this->easydbApiService->initializeFromCredentials($easydbToken, $easydbSessionContent);
+            $this->easydbApiService->initializeFromCredentials($easydbToken, $easydbSessionContent, $message->isFylr());
 
             // Update job status to running
             $this->jobStatusService->updateJobStatus($jobId, 'running');
@@ -152,6 +152,7 @@ final class ImportDataMessageHandler
                     $userId,
                     $easydbToken,
                     $easydbSessionContent,
+                    $message->isFylr(),
                     $page + 1,
                     $pageSize
                 );

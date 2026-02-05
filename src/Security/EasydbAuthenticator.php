@@ -153,9 +153,11 @@ class EasydbAuthenticator extends AbstractAuthenticator implements Authenticatio
     {
         // Store EasyDB session token in the user session for later use
         $session = $request->getSession();
-        if ($this->easydbSession->getToken()) {
-            $session->set('easydb_token', $this->easydbSession->getToken());
+        $authToken = $this->easydbSession->getAuthToken();
+        if ($authToken) {
+            $session->set('easydb_token', $authToken);
             $session->set('easydb_session_content', $this->easydbSession->getSessionContent());
+            $session->set('easydb_is_fylr', $this->easydbSession->isFylr());
         }
 
         $this->logger->info('Authentication successful', [

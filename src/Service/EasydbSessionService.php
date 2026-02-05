@@ -20,18 +20,27 @@ class EasydbSessionService
     private string $searchUrl;
     private string $pluginUrl;
     private string $serverUrl;
+    private string $oauthTokenUrl;
 
     private ?string $token = null;
+    private ?string $accessToken = null;
     private ?array $sessionContent = null;
     private ?array $sessionHeader = null;
     private ?string $login = null;
     private ?string $password = null;
+    private bool $isFylr = false;
+    private ?string $clientId = null;
+    private ?string $clientSecret = null;
 
     public function __construct(
         private HttpClientInterface $httpClient,
         private LoggerInterface $logger,
-        private string $easydbServerUrl
+        private string $easydbServerUrl,
+        ?string $clientId = null,
+        ?string $clientSecret = null
     ) {
+        $this->clientId = $clientId;
+        $this->clientSecret = $clientSecret;
         $this->initializeUrls($easydbServerUrl);
     }
 
@@ -50,6 +59,7 @@ class EasydbSessionService
         $this->searchUrl = $this->baseUrl . 'search';
         $this->pluginUrl = $this->baseUrl . 'plugin';
         $this->serverUrl = $this->baseUrl . 'plugin/base/server/status';
+        $this->oauthTokenUrl = $server . '/api/oauth2/token';
     }
 
     /**
@@ -61,6 +71,14 @@ class EasydbSessionService
 
         try {
             $response = $this->httpClient->request('GET', $this->newSessionUrl);
+            $statusCode = $response->getStatusCode();
+
+            if ($statusCode === 400) {
+                $this->logger->info('Detected Fylr instance (400 on session endpoint)');
+                $this->isFylr = true;
+                return []; // No session content for Fylr
+            }
+
             $this->checkStatusCode($response);
 
             $content = $response->toArray();
@@ -81,11 +99,15 @@ class EasydbSessionService
     }
 
     /**
-     * Retrieve the same session using Token and plain url
+     * Retrieve the same session using Token and plain url (for EasyDB only)
      * Compare instances to prove similarity
      */
     public function retrieveCurrentSession(): array
     {
+        if ($this->isFylr) {
+            throw new \RuntimeException('retrieveCurrentSession is not supported for Fylr');
+        }
+
         if (!$this->token) {
             throw new \RuntimeException('No active session token available');
         }
@@ -110,17 +132,26 @@ class EasydbSessionService
     }
 
     /**
-     * Authenticate Session using authenticate url
+     * Authenticate Session using authenticate url or OAuth2 for Fylr
      * login and password credentials required, or email instead of login
      */
     public function authenticateSession(string $login, string $password): array
     {
+        $this->login = $login;
+        $this->password = $password;
+
+        if ($this->isFylr) {
+            return $this->authenticateFylr($login, $password);
+        } else {
+            return $this->authenticateEasydb($login, $password);
+        }
+    }
+
+    private function authenticateEasydb(string $login, string $password): array
+    {
         if (!$this->token) {
             throw new \RuntimeException('No active session token available');
         }
-
-        $this->login = $login;
-        $this->password = $password;
 
         $payload = [
             'token' => $this->token,
@@ -145,11 +176,53 @@ class EasydbSessionService
         return $content;
     }
 
+    private function authenticateFylr(string $login, string $password): array
+    {
+        $payload = [
+            'grant_type' => 'password',
+            'username' => $login,
+            'password' => $password,
+        ];
+
+        if ($this->clientId) {
+            $payload['client_id'] = $this->clientId;
+        }
+        if ($this->clientSecret) {
+            $payload['client_secret'] = $this->clientSecret;
+        }
+
+        $this->logger->info('Authenticating Fylr via OAuth2', [
+            'login' => $login,
+            'client_id' => $this->clientId
+        ]);
+
+        $response = $this->httpClient->request('POST', $this->oauthTokenUrl, [
+            'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
+            'body' => http_build_query($payload)
+        ]);
+
+        $this->checkStatusCode($response);
+        $content = $response->toArray();
+
+        $this->accessToken = $this->getValue($content, 'access_token');
+
+        $this->logger->info('Fylr authenticated successfully');
+
+        return $content;
+    }
+
     /**
-     * Deauthenticate session using deauthenticate url
+     * Deauthenticate session using deauthenticate url or clear for Fylr
      */
     public function deauthenticateSession(): array
     {
+        if ($this->isFylr) {
+            // For Fylr, no deauth endpoint mentioned, just clear
+            $this->logger->info('Deauthenticating Fylr session (clearing tokens)');
+            $this->clearSession();
+            return [];
+        }
+
         if (!$this->token) {
             throw new \RuntimeException('No active session token available');
         }
@@ -165,29 +238,37 @@ class EasydbSessionService
         $this->checkStatusCode($response, false);
         $content = $response->toArray();
 
-        // Clear session data
-        $this->token = null;
-        $this->sessionContent = null;
-        $this->sessionHeader = null;
-        $this->login = null;
-        $this->password = null;
+        $this->clearSession();
 
         $this->logger->info('EasyDB session deauthenticated successfully');
 
         return $content;
     }
 
+    private function clearSession(): void
+    {
+        $this->token = null;
+        $this->accessToken = null;
+        $this->sessionContent = null;
+        $this->sessionHeader = null;
+        $this->login = null;
+        $this->password = null;
+    }
+
     /**
-     * Get URL with token parameter
+     * Get URL with token or access_token parameter
      */
     public function getUrl(string $path): string
     {
-        if (!$this->token) {
-            throw new \RuntimeException('No active session token available');
+        $token = $this->isFylr ? $this->accessToken : $this->token;
+
+        if (!$token) {
+            throw new \RuntimeException('No active token available');
         }
 
         $separator = str_contains($path, '?') ? '&' : '?';
-        return $this->baseUrl . $path . $separator . 'token=' . $this->token;
+        $param = $this->isFylr ? 'access_token' : 'token';
+        return $this->baseUrl . $path . $separator . $param . '=' . $token;
     }
 
     /**
@@ -195,15 +276,15 @@ class EasydbSessionService
      */
     public function isAuthenticated(): bool
     {
-        return $this->token !== null && $this->login !== null;
+        return ($this->token !== null || $this->accessToken !== null) && $this->login !== null;
     }
 
     /**
-     * Get current token
+     * Get current token (for EasyDB) or access_token (for Fylr)
      */
-    public function getToken(): ?string
+    public function getAuthToken(): ?string
     {
-        return $this->token;
+        return $this->isFylr ? $this->accessToken : $this->token;
     }
 
     /**
@@ -215,11 +296,11 @@ class EasydbSessionService
     }
 
     /**
-     * Get session content
+     * Check if this is a Fylr instance
      */
-    public function getSessionContent(): ?array
+    public function isFylr(): bool
     {
-        return $this->sessionContent;
+        return $this->isFylr;
     }
 
     /**

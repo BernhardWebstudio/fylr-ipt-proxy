@@ -38,13 +38,14 @@ class EasydbApiService
 
         $token = $session->get('easydb_token');
         $sessionContent = $session->get('easydb_session_content');
+        $isFylr = $session->get('easydb_is_fylr', false);
 
-        if (!$token || !$sessionContent) {
+        if (!$token) {
             return false;
         }
 
         try {
-            $this->restoreSessionState($token, $sessionContent);
+            $this->restoreSessionState($token, $sessionContent, $isFylr);
             $this->isInitialized = true;
             return true;
         } catch (\Exception $e) {
@@ -55,6 +56,7 @@ class EasydbApiService
             // Clear invalid session data
             $session->remove('easydb_token');
             $session->remove('easydb_session_content');
+            $session->remove('easydb_is_fylr');
 
             return false;
         }
@@ -63,19 +65,19 @@ class EasydbApiService
     /**
      * Initialize EasyDB session from explicit credentials (for use in async contexts like message handlers)
      */
-    public function initializeFromCredentials(?string $token, ?array $sessionContent): bool
+    public function initializeFromCredentials(?string $token, ?array $sessionContent, bool $isFylr = false): bool
     {
         // Skip if already initialized
         if ($this->isInitialized) {
             return true;
         }
 
-        if (!$token || !$sessionContent) {
+        if (!$token) {
             return false;
         }
 
         try {
-            $this->restoreSessionState($token, $sessionContent);
+            $this->restoreSessionState($token, $sessionContent, $isFylr);
             $this->isInitialized = true;
             return true;
         } catch (\Exception $e) {
@@ -112,7 +114,8 @@ class EasydbApiService
             return true;
         } catch (\Exception $e) {
             $this->logger->warning('Failed to initialize EasyDB session via login/password', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'exception' => $e
             ]);
             return false;
         }
@@ -146,20 +149,30 @@ class EasydbApiService
     /**
      * Restore session state to the EasydbSessionService
      */
-    private function restoreSessionState(string $token, array $sessionContent): void
+    private function restoreSessionState(string $token, ?array $sessionContent, bool $isFylr): void
     {
         $reflection = new \ReflectionClass($this->sessionService);
 
-        $tokenProperty = $reflection->getProperty('token');
-        $tokenProperty->setAccessible(true);
-        $tokenProperty->setValue($this->sessionService, $token);
+        if ($isFylr) {
+            $accessTokenProperty = $reflection->getProperty('accessToken');
+            $accessTokenProperty->setAccessible(true);
+            $accessTokenProperty->setValue($this->sessionService, $token);
 
-        $contentProperty = $reflection->getProperty('sessionContent');
-        $contentProperty->setAccessible(true);
-        $contentProperty->setValue($this->sessionService, $sessionContent);
+            $isFylrProperty = $reflection->getProperty('isFylr');
+            $isFylrProperty->setAccessible(true);
+            $isFylrProperty->setValue($this->sessionService, true);
+        } else {
+            $tokenProperty = $reflection->getProperty('token');
+            $tokenProperty->setAccessible(true);
+            $tokenProperty->setValue($this->sessionService, $token);
 
-        // Verify session is still valid
-        $this->sessionService->retrieveCurrentSession();
+            $contentProperty = $reflection->getProperty('sessionContent');
+            $contentProperty->setAccessible(true);
+            $contentProperty->setValue($this->sessionService, $sessionContent);
+
+            // Verify session is still valid
+            $this->sessionService->retrieveCurrentSession();
+        }
     }
 
     /**

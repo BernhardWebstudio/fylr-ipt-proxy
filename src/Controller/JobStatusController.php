@@ -206,8 +206,9 @@ final class JobStatusController extends AbstractController
             $session = $request->getSession();
             $easydbToken = $session->get('easydb_token');
             $easydbSessionContent = $session->get('easydb_session_content');
+            $isFylr = $session->get('easydb_is_fylr', false);
 
-            if (!$easydbToken || !$easydbSessionContent) {
+            if (!$easydbToken) {
                 $this->addFlash('error', 'EasyDB session expired. Please log in again to retry the job.');
                 return $this->redirectToRoute('app_job_status', ['jobId' => $jobId]);
             }
@@ -218,7 +219,8 @@ final class JobStatusController extends AbstractController
                 $criteria,
                 $user->getId(),
                 $easydbToken,
-                $easydbSessionContent
+                $easydbSessionContent,
+                $isFylr
             );
             $messageBus->dispatch($importMessage);
 
