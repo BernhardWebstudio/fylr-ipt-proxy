@@ -2,7 +2,9 @@
 services:
   php:
     env_file:
+      - .env
       - .env.local
+      - .env.prod.local
     build:
       context: .
       target: frankenphp_prod
@@ -15,7 +17,9 @@ services:
   # Message consumer for production
   messenger_consumer:
     env_file:
+      - .env
       - .env.local
+      - .env.prod.local
     build:
       context: .
       target: frankenphp_prod

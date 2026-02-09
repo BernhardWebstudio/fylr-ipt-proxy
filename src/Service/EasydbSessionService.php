@@ -39,8 +39,8 @@ class EasydbSessionService
         ?string $clientId = null,
         ?string $clientSecret = null
     ) {
-        $this->clientId = $clientId;
-        $this->clientSecret = $clientSecret;
+        $this->clientId = $clientId ?? getenv('EASYDB_CLIENT_ID');
+        $this->clientSecret = $clientSecret ?? getenv('EASYDB_CLIENT_SECRET');
         $this->initializeUrls($easydbServerUrl);
     }
 
