@@ -26,6 +26,22 @@ if [ "$1" = 'frankenphp' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 		composer install --prefer-dist --no-progress --no-interaction
 	fi
 
+	# Clear and warm up cache when dependencies change (persistent /app/var volume)
+	if [ -f composer.lock ]; then
+		CURRENT_LOCK_HASH=$(sha256sum composer.lock | awk '{print $1}')
+		CACHED_LOCK_HASH_FILE="var/cache/.composer.lock.hash"
+		CACHED_LOCK_HASH=""
+		if [ -f "$CACHED_LOCK_HASH_FILE" ]; then
+			CACHED_LOCK_HASH=$(cat "$CACHED_LOCK_HASH_FILE")
+		fi
+		if [ "$CURRENT_LOCK_HASH" != "$CACHED_LOCK_HASH" ]; then
+			echo "Composer lock changed; clearing Symfony cache"
+			php bin/console cache:clear
+			php bin/console cache:warmup
+			echo "$CURRENT_LOCK_HASH" > "$CACHED_LOCK_HASH_FILE"
+		fi
+	fi
+
 	# Display information about the current project
 	# Or about an error in project initialization
 	php bin/console -V
