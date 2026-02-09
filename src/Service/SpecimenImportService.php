@@ -47,6 +47,13 @@ class SpecimenImportService
         try {
             // Load entity data from EasyDB
             $entityData = $this->easydbApiService->loadEntityByGlobalObjectID($globalObjectId);
+            if ($entityData === null) {
+                $this->logger->warning('No entity found for global object ID', [
+                    'globalObjectId' => $globalObjectId,
+                    'userId' => $user?->getId(),
+                ]);
+                return false;
+            }
 
             return $this->importByEntityData(
                 $entityData,
@@ -97,6 +104,15 @@ class SpecimenImportService
         try {
             // Load entity data from EasyDB
             $entityData = $this->easydbApiService->loadEntityByUUIDAndSystemObjectID($uuid, $systemObjectId);
+            if ($entityData === null) {
+                $this->logger->warning('No entity found for UUID/system object id', [
+                    'type' => $type,
+                    'uuid' => $uuid,
+                    'systemObjectId' => $systemObjectId,
+                    'userId' => $user?->getId(),
+                ]);
+                return false;
+            }
 
             return $this->importByEntityData(
                 $entityData,

@@ -26,18 +26,36 @@ if [ "$1" = 'frankenphp' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 		composer install --prefer-dist --no-progress --no-interaction
 	fi
 
-	# Clear and warm up cache when dependencies change (persistent /app/var volume)
+	# Clear and warm up cache when dependencies or cache timestamps change (persistent /app/var volume)
+	CACHE_ENV_DIR="var/cache/${APP_ENV:-dev}"
+	CACHED_LOCK_HASH_FILE="var/cache/.composer.lock.hash"
+	SHOULD_CLEAR_CACHE=0
+
 	if [ -f composer.lock ]; then
 		CURRENT_LOCK_HASH=$(sha256sum composer.lock | awk '{print $1}')
-		CACHED_LOCK_HASH_FILE="var/cache/.composer.lock.hash"
 		CACHED_LOCK_HASH=""
 		if [ -f "$CACHED_LOCK_HASH_FILE" ]; then
 			CACHED_LOCK_HASH=$(cat "$CACHED_LOCK_HASH_FILE")
 		fi
 		if [ "$CURRENT_LOCK_HASH" != "$CACHED_LOCK_HASH" ]; then
-			echo "Composer lock changed; clearing Symfony cache"
-			php bin/console cache:clear
-			php bin/console cache:warmup
+			SHOULD_CLEAR_CACHE=1
+		fi
+	fi
+
+	# If cache is older than vendor/autoload.php, clear to avoid stale containers
+	if [ -f "${CACHE_ENV_DIR}/App_Kernel${APP_ENV:-dev}Container.php" ] && [ -f vendor/autoload.php ]; then
+		CACHE_MTIME=$(stat -c %Y "${CACHE_ENV_DIR}/App_Kernel${APP_ENV:-dev}Container.php" 2>/dev/null || echo 0)
+		AUTOLOAD_MTIME=$(stat -c %Y vendor/autoload.php 2>/dev/null || echo 0)
+		if [ "$AUTOLOAD_MTIME" -gt "$CACHE_MTIME" ]; then
+			SHOULD_CLEAR_CACHE=1
+		fi
+	fi
+
+	if [ "$SHOULD_CLEAR_CACHE" -eq 1 ]; then
+		echo "Clearing Symfony cache (detected stale cache)"
+		php bin/console cache:clear
+		php bin/console cache:warmup
+		if [ -f composer.lock ]; then
 			echo "$CURRENT_LOCK_HASH" > "$CACHED_LOCK_HASH_FILE"
 		fi
 	fi
