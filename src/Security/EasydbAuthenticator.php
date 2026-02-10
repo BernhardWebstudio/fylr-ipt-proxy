@@ -156,7 +156,6 @@ class EasydbAuthenticator extends AbstractAuthenticator implements Authenticatio
         $authToken = $this->easydbSession->getAuthToken();
         if ($authToken) {
             $session->set('easydb_token', $authToken);
-            $session->set('easydb_session_content', $this->easydbSession->getSessionContent());
             $session->set('easydb_is_fylr', $this->easydbSession->isFylr());
         }
 
@@ -179,7 +178,7 @@ class EasydbAuthenticator extends AbstractAuthenticator implements Authenticatio
     {
         // Clean up any partial EasyDB session
         try {
-            if ($this->easydbSession->getToken()) {
+            if ($this->easydbSession->getAuthToken()) {
                 $this->easydbSession->deauthenticateSession();
             }
         } catch (\Exception $e) {
