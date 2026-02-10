@@ -47,7 +47,7 @@ class AssetResolutionService
     {
         // Build the EAS API URL with asset IDs
         $assetIdsList = implode(',', $assetIds);
-        $easUrl = sprintf('eas?ids=[%s]&format=short', $assetIdsList);
+        $easUrl = sprintf('eas?ids=[%s]&format=long', $assetIdsList);
 
         // Create a temporary session context if needed
         try {
@@ -101,10 +101,19 @@ class AssetResolutionService
             return $assetData['versions']['original']['download_url'];
         }
 
+
+        if (isset($assetData['versions']['original']['url'])) {
+            return $assetData['versions']['original']['url'];
+        }
+
         // Fall back to the first available version if 'original' is not available
         foreach ($assetData['versions'] as $version) {
             if (isset($version['download_url'])) {
                 return $version['download_url'];
+            }
+
+            if (isset($version['url'])) {
+                return $version['url'];
             }
         }
 
