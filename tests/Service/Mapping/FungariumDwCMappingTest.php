@@ -22,7 +22,10 @@ class FungariumDwCMappingTest extends TestCase
     protected function setUp(): void
     {
         $this->entityManager = $this->createMock(EntityManagerInterface::class);
-        $this->mapping = new FungariumDwCMapping($this->entityManager);
+        $assetResolutionService = $this->createMock(\App\Service\Asset\AssetResolutionService::class);
+        $assetResolutionService->method('resolveOriginalAssetUrls')
+            ->willReturn(['https://example.com/asset.jpg']);
+        $this->mapping = new FungariumDwCMapping($this->entityManager, $assetResolutionService);
     }
 
     public function testSupportsPoolsFungarium(): void
@@ -65,13 +68,13 @@ class FungariumDwCMappingTest extends TestCase
 
         // Assert institutional information
         $this->assertEquals('ETHZ', $occurrence->getInstitutionCode());
-        $this->assertEquals('ETHZ-ZT', $occurrence->getCollectionCode());
+        $this->assertEquals('ZT', $occurrence->getCollectionCode());
 
         // Assert organism information
         $organism = $occurrence->getOrganism();
         $this->assertInstanceOf(Organism::class, $organism);
         $this->assertEquals('ETHZ', $organism->getInstitutionCode());
-        $this->assertEquals('ETHZ-ZT', $organism->getCollectionCode());
+        $this->assertEquals('ZT', $organism->getCollectionCode());
     }
 
     public function testMapTaxonomicInformation(): void
@@ -163,7 +166,7 @@ class FungariumDwCMappingTest extends TestCase
         $this->assertStringContainsString('https://', $associatedMedia);
 
         // Assert associated references
-        $associatedReferences = $occurrence->getAssociatedReferences();
+        $associatedReferences = $occurrence->getReferences();
         $this->assertNotNull($associatedReferences);
         $this->assertEquals('https://www.nahima.ethz.ch/#/detail/1408175', $associatedReferences);
     }
@@ -185,7 +188,7 @@ class FungariumDwCMappingTest extends TestCase
         $this->assertInstanceOf(Occurrence::class, $occurrence);
         $this->assertNotNull($occurrence->getOccurrenceID());
         $this->assertEquals('ETHZ', $occurrence->getInstitutionCode());
-        $this->assertEquals('ETHZ-ZT', $occurrence->getCollectionCode());
+        $this->assertEquals('ZT', $occurrence->getCollectionCode());
     }
 
     public function testMapOccurrenceWithTypeStatus(): void

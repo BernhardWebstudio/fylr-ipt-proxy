@@ -5,15 +5,12 @@ doctrine:
             default:
                 url: '%env(resolve:DATABASE_URL)%'
                 profiling_collect_backtrace: '%kernel.debug%'
-                use_savepoints: true
             mysql_mirror:
                 url: '%env(default::MYSQL_MIRROR_URL)%'
                 profiling_collect_backtrace: false
-                use_savepoints: false
                 driver: 'pdo_mysql'
     orm:
-        auto_generate_proxy_classes: true
-        enable_lazy_ghost_objects: true
+        enable_native_lazy_objects: true
         controller_resolver:
             auto_mapping: false
         entity_managers:
