@@ -32,6 +32,9 @@ jobs:
                       *.cache-from=type=gha,scope=${{github.ref}}
                       *.cache-from=type=gha,scope=refs/heads/main
                       *.cache-to=type=gha,scope=${{github.ref}},mode=max
+            - name: Free ports 80 and 443
+              run: |
+                  sudo systemctl stop apache2 || true
             - name: Start services
               run: docker compose up --wait --no-build
               continue-on-error: true
