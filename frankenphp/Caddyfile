@@ -38,6 +38,10 @@
 		anonymous
 		# Enable the subscription API (double-check that it's what you want)
 		subscriptions
+		# Transport
+		transport bolt {
+			path /data/mercure.db
+		}
 		# Extra directives
 		{$MERCURE_EXTRA_DIRECTIVES}
 	}
