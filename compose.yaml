@@ -2,8 +2,10 @@ services:
   php:
     env_file:
       - .env
-      - .env.local
-      - .env.prod.local
+      - path: .env.local
+        required: false
+      - path: .env.prod.local
+        required: false
     image: ${IMAGES_PREFIX:-}app-php
     restart: unless-stopped
     environment:
@@ -42,8 +44,10 @@ services:
   messenger_consumer:
     env_file:
       - .env
-      - .env.local
-      - .env.prod.local
+      - path: .env.local
+        required: false
+      - path: .env.prod.local
+        required: false
     image: ${IMAGES_PREFIX:-}app-php
     restart: unless-stopped
     command: ["php", "bin/console", "messenger:consume", "async", "--limit=100", "--memory-limit=128M", "--time-limit=3600"]
@@ -63,7 +67,8 @@ services:
   mysql_mirror_cron:
     env_file:
       - .env
-      - .env.local
+      - path: .env.local
+        required: false
     image: ${IMAGES_PREFIX:-}app-php
     restart: unless-stopped
     command: ["/bin/sh", "-c", "mkdir -p /app/var/log && crontab /etc/cron.d/mysql-mirror && touch /app/var/log/mysql-mirror.log && cron -f"]
@@ -86,7 +91,8 @@ services:
   database:
     env_file:
       - .env
-      - .env.local
+      - path: .env.local
+        required: false
     image: postgres:${POSTGRES_VERSION:-16}-alpine
     command:
       ["postgres",

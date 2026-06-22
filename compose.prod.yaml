@@ -3,8 +3,10 @@ services:
   php:
     env_file:
       - .env
-      - .env.local
-      - .env.prod.local
+      - path: .env.local
+        required: false
+      - path: .env.prod.local
+        required: false
     build:
       context: .
       target: frankenphp_prod
@@ -18,8 +20,10 @@ services:
   messenger_consumer:
     env_file:
       - .env
-      - .env.local
-      - .env.prod.local
+      - path: .env.local
+        required: false
+      - path: .env.prod.local
+        required: false
     build:
       context: .
       target: frankenphp_prod

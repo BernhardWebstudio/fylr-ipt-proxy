@@ -4,7 +4,8 @@
 services:
   app:
     env_file:
-      - .env.local
+      - path: .env.local
+        required: false
     build:
       context: .
       dockerfile: Dockerfile.supervisor
@@ -44,7 +45,8 @@ services:
 ###> doctrine/doctrine-bundle ###
   database:
     env_file:
-      - .env.local
+      - path: .env.local
+        required: false
     image: postgres:${POSTGRES_VERSION:-16}-alpine
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-app}
