@@ -32,6 +32,15 @@ jobs:
                       *.cache-from=type=gha,scope=${{github.ref}}
                       *.cache-from=type=gha,scope=refs/heads/main
                       *.cache-to=type=gha,scope=${{github.ref}},mode=max
+            - name: Generate database SSL certificates
+              run: |
+                  mkdir -p docker/db/ssl
+                  openssl req -new -x509 -days 3650 -nodes -subj "/CN=PostgreSQL CA" -keyout docker/db/ssl/ca.key -out docker/db/ssl/ca.crt
+                  openssl req -new -nodes -subj "/CN=postgres" -keyout docker/db/ssl/server.key -out docker/db/ssl/server.csr
+                  openssl x509 -req -in docker/db/ssl/server.csr -CA docker/db/ssl/ca.crt -CAkey docker/db/ssl/ca.key -CAcreateserial -days 3650 -out docker/db/ssl/server.crt
+                  chmod 600 docker/db/ssl/server.key docker/db/ssl/ca.key
+                  chmod 644 docker/db/ssl/server.crt docker/db/ssl/ca.crt
+                  docker run --rm -v "$(pwd)/docker/db/ssl:/ssl" alpine sh -c "chown 70:70 /ssl/server.key /ssl/server.crt /ssl/ca.crt /ssl/ca.key"
             - name: Free ports 80 and 443
               run: |
                   sudo systemctl stop apache2 || true
@@ -39,7 +48,7 @@ jobs:
               run: docker compose up --wait --no-build
               continue-on-error: true
 
-            - name: "Debug: dump Docker Compose state and php logs (always)"
+            - name: "Debug: dump Docker Compose state and logs (always)"
               run: |
                   echo "==== docker ps ===="
                   docker ps -a || true
@@ -52,8 +61,8 @@ jobs:
                     docker inspect --format='{{json .State.Health}}' "$PHP_ID" || true
                     docker inspect --format='{{json .State.Health.Log}}' "$PHP_ID" || true
                   fi
-                  echo "==== php container logs ===="
-                  docker compose logs --no-tail --timestamps php || true
+                  echo "==== docker compose logs ===="
+                  docker compose logs --timestamps || true
             - name: Check HTTP reachability
               run: curl -v --fail-with-body http://localhost
             - name: Check HTTPS reachability
