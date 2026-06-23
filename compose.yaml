@@ -61,7 +61,10 @@ services:
       MYSQL_MIRROR_SERVER_VERSION: ${MYSQL_MIRROR_SERVER_VERSION:-8.0}
       SKIP_MIGRATIONS: "1"
     depends_on:
-      - database
+      database:
+        condition: service_healthy
+      php:
+        condition: service_healthy
     healthcheck:
       disable: true
 
@@ -82,8 +85,10 @@ services:
       - ./docker/cron/mysql-mirror:/etc/cron.d/mysql-mirror:ro
       - ./var:/app/var
     depends_on:
-      - database
-      - php
+      database:
+        condition: service_healthy
+      php:
+        condition: service_healthy
     healthcheck:
       disable: true
 

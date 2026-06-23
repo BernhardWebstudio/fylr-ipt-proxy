@@ -5,8 +5,14 @@ framework:
 
         transports:
             # https://symfony.com/doc/current/messenger.html#transport-configuration
-            async: 'doctrine://default?queue_name=messenger_messages'
-            failed: 'doctrine://default?queue_name=failed'
+            async:
+                dsn: 'doctrine://default?queue_name=messenger_messages'
+                options:
+                    auto_setup: false
+            failed:
+                dsn: 'doctrine://default?queue_name=failed'
+                options:
+                    auto_setup: false
             sync: 'sync://'
 
         routing:
