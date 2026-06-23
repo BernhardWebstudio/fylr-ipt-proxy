@@ -25,7 +25,9 @@ jobs:
                   extensions: apcu, intl, pdo_pgsql, zip
                   coverage: none
             - name: Install dependencies
-              run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
+              run: |
+                  composer install --prefer-dist --no-progress --no-interaction --no-scripts
+                  php bin/console importmap:install
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v3
             - name: Build Docker images
