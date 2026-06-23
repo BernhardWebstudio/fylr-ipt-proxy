@@ -412,12 +412,12 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
         $assetIds = [];
         foreach ($mediaItems as $mediaItem) {
             $publicEas = $mediaItem["mediaassetpublic"]["_standard"]["eas"] ?? [];
-            if (empty($publicEas)) {
+            if (!$publicEas) {
                 continue; // Skip if no public eas found
             }
 
             $assets = array_merge(...array_values($publicEas));
-            if (empty($assets)) {
+            if (!$assets) {
                 continue; // Skip if no assets found
             }
 
