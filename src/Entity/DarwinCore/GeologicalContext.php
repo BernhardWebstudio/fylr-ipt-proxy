@@ -23,7 +23,7 @@ class GeologicalContext
     /**
      * Reverse relationship from Location
      */
-    #[ORM\OneToMany(mappedBy: 'location', targetEntity: Location::class, cascade: ['persist'])]
+    #[ORM\OneToMany(mappedBy: 'geologicalContext', targetEntity: Location::class, cascade: ['persist'])]
     private Collection $locations;
 
     #[ORM\Column(name: 'earliestEonOrLowestEonothem', type: 'string', nullable: true)]

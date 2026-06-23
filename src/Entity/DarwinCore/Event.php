@@ -30,13 +30,13 @@ class Event
     /**
      * Reverse relationship from Occurrence
      */
-    #[ORM\OneToMany(mappedBy: 'occurrence', targetEntity: Occurrence::class, cascade: ['persist'])]
+    #[ORM\OneToMany(mappedBy: 'event', targetEntity: Occurrence::class, cascade: ['persist'])]
     private Collection $occurrences;
 
     /**
      * Reverse relationship from MeasurementOrFact
      */
-    #[ORM\OneToMany(mappedBy: 'measurementOrFact', targetEntity: MeasurementOrFact::class, cascade: ['persist'])]
+    #[ORM\OneToMany(mappedBy: 'event', targetEntity: MeasurementOrFact::class, cascade: ['persist'])]
     private Collection $measurementOrFacts;
 
     #[ORM\Column(name: 'parentEventID', type: 'string', nullable: true)]

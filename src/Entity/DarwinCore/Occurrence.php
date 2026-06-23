@@ -65,13 +65,13 @@ class Occurrence
     /**
      * Reverse relationship from MeasurementOrFact
      */
-    #[ORM\OneToMany(mappedBy: 'measurementOrFact', targetEntity: MeasurementOrFact::class, cascade: ['persist'])]
+    #[ORM\OneToMany(mappedBy: 'occurrence', targetEntity: MeasurementOrFact::class, cascade: ['persist'])]
     private Collection $measurementOrFacts;
 
     /**
      * Reverse relationship from ResourceRelationship
      */
-    #[ORM\OneToMany(mappedBy: 'resourceRelationship', targetEntity: ResourceRelationship::class, cascade: ['persist'])]
+    #[ORM\OneToMany(mappedBy: 'occurrence', targetEntity: ResourceRelationship::class, cascade: ['persist'])]
     private Collection $resourceRelationships;
 
     #[ORM\Column(name: 'catalogNumber', type: 'string', nullable: true)]

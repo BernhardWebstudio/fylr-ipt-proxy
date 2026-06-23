@@ -30,19 +30,19 @@ class Location
     /**
      * Reverse relationship from Occurrence
      */
-    #[ORM\OneToMany(mappedBy: 'occurrence', targetEntity: Occurrence::class, cascade: ['persist'])]
+    #[ORM\OneToMany(mappedBy: 'location', targetEntity: Occurrence::class, cascade: ['persist'])]
     private Collection $occurrences;
 
     /**
      * Reverse relationship from Event
      */
-    #[ORM\OneToMany(mappedBy: 'event', targetEntity: Event::class, cascade: ['persist'])]
+    #[ORM\OneToMany(mappedBy: 'location', targetEntity: Event::class, cascade: ['persist'])]
     private Collection $events;
 
     /**
      * Reverse relationship from MeasurementOrFact
      */
-    #[ORM\OneToMany(mappedBy: 'measurementOrFact', targetEntity: MeasurementOrFact::class, cascade: ['persist'])]
+    #[ORM\OneToMany(mappedBy: 'location', targetEntity: MeasurementOrFact::class, cascade: ['persist'])]
     private Collection $measurementOrFacts;
 
     #[ORM\Column(name: 'higherGeographyID', type: 'string', nullable: true)]

@@ -30,7 +30,7 @@ class MaterialEntity
     /**
      * Reverse relationship from Occurrence
      */
-    #[ORM\OneToMany(mappedBy: 'occurrence', targetEntity: Occurrence::class, cascade: ['persist'])]
+    #[ORM\OneToMany(mappedBy: 'materialEntity', targetEntity: Occurrence::class, cascade: ['persist'])]
     private Collection $occurrences;
 
     #[ORM\Column(name: 'preparations', type: 'string', nullable: true)]

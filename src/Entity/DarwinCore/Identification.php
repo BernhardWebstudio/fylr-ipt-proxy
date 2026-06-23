@@ -23,7 +23,7 @@ class Identification
     /**
      * Reverse relationship from Occurrence
      */
-    #[ORM\OneToMany(mappedBy: 'occurrence', targetEntity: Occurrence::class, cascade: ['persist'])]
+    #[ORM\OneToMany(mappedBy: 'identification', targetEntity: Occurrence::class, cascade: ['persist'])]
     private Collection $occurrences;
 
     #[ORM\Column(name: 'verbatimIdentification', type: 'string', nullable: true)]
