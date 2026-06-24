@@ -128,7 +128,10 @@ class RefreshAllImportedSpecimenCommand extends Command
                     'trace' => $e->getTraceAsString(),
                 ]);
 
-                // Continue with next specimen even if this one fails
+                if (!$this->entityManager->isOpen()) {
+                    $io->error('The EntityManager is closed. Aborting execution to prevent cascading errors.');
+                    break;
+                }
             }
 
             $processedCount++;

@@ -10,9 +10,6 @@ doctrine:
                 profiling_collect_backtrace: false
                 driver: 'pdo_mysql'
     orm:
-        enable_native_lazy_objects: true
-        controller_resolver:
-            auto_mapping: false
         entity_managers:
             default:
                 connection: default
