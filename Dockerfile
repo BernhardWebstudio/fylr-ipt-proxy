@@ -30,6 +30,8 @@ RUN set -eux; \
 	install-php-extensions \
 		@composer \
 		apcu \
+		gd \
+		imagick \
 		intl \
 		mysqli \
 		opcache \

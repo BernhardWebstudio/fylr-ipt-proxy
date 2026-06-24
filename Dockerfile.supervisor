@@ -17,6 +17,8 @@ RUN set -eux; \
 	install-php-extensions \
 		@composer \
 		apcu \
+		gd \
+		imagick \
 		intl \
 		opcache \
 		zip \

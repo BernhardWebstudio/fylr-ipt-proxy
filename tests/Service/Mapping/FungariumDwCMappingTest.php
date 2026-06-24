@@ -138,8 +138,8 @@ class FungariumDwCMappingTest extends TestCase
         $location = $occurrence->getLocation();
 
         $this->assertInstanceOf(Location::class, $location);
-        $this->assertEquals(47.290916, $location->getDecimalLatitude());
-        $this->assertEquals(8.660184, $location->getDecimalLongitude());
+        $this->assertEquals(47.290914, $location->getDecimalLatitude());
+        $this->assertEquals(8.660183, $location->getDecimalLongitude());
         $this->assertEquals('Meilen, Rappentobel', $location->getVerbatimLocality());
         // GeodeticDatum field is not present in this example data
         $this->assertNull($location->getGeodeticDatum());
@@ -269,8 +269,8 @@ class FungariumDwCMappingTest extends TestCase
         $location = $occurrence->getLocation();
 
         // Test that coordinates with direction prefix (N, E) are correctly parsed
-        $this->assertEqualsWithDelta(47.290916, $location->getDecimalLatitude(), 0.000001);
-        $this->assertEqualsWithDelta(8.660184, $location->getDecimalLongitude(), 0.000001);
+        $this->assertEqualsWithDelta(47.290914, $location->getDecimalLatitude(), 0.000001);
+        $this->assertEqualsWithDelta(8.660183, $location->getDecimalLongitude(), 0.000001);
     }
 
     public function testMapLocationWithCountry(): void

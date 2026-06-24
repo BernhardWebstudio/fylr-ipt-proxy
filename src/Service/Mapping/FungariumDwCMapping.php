@@ -360,10 +360,23 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
                 $aufsammlung["fehlerradius"] ?? null
             );
 
-            $coordinateString = trim(
-                ($aufsammlung["breitengrad_grad_minute_sekunden"] ?? $aufsammlung["breitengrad"] ?? $aufsammlung["breitengraddezimal"] ?? '')
-                    . ' ' . ($aufsammlung["laengengrad_grad_minute_sekunden"] ?? $aufsammlung["laengengrad"] ?? $aufsammlung["langngraddzimal"] ?? $aufsammlung['laengengraddezimal'] ?? '')
-            );
+            $strs_to_replace = [
+                ' ' => '',
+                "''" => '″',
+                '"' => '″',
+                "'" => '′',
+                '°' => '°',
+            ];
+
+            $latitude = ($aufsammlung["breitengrad_grad_minute_sekunden"] ?? $aufsammlung["breitengrad"] ?? $aufsammlung["breitengraddezimal"] ?? '');
+            $longitude = ($aufsammlung["laengengrad_grad_minute_sekunden"] ?? $aufsammlung["laengengrad"] ?? $aufsammlung["langngraddzimal"] ?? $aufsammlung['laengengraddezimal'] ?? '');
+
+            foreach ($strs_to_replace as $search => $replace) {
+                $latitude = str_replace($search, $replace, $latitude);
+                $longitude = str_replace($search, $replace, $longitude);
+            }
+
+            $coordinateString = trim($latitude . ' ' . $longitude);
             $coordinateParsed = $coordinateString ? new Coordinate($coordinateString) : null;
             $location->setDecimalLatitude($coordinateParsed ? $coordinateParsed->getLatitude() : null);
             $location->setDecimalLongitude($coordinateParsed ? $coordinateParsed->getLongitude() : null);
