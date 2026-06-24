@@ -312,7 +312,7 @@ openssl rand -base64 32
 ## Architecture
 
 This application uses:
-- **Symfony 7.x**: PHP framework
+- **Symfony 8.x**: PHP framework
 - **FrankenPHP**: Modern PHP application server with worker mode
 - **PostgreSQL**: Relational database
 - **Symfony Messenger**: Asynchronous message handling
