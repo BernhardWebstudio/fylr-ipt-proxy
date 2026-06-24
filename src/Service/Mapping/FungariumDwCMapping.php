@@ -2,14 +2,15 @@
 
 namespace App\Service\Mapping;
 
+use App\Entity\DarwinCore\Event;
+use App\Entity\DarwinCore\Identification;
+use App\Entity\DarwinCore\Location;
 use App\Entity\DarwinCore\Occurrence;
 use App\Entity\DarwinCore\Taxon;
-use App\Entity\DarwinCore\Event;
-use App\Entity\DarwinCore\Location;
-use App\Entity\DarwinCore\Identification;
 use App\Entity\OccurrenceImport;
 use App\Service\Asset\AssetResolutionService;
 use Doctrine\ORM\EntityManagerInterface;
+use Ixnode\PhpCoordinate\Coordinate;
 
 class FungariumDwCMapping implements EasydbDwCMappingInterface
 {
@@ -359,8 +360,13 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
                 $aufsammlung["fehlerradius"] ?? null
             );
 
-            $location->setDecimalLatitude($this->parseCoordinate($aufsammlung["breitengraddezimal"] ?? null));
-            $location->setDecimalLongitude($this->parseCoordinate($aufsammlung["langngraddzimal"] ?? $aufsammlung['laengengraddezimal'] ?? null));
+            $coordinateString = trim(
+                ($aufsammlung["breitengrad_grad_minute_sekunden"] ?? $aufsammlung["breitengrad"] ?? $aufsammlung["breitengraddezimal"] ?? '')
+                    . ' ' . ($aufsammlung["laengengrad_grad_minute_sekunden"] ?? $aufsammlung["laengengrad"] ?? $aufsammlung["langngraddzimal"] ?? $aufsammlung['laengengraddezimal'] ?? '')
+            );
+            $coordinateParsed = $coordinateString ? new Coordinate($coordinateString) : null;
+            $location->setDecimalLatitude($coordinateParsed ? $coordinateParsed->getLatitude() : null);
+            $location->setDecimalLongitude($coordinateParsed ? $coordinateParsed->getLongitude() : null);
 
             $location->setVerbatimLocality(implode(" | ", array_filter(array_map(function ($coll) {
                 return $coll["lokalitaettrans"] ?? null;
@@ -582,48 +588,5 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
             // If all parsing fails, return null
             return null;
         }
-    }
-
-    /**
-     * Parse coordinate string that may contain direction prefix (N/S/E/W) and degree symbol.
-     * Examples: "E 8.660184°", "N 47.290916°", "8.660184", "-47.290916"
-     *
-     * @param string|null $coordinate The coordinate string to parse
-     * @return float|null The parsed coordinate as a float, or null if parsing fails
-     */
-    private function parseCoordinate(?string $coordinate): ?float
-    {
-        if (!$coordinate) {
-            return null;
-        }
-
-        // Remove whitespace and degree symbol
-        $coordinate = trim($coordinate);
-        $coordinate = str_replace('°', '', $coordinate);
-        $coordinate = trim($coordinate);
-
-        // Check for direction prefix (N/S/E/W)
-        $direction = null;
-        if (preg_match('/^([NSEW])\s*(.+)$/', $coordinate, $matches)) {
-            $direction = $matches[1];
-            $coordinate = $matches[2];
-        }
-
-        // Try to extract the numeric value
-        $numericValue = floatval($coordinate);
-
-        if ($numericValue == 0 && $coordinate !== '0' && $coordinate !== '0.0') {
-            // Parsing failed
-            return null;
-        }
-
-        // Apply direction: S and W are negative
-        if ($direction === 'S' || $direction === 'W') {
-            $numericValue = -abs($numericValue);
-        } else {
-            $numericValue = abs($numericValue);
-        }
-
-        return $numericValue;
     }
 }
