@@ -274,6 +274,49 @@ class FungariumDwCMappingTest extends TestCase
         $this->assertEqualsWithDelta(8.660183, $location->getDecimalLongitude(), 0.000001);
     }
 
+    public function testAdvancedCoordinateParsing(): void
+    {
+        $testCases = [
+            ['27°37″S', '30°20″E"', -27.616667, 30.333333],
+            ['25°53′52″S', '28°12′42″E', -25.897778, 28.211667],
+            ['24°38′39″S', '28°40′30″E', -24.644167, 28.675000],
+            ['18°44′03″S', '26°57′06″E', -18.734167, 26.951667],
+            ['25°44′06″N', '104°40′40″', null, null], // Should fail and leave them null
+        ];
+
+        foreach ($testCases as $index => [$lat, $lon, $expectedLat, $expectedLon]) {
+            $source = [
+                '_global_object_id' => 'test_obj_' . $index,
+                '_system_object_id' => 'test_sys_' . $index,
+                '_created' => '2026-01-01T00:00:00Z',
+                'fungarium' => [
+                    '_reverse_nested:aufsammlung:fungarium' => [
+                        [
+                            'breitengrad_grad_minute_sekunden' => $lat,
+                            'laengengrad_grad_minute_sekunden' => $lon,
+                        ]
+                    ]
+                ]
+            ];
+
+            $this->setupMockRepositories();
+            $target = new OccurrenceImport();
+
+            $this->mapping->mapOccurrence($source, $target);
+
+            $occurrence = $target->getOccurrence();
+            $location = $occurrence->getLocation();
+
+            if ($expectedLat === null) {
+                $this->assertNull($location->getDecimalLatitude());
+                $this->assertNull($location->getDecimalLongitude());
+            } else {
+                $this->assertEqualsWithDelta($expectedLat, $location->getDecimalLatitude(), 0.00001);
+                $this->assertEqualsWithDelta($expectedLon, $location->getDecimalLongitude(), 0.00001);
+            }
+        }
+    }
+
     public function testMapLocationWithCountry(): void
     {
         $source = json_decode(

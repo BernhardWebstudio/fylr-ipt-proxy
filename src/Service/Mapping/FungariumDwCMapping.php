@@ -380,9 +380,9 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
             foreach ($latitudeFields as $latField) {
                 foreach ($longitudesFields as $lonField) {
                     if (isset($aufsammlung[$latField]) && isset($aufsammlung[$lonField])) {
-                        $latitude = $this->normalizeCoordinateString($aufsammlung[$latField]);
-                        $longitude = $this->normalizeCoordinateString($aufsammlung[$lonField]);
                         try {
+                            $latitude = $this->normalizeCoordinateString($aufsammlung[$latField], 'latitude');
+                            $longitude = $this->normalizeCoordinateString($aufsammlung[$lonField], 'longitude');
                             $coordinateString = trim($latitude . ' ' . $longitude);
                             $coordinateParsed = $coordinateString ? new Coordinate($coordinateString) : null;
                             if ($coordinateParsed) {
@@ -391,7 +391,7 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
                                 break 2; // exit both loops if we successfully parsed coordinates
                             }
                         } catch (\Exception $e) {
-                            // If parsing fails, continue to the next combination
+                            // If parsing or normalization fails, continue to the next combination
                             $this->logger->warning(sprintf(
                                 'Failed to parse coordinates from fields "%s" and "%s": %s',
                                 $latField,
@@ -412,18 +412,75 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
         }
     }
 
-    private  function normalizeCoordinateString(string $input): string
+    private function normalizeCoordinateString(string $input, string $type): string
     {
-        $strs_to_replace = [
-            ' ' => '',
-            "''" => '″',
-            '"' => '″',
-            "'" => '′',
-            '°' => '°',
-        ];
-        foreach ($strs_to_replace as $search => $replace) {
-            $input = str_replace($search, $replace, $input);
+        $input = trim($input);
+
+        // Remove any trailing quotes/double-quotes that might be typos at the very end of the string, e.g. 30°20″E" -> 30°20″E
+        $input = preg_replace('/([NSEWnsew])[\'\"′″]+$/', '$1', $input);
+
+        // Remove surrounding quotes if the entire string was quoted
+        if ((str_starts_with($input, '"') && str_ends_with($input, '"')) || 
+            (str_starts_with($input, "'") && str_ends_with($input, "'"))) {
+            $input = substr($input, 1, -1);
         }
+        $input = trim($input);
+
+        // If it's already a clean decimal number (e.g. "25.12345" or "-25,12345")
+        if (preg_match('/^-?\d+([.,]\d+)?$/', $input)) {
+            return str_replace(',', '.', $input);
+        }
+
+        // Normalize degree, minute, second symbols to standard ones
+        $input = str_replace(['°', 'd', 'D'], '°', $input);
+
+        // Extract direction first
+        $direction = '';
+        if (preg_match('/([NSEWnsew])/i', $input, $matches)) {
+            $direction = strtoupper($matches[1]);
+            // Remove the direction letter from the string to make numbers easier to parse
+            $input = preg_replace('/[NSEWnsew]/i', '', $input);
+        }
+
+        $isNegative = str_contains($input, '-');
+
+        // Extract all number sequences (including decimals if present)
+        if (preg_match_all('/(\d+(?:\.\d+)?)/', $input, $matches)) {
+            $numbers = $matches[1];
+
+            // If there's only one number, it's a decimal degree (potentially with direction/symbols, like N 47.290916°)
+            if (count($numbers) === 1) {
+                $decimal = (float)$numbers[0];
+                if ($direction === 'S' || $direction === 'W' || $isNegative) {
+                    $decimal = -$decimal;
+                }
+                return (string)$decimal;
+            }
+
+            $degrees = isset($numbers[0]) ? (float)$numbers[0] : 0.0;
+            $minutes = isset($numbers[1]) ? (float)$numbers[1] : 0.0;
+            $seconds = isset($numbers[2]) ? (float)$numbers[2] : 0.0;
+
+            $degrees = abs($degrees);
+
+            if (empty($direction)) {
+                if ($isNegative) {
+                    $direction = ($type === 'latitude') ? 'S' : 'W';
+                } else {
+                    // Without explicit direction or minus sign, a DMS coordinate is ambiguous.
+                    // Throwing an exception prevents the library parser from incorrectly parsing it.
+                    throw new \InvalidArgumentException(sprintf(
+                        'DMS coordinate "%s" is missing a direction letter (N, S, E, W) and is ambiguous.',
+                        $input
+                    ));
+                }
+            }
+
+            // Return standard DMS string that the library is guaranteed to parse:
+            // Format: {degrees}°{minutes}′{seconds}.00″{direction}
+            return sprintf("%d°%d′%0.2f″%s", (int)$degrees, (int)$minutes, (float)$seconds, $direction);
+        }
+
         return $input;
     }
 
