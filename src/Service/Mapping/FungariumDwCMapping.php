@@ -374,29 +374,14 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
                 "laengengraddezimal",
             ];
 
-            function replaceStrings(string $input): string
-            {
-                $strs_to_replace = [
-                    ' ' => '',
-                    "''" => '″',
-                    '"' => '″',
-                    "'" => '′',
-                    '°' => '°',
-                ];
-                foreach ($strs_to_replace as $search => $replace) {
-                    $input = str_replace($search, $replace, $input);
-                }
-                return $input;
-            }
-
             // try to parse one field combination at a time until we find a valid coordinate
             $latitude = null;
             $longitude = null;
             foreach ($latitudeFields as $latField) {
                 foreach ($longitudesFields as $lonField) {
                     if (isset($aufsammlung[$latField]) && isset($aufsammlung[$lonField])) {
-                        $latitude = replaceStrings($aufsammlung[$latField]);
-                        $longitude = replaceStrings($aufsammlung[$lonField]);
+                        $latitude = $this->normalizeCoordinateString($aufsammlung[$latField]);
+                        $longitude = $this->normalizeCoordinateString($aufsammlung[$lonField]);
                         try {
                             $coordinateString = trim($latitude . ' ' . $longitude);
                             $coordinateParsed = $coordinateString ? new Coordinate($coordinateString) : null;
@@ -425,6 +410,21 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
 
             $occurrence->setLocation($location);
         }
+    }
+
+    private  function normalizeCoordinateString(string $input): string
+    {
+        $strs_to_replace = [
+            ' ' => '',
+            "''" => '″',
+            '"' => '″',
+            "'" => '′',
+            '°' => '°',
+        ];
+        foreach ($strs_to_replace as $search => $replace) {
+            $input = str_replace($search, $replace, $input);
+        }
+        return $input;
     }
 
     private function mapInstitutionalInfo(array $source, Occurrence $occurrence): void

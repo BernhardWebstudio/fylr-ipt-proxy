@@ -25,7 +25,8 @@ class FungariumDwCMappingTest extends TestCase
         $assetResolutionService = $this->createMock(\App\Service\Asset\AssetResolutionService::class);
         $assetResolutionService->method('resolveOriginalAssetUrls')
             ->willReturn(['https://example.com/asset.jpg']);
-        $this->mapping = new FungariumDwCMapping($this->entityManager, $assetResolutionService);
+        $logger = $this->createMock(\Psr\Log\LoggerInterface::class);
+        $this->mapping = new FungariumDwCMapping($this->entityManager, $assetResolutionService, $logger);
     }
 
     public function testSupportsPoolsFungarium(): void
