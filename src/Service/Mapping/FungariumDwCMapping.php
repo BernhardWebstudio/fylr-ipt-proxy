@@ -11,6 +11,7 @@ use App\Entity\OccurrenceImport;
 use App\Service\Asset\AssetResolutionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Ixnode\PhpCoordinate\Coordinate;
+use Psr\Log\LoggerInterface;
 
 class FungariumDwCMapping implements EasydbDwCMappingInterface
 {
@@ -27,6 +28,7 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
     public function __construct(
         private EntityManagerInterface $entityManager,
         private AssetResolutionService $assetResolutionService,
+        private LoggerInterface $logger
     ) {}
 
     public function mapOccurrence(array $source, OccurrenceImport $target): void
@@ -360,26 +362,62 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
                 $aufsammlung["fehlerradius"] ?? null
             );
 
-            $strs_to_replace = [
-                ' ' => '',
-                "''" => '″',
-                '"' => '″',
-                "'" => '′',
-                '°' => '°',
+            $latitudeFields = [
+                "breitengrad_grad_minute_sekunden",
+                "breitengrad",
+                "breitengraddezimal",
+            ];
+            $longitudesFields = [
+                "laengengrad_grad_minute_sekunden",
+                "laengengrad",
+                "langngraddzimal",
+                "laengengraddezimal",
             ];
 
-            $latitude = ($aufsammlung["breitengrad_grad_minute_sekunden"] ?? $aufsammlung["breitengrad"] ?? $aufsammlung["breitengraddezimal"] ?? '');
-            $longitude = ($aufsammlung["laengengrad_grad_minute_sekunden"] ?? $aufsammlung["laengengrad"] ?? $aufsammlung["langngraddzimal"] ?? $aufsammlung['laengengraddezimal'] ?? '');
-
-            foreach ($strs_to_replace as $search => $replace) {
-                $latitude = str_replace($search, $replace, $latitude);
-                $longitude = str_replace($search, $replace, $longitude);
+            function replaceStrings(string $input): string
+            {
+                $strs_to_replace = [
+                    ' ' => '',
+                    "''" => '″',
+                    '"' => '″',
+                    "'" => '′',
+                    '°' => '°',
+                ];
+                foreach ($strs_to_replace as $search => $replace) {
+                    $input = str_replace($search, $replace, $input);
+                }
+                return $input;
             }
 
-            $coordinateString = trim($latitude . ' ' . $longitude);
-            $coordinateParsed = $coordinateString ? new Coordinate($coordinateString) : null;
-            $location->setDecimalLatitude($coordinateParsed ? $coordinateParsed->getLatitude() : null);
-            $location->setDecimalLongitude($coordinateParsed ? $coordinateParsed->getLongitude() : null);
+            // try to parse one field combination at a time until we find a valid coordinate
+            $latitude = null;
+            $longitude = null;
+            foreach ($latitudeFields as $latField) {
+                foreach ($longitudesFields as $lonField) {
+                    if (isset($aufsammlung[$latField]) && isset($aufsammlung[$lonField])) {
+                        $latitude = replaceStrings($aufsammlung[$latField]);
+                        $longitude = replaceStrings($aufsammlung[$lonField]);
+                        try {
+                            $coordinateString = trim($latitude . ' ' . $longitude);
+                            $coordinateParsed = $coordinateString ? new Coordinate($coordinateString) : null;
+                            if ($coordinateParsed) {
+                                $location->setDecimalLatitude($coordinateParsed->getLatitude());
+                                $location->setDecimalLongitude($coordinateParsed->getLongitude());
+                                break 2; // exit both loops if we successfully parsed coordinates
+                            }
+                        } catch (\Exception $e) {
+                            // If parsing fails, continue to the next combination
+                            $this->logger->warning(sprintf(
+                                'Failed to parse coordinates from fields "%s" and "%s": %s',
+                                $latField,
+                                $lonField,
+                                $e->getMessage()
+                            ));
+                            continue;
+                        }
+                    }
+                }
+            }
 
             $location->setVerbatimLocality(implode(" | ", array_filter(array_map(function ($coll) {
                 return $coll["lokalitaettrans"] ?? null;
@@ -430,12 +468,12 @@ class FungariumDwCMapping implements EasydbDwCMappingInterface
         // Extract asset IDs from the embedded media data
         $assetIds = [];
         foreach ($mediaItems as $mediaItem) {
-            $publicEas = $mediaItem["mediaassetpublic"]["_standard"]["eas"] ?? [];
+            $publicEas = array_filter(array_values($mediaItem["mediaassetpublic"]["_standard"]["eas"] ?? []));
             if (!$publicEas) {
                 continue; // Skip if no public eas found
             }
 
-            $assets = array_merge(...array_values($publicEas));
+            $assets = array_merge(...$publicEas);
             if (!$assets) {
                 continue; // Skip if no assets found
             }
