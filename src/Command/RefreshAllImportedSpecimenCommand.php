@@ -43,8 +43,8 @@ class RefreshAllImportedSpecimenCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $login = $input->getOption('login') ?? getenv('EASYDB_LOGIN');
-        $password = $input->getOption('password') ?? getenv('EASYDB_PASSWORD');
+        $login = $input->getOption('login') ?? $_ENV['EASYDB_LOGIN'] ?? getenv('EASYDB_LOGIN');
+        $password = $input->getOption('password') ?? $_ENV['EASYDB_PASSWORD'] ?? getenv('EASYDB_PASSWORD');
         $dryRun = $input->getOption('dry-run');
         $force = $input->getOption('force');
 

@@ -41,8 +41,8 @@ class ImportSpecimenCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $queries = $input->getArgument('query');
-        $login = $input->getOption('login') ?? getenv('EASYDB_LOGIN');
-        $password = $input->getOption('password') ?? getenv('EASYDB_PASSWORD');
+        $login = $input->getOption('login') ?? $_ENV['EASYDB_LOGIN'] ?? getenv('EASYDB_LOGIN');
+        $password = $input->getOption('password') ?? $_ENV['EASYDB_PASSWORD'] ?? getenv('EASYDB_PASSWORD');
 
         if (empty($queries)) {
             $io->warning('No query arguments provided. Nothing to import.');

@@ -5,11 +5,12 @@ namespace App\Service;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\Service\ResetInterface;
 
 /**
  * Utility service for EasyDB operations in authenticated context
  */
-class EasydbApiService
+class EasydbApiService implements ResetInterface
 {
     private bool $isInitialized = false;
 
@@ -135,10 +136,10 @@ class EasydbApiService
             return;
         }
 
-        if ($this->initializeFromLoginPassword(
-            getenv('EASYDB_LOGIN') ?: null,
-            getenv('EASYDB_PASSWORD') ?: null
-        )) {
+        $login = $_ENV['EASYDB_LOGIN'] ?? getenv('EASYDB_LOGIN') ?: null;
+        $password = $_ENV['EASYDB_PASSWORD'] ?? getenv('EASYDB_PASSWORD') ?: null;
+
+        if ($this->initializeFromLoginPassword($login, $password)) {
             return;
         }
 
@@ -181,6 +182,7 @@ class EasydbApiService
     public function reset(): void
     {
         $this->isInitialized = false;
+        $this->sessionService->reset();
     }
 
     /**

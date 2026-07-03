@@ -6,12 +6,13 @@ use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Contracts\Service\ResetInterface;
 
 /**
  * Service for handling EasyDB API session management
  * Ported from Python session.py script
  */
-class EasydbSessionService
+class EasydbSessionService implements ResetInterface
 {
     private string $baseUrl;
     private string $newSessionUrl;
@@ -243,6 +244,12 @@ class EasydbSessionService
         $this->logger->info('EasyDB session deauthenticated successfully');
 
         return $content;
+    }
+
+    public function reset(): void
+    {
+        $this->clearSession();
+        $this->isFylr = false;
     }
 
     private function clearSession(): void

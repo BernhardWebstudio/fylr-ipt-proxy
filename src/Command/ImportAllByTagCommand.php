@@ -49,8 +49,8 @@ class ImportAllByTagCommand extends Command
 
         $io = new SymfonyStyle($input, $output);
         $tagId = $input->getArgument('query');
-        $login = $input->getOption('login') ?? getenv('EASYDB_LOGIN');
-        $password = $input->getOption('password') ?? getenv('EASYDB_PASSWORD');
+        $login = $input->getOption('login') ?? $_ENV['EASYDB_LOGIN'] ?? getenv('EASYDB_LOGIN');
+        $password = $input->getOption('password') ?? $_ENV['EASYDB_PASSWORD'] ?? getenv('EASYDB_PASSWORD');
         $force = (bool) $input->getOption('force');
         $initialOffset = (int) $input->getOption('offset');
         $retryOnClose = (int) $input->getOption('retry-on-close');
