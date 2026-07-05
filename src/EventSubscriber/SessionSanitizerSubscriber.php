@@ -17,15 +17,16 @@ final class SessionSanitizerSubscriber implements EventSubscriberInterface
 
         $request = $event->getRequest();
 
-        // Check if session exists in the request
+        $sessionNames = [];
         if ($request->hasSession()) {
-            $session = $request->getSession();
-            $sessionName = $session->getName();
+            $sessionNames[] = $request->getSession()->getName();
+        }
+        $sessionNames[] = \session_name() ?: 'PHPSESSID';
+        $sessionNames = array_unique($sessionNames);
 
+        foreach ($sessionNames as $sessionName) {
             // If the session cookie is present in the request
-            if ($request->cookies->has($sessionName)) {
-                $sessionId = $request->cookies->get($sessionName);
-
+            if (($sessionId = $request->cookies->get($sessionName))) {
                 // Validate session ID. Valid characters in PHP: A-Z, a-z, 0-9, "-", and ","
                 // We also check length to prevent extremely long malicious inputs (e.g. > 128 characters)
                 if (
@@ -35,8 +36,8 @@ final class SessionSanitizerSubscriber implements EventSubscriberInterface
                     || \strlen($sessionId) > 128
                 ) {
                     // Remove from Symfony request cookies
-                    $request->cookies->remove($sessionName);
-                    
+                    $request->cookies->set($sessionName, null);
+
                     // Remove from superglobal to prevent native php session_start() from picking it up
                     if (isset($_COOKIE[$sessionName])) {
                         unset($_COOKIE[$sessionName]);

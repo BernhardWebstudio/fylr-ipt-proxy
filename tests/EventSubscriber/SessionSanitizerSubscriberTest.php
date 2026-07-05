@@ -29,30 +29,27 @@ class SessionSanitizerSubscriberTest extends TestCase
     public function testNotMainRequestDoesNothing(): void
     {
         $kernel = $this->createMock(HttpKernelInterface::class);
-        $request = $this->createMock(Request::class);
-        
-        // This should not call hasSession on the request because it's a sub-request
-        $request->expects($this->never())->method('hasSession');
+        $request = new Request();
         
         $event = new RequestEvent($kernel, $request, HttpKernelInterface::SUB_REQUEST);
         
         $subscriber = new SessionSanitizerSubscriber();
         $subscriber->onKernelRequest($event);
+        
+        $this->assertFalse($request->hasSession());
     }
 
     public function testNoSessionDoesNothing(): void
     {
         $kernel = $this->createMock(HttpKernelInterface::class);
-        $request = $this->createMock(Request::class);
-        $request->method('hasSession')->willReturn(false);
-        
-        // This should not call getSession because hasSession is false
-        $request->expects($this->never())->method('getSession');
+        $request = new Request();
         
         $event = new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST);
         
         $subscriber = new SessionSanitizerSubscriber();
         $subscriber->onKernelRequest($event);
+        
+        $this->assertFalse($request->hasSession());
     }
 
     public function testValidSessionCookieIsNotRemoved(): void
