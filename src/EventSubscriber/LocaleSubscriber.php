@@ -15,10 +15,21 @@ final class LocaleSubscriber implements EventSubscriberInterface
         // Try to get locale from session
         if ($request->hasPreviousSession()) {
             $session = $request->getSession();
-            $locale = $session->get('_locale');
+            $sessionName = $session->getName();
+            $sessionId = $request->cookies->get($sessionName);
 
-            if ($locale) {
-                $request->setLocale($locale);
+            // Guard against starting session with invalid/malicious session ID from crawlers
+            if (
+                \is_string($sessionId)
+                && $sessionId !== ''
+                && \preg_match('/^[a-zA-Z0-9,-]+$/', $sessionId)
+                && \strlen($sessionId) <= 128
+            ) {
+                $locale = $session->get('_locale');
+
+                if ($locale) {
+                    $request->setLocale($locale);
+                }
             }
         }
     }

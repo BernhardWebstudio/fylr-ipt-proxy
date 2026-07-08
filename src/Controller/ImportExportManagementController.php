@@ -17,6 +17,7 @@ use App\Entity\DarwinCore\Occurrence;
 use App\Form\ImportSelectionType;
 use Doctrine\ORM\EntityManagerInterface;
 use LogicException;
+use App\Exception\UnsupportedObjectTypeException;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Request;
@@ -248,6 +249,13 @@ final class ImportExportManagementController extends AbstractController
                         'uuid' => $uuid,
                         'systemObjectId' => $systemObjectId,
                     ]);
+                } catch (UnsupportedObjectTypeException $e) {
+                    $logger->info('Skipped importing object of unsupported type from webhook', [
+                        'type' => $type,
+                        'uuid' => $uuid,
+                        'systemObjectId' => $systemObjectId,
+                        'message' => $e->getMessage(),
+                    ]);
                 } catch (\Exception $e) {
                     $logger->error('Error processing webhook object', [
                         'type' => $type,
@@ -328,6 +336,25 @@ final class ImportExportManagementController extends AbstractController
 
             // Redirect back to import page with preserved query params
             return $this->redirectToRoute('app_import_management', $queryParams);
+        } catch (UnsupportedObjectTypeException $e) {
+            $logger->warning('Attempted to import single entity of unsupported type', [
+                'globalObjectId' => $globalObjectId,
+                'message' => $e->getMessage()
+            ]);
+            $this->addFlash('error', 'Import failed: ' . $e->getMessage());
+
+            // Preserve the current view state by extracting query params from referer
+            $referer = $request->headers->get('referer');
+            $queryParams = [];
+            if ($referer) {
+                $parsedUrl = parse_url($referer);
+                if (isset($parsedUrl['query'])) {
+                    parse_str($parsedUrl['query'], $queryParams);
+                }
+            }
+
+            // Redirect back to import page with preserved query params
+            return $this->redirectToRoute('app_import_management', $queryParams);
         } catch (\Exception $e) {
             $logger->error('Failed to import single entity', [
                 'globalObjectId' => $globalObjectId,
@@ -389,6 +416,14 @@ final class ImportExportManagementController extends AbstractController
             ]);
 
             return new Response('Import successful', 200);
+        } catch (UnsupportedObjectTypeException $e) {
+            $logger->info('Skipped importing object of unsupported type', [
+                'type' => $type,
+                'uuid' => $uuid,
+                'systemObjectId' => $systemObjectId,
+                'message' => $e->getMessage(),
+            ]);
+            return new Response('Import skipped: ' . $e->getMessage(), 200);
         } catch (\Exception $e) {
             $logger->error('Error processing webhook object', [
                 'type' => $type,

@@ -36,7 +36,7 @@ final class SessionSanitizerSubscriber implements EventSubscriberInterface
                     || \strlen($sessionId) > 128
                 ) {
                     // Remove from Symfony request cookies
-                    $request->cookies->set($sessionName, null);
+                    $request->cookies->remove($sessionName);
 
                     // Remove from superglobal to prevent native php session_start() from picking it up
                     if (isset($_COOKIE[$sessionName])) {

@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\User;
+use App\Exception\UnsupportedObjectTypeException;
 use App\Service\Mapping\EasydbDwCMappingInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -61,6 +62,8 @@ class SpecimenImportService
                 $flush,
                 $force
             );
+        } catch (UnsupportedObjectTypeException $e) {
+            throw $e;
         } catch (\Exception $e) {
             $this->logger->error('Failed to import specimen by global object ID', [
                 'globalObjectId' => $globalObjectId,
@@ -120,6 +123,8 @@ class SpecimenImportService
                 $flush,
                 false
             );
+        } catch (UnsupportedObjectTypeException $e) {
+            throw $e;
         } catch (\Exception $e) {
             $this->logger->error('Failed to import specimen by UUID/system object id', [
                 'type' => $type,
@@ -186,6 +191,8 @@ class SpecimenImportService
             ]);
 
             return true;
+        } catch (UnsupportedObjectTypeException $e) {
+            throw $e;
         } catch (\Exception $e) {
             $this->logger->error('Failed to import specimen given entity data', [
                 'globalObjectId' => $globalObjectId,
@@ -218,7 +225,7 @@ class SpecimenImportService
 
         $mapping = $this->findMappingForType($type);
         if (!$mapping) {
-            throw new \RuntimeException(sprintf('No mapping found for type: %s', $type));
+            throw new UnsupportedObjectTypeException(sprintf('No mapping found for type: %s', $type));
         }
 
         return $this->importProcessingService->processEntity($entityData, $mapping, $user, [], $force);
