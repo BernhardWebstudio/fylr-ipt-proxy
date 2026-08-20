@@ -209,13 +209,17 @@ final class ImportExportManagementController extends AbstractController
     ): Response {
         try {
             $content = $request->getContent();
-            $data = json_decode($content, true);
+            $data = json_decode($content, true, 512, JSON_INVALID_UTF8_SUBSTITUTE | JSON_BIGINT_AS_STRING);
 
-            if (!$data || !isset($data['objects']) || !is_array($data['objects'])) {
+            if (!is_array($data) || !isset($data['objects']) || !is_array($data['objects'])) {
+                $jsonError = json_last_error_msg();
+                $contentLength = strlen($content);
                 $logger->error('Invalid webhook payload', [
-                    'content' => $content,
+                    'json_error' => $jsonError,
+                    'content_length' => $contentLength,
+                    'content_preview' => $contentLength > 1000 ? substr($content, 0, 500) . '...' . substr($content, -200) : $content,
                 ]);
-                return new Response('Invalid webhook payload', 400);
+                return new Response('Invalid webhook payload: ' . $jsonError, 400);
             }
 
             $logger->info('Received webhook call', [
@@ -225,45 +229,75 @@ final class ImportExportManagementController extends AbstractController
             ]);
 
             $successCount = 0;
+            $skippedCount = 0;
             $errors = [];
 
             // Process each object in the webhook payload
             foreach ($data['objects'] as $object) {
+                if (!is_array($object)) {
+                    $logger->warning('Non-array item in webhook objects', ['object' => $object]);
+                    $errors[] = 'Invalid object item in payload';
+                    continue;
+                }
+
+                // Check for monitoring/test/ping probes
+                $callbackHash = $object['_callback_context']['hash'] ?? '';
+                $isMonitoringTest = (is_string($callbackHash) && str_contains($callbackHash, 'monitoring'))
+                    || (($object['_objecttype'] ?? null) === 'object' && empty($object['_global_object_id']) && empty($object['_uuid']));
+
+                if ($isMonitoringTest) {
+                    $logger->info('Recognized monitoring/ping webhook object, skipping import', [
+                        'callback_context' => $object['_callback_context'] ?? null,
+                    ]);
+                    $skippedCount++;
+                    continue;
+                }
+
+                $globalObjectId = $object['_global_object_id'] ?? null;
                 $type = $object['_objecttype'] ?? null;
                 $uuid = $object['_uuid'] ?? null;
                 $systemObjectId = $object['_system_object_id'] ?? null;
 
-                if (!$type || !$uuid || !$systemObjectId) {
-                    $logger->warning('Incomplete object data in webhook', ['object' => $object]);
-                    $errors[] = 'Missing required fields for object';
-                    continue;
-                }
-
                 try {
-                    // Use the specimen import service directly
-                    $specimenImportService->importByUuid($type, $uuid, $systemObjectId);
-
-                    $successCount++;
-                    $logger->info('Successfully imported object from webhook', [
-                        'type' => $type,
-                        'uuid' => $uuid,
-                        'systemObjectId' => $systemObjectId,
-                    ]);
+                    if ($globalObjectId && $type) {
+                        // Prefer importing directly using entity data already provided in webhook payload
+                        $specimenImportService->importByEntityData($object);
+                        $successCount++;
+                        $logger->info('Successfully imported object from webhook entity data', [
+                            'globalObjectId' => $globalObjectId,
+                            'type' => $type,
+                        ]);
+                    } elseif ($type && $uuid && $systemObjectId) {
+                        // Fall back to import by UUID if full entity data is missing
+                        $specimenImportService->importByUuid($type, $uuid, $systemObjectId);
+                        $successCount++;
+                        $logger->info('Successfully imported object from webhook by UUID', [
+                            'type' => $type,
+                            'uuid' => $uuid,
+                            'systemObjectId' => $systemObjectId,
+                        ]);
+                    } else {
+                        $logger->warning('Incomplete object data in webhook', ['object' => $object]);
+                        $errors[] = 'Missing required fields for object';
+                    }
                 } catch (UnsupportedObjectTypeException $e) {
+                    $skippedCount++;
                     $logger->info('Skipped importing object of unsupported type from webhook', [
                         'type' => $type,
                         'uuid' => $uuid,
-                        'systemObjectId' => $systemObjectId,
+                        'globalObjectId' => $globalObjectId,
                         'message' => $e->getMessage(),
                     ]);
                 } catch (\Exception $e) {
+                    $identifier = $globalObjectId ?? ($type && $uuid ? "$type/$uuid" : 'unknown');
                     $logger->error('Error processing webhook object', [
                         'type' => $type,
                         'uuid' => $uuid,
+                        'globalObjectId' => $globalObjectId,
                         'systemObjectId' => $systemObjectId,
                         'error' => $e->getMessage(),
                     ]);
-                    $errors[] = "Error importing $type/$uuid: " . $e->getMessage();
+                    $errors[] = "Error importing $identifier: " . $e->getMessage();
                 }
             }
 
@@ -274,12 +308,17 @@ final class ImportExportManagementController extends AbstractController
                 count($data['objects'])
             );
 
+            if ($skippedCount > 0) {
+                $message .= sprintf(' (%d skipped)', $skippedCount);
+            }
+
             if (!empty($errors)) {
                 $message .= '. Errors: ' . implode('; ', $errors);
             }
 
             $logger->info('Webhook processing complete', [
                 'successCount' => $successCount,
+                'skippedCount' => $skippedCount,
                 'totalCount' => count($data['objects']),
                 'errorCount' => count($errors),
             ]);
@@ -288,7 +327,6 @@ final class ImportExportManagementController extends AbstractController
         } catch (\Exception $e) {
             $logger->error('Webhook processing failed', [
                 'error' => $e->getMessage(),
-                'content' => $request->getContent(),
             ]);
             return new Response('Webhook processing failed: ' . $e->getMessage(), 500);
         }
