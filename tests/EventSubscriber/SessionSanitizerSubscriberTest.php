@@ -23,7 +23,7 @@ class SessionSanitizerSubscriberTest extends TestCase
         $events = SessionSanitizerSubscriber::getSubscribedEvents();
         $this->assertArrayHasKey(KernelEvents::REQUEST, $events);
         $this->assertEquals('onKernelRequest', $events[KernelEvents::REQUEST][0][0]);
-        $this->assertEquals(100, $events[KernelEvents::REQUEST][0][1]);
+        $this->assertEquals(256, $events[KernelEvents::REQUEST][0][1]);
     }
 
     public function testNotMainRequestDoesNothing(): void
@@ -121,5 +121,49 @@ class SessionSanitizerSubscriberTest extends TestCase
         
         $this->assertFalse($request->cookies->has($sessionName));
         $this->assertArrayNotHasKey($sessionName, $_COOKIE);
+    }
+
+    public function testDoesNotTriggerUninitializedSessionFactory(): void
+    {
+        $kernel = $this->createMock(HttpKernelInterface::class);
+        $request = new Request();
+
+        $factoryCalled = false;
+        $request->setSessionFactory(function () use (&$factoryCalled) {
+            $factoryCalled = true;
+            return $this->createMock(SessionInterface::class);
+        });
+
+        $request->cookies->set('PHPSESSID', 'invalid/cookie');
+        $_COOKIE['PHPSESSID'] = 'invalid/cookie';
+
+        $event = new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST);
+
+        $subscriber = new SessionSanitizerSubscriber();
+        $subscriber->onKernelRequest($event);
+
+        $this->assertFalse($factoryCalled, 'Sanitizer should not invoke the lazy session factory closure');
+        $this->assertFalse($request->cookies->has('PHPSESSID'));
+        $this->assertArrayNotHasKey('PHPSESSID', $_COOKIE);
+
+        unset($_COOKIE['PHPSESSID']);
+    }
+
+    public function testResetsNativeSessionIdWhenInvalidCookieDetected(): void
+    {
+        $kernel = $this->createMock(HttpKernelInterface::class);
+        $request = new Request();
+        $request->cookies->set('PHPSESSID', 'invalid$cookie');
+
+        if (\session_status() !== \PHP_SESSION_ACTIVE) {
+            \session_id('dirty_session_id_from_worker');
+        }
+
+        $event = new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST);
+
+        $subscriber = new SessionSanitizerSubscriber();
+        $subscriber->onKernelRequest($event);
+
+        $this->assertSame('', \session_id());
     }
 }
