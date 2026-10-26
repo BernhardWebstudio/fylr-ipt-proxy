@@ -1,5 +1,5 @@
 # Production Dockerfile with Supervisor for message queue management
-FROM dunglas/frankenphp:1-php8.4 AS frankenphp_prod_supervisor
+FROM dunglas/frankenphp:1.13-php8.4 AS frankenphp_prod_supervisor
 
 WORKDIR /app
 

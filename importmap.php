@@ -10,34 +10,25 @@
  *     be used as an "entrypoint" (and passed to the importmap() Twig function).
  *
  * The "importmap:require" command can be used to add new entries to this file.
+ *
+ * @return array<string, array{    // Import name as key, description of the imported file as value
+ *     path: string,               // Logical, relative or absolute path to the file
+ *     type?: 'js'|'css'|'json',   // Type of the file, defaults to 'js'
+ *     entrypoint?: bool,          // Whether the file is an entrypoint, for 'js' only
+ * }|array{
+ *     version: string,            // Version of the remote package
+ *     package_specifier?: string, // Remote "package-name/path" specifier, defaults to the import name
+ *     type?: 'js'|'css'|'json',
+ *     entrypoint?: bool,
+ * }>
  */
 return [
-    'app' => [
-        'path' => './assets/app.js',
-        'entrypoint' => true,
-    ],
-    '@hotwired/stimulus' => [
-        'version' => '3.2.2',
-    ],
-    '@symfony/stimulus-bundle' => [
-        'path' => './vendor/symfony/stimulus-bundle/assets/dist/loader.js',
-    ],
-    '@hotwired/turbo' => [
-        'version' => '7.3.0',
-    ],
-    'halfmoon' => [
-        'version' => '2.0.2',
-    ],
-    'halfmoon/css/halfmoon.min.css' => [
-        'version' => '2.0.2',
-        'type' => 'css',
-    ],
-    // Chart.js via CDN (auto build)
-    'chart.js/auto' => [
-        'version' => '4.4.1',
-    ],
-    // Chart.js dependency used for color utilities
-    '@kurkle/color' => [
-        'version' => '0.3.2',
-    ],
+    'app' => ['path' => './assets/app.js', 'entrypoint' => true],
+    '@symfony/stimulus-bundle' => ['path' => './vendor/symfony/stimulus-bundle/assets/dist/loader.js'],
+    '@hotwired/stimulus' => ['version' => '3.2.2'],
+    '@hotwired/turbo' => ['version' => '8.0.23'],
+    'halfmoon' => ['version' => '2.0.2'],
+    'halfmoon/css/halfmoon.min.css' => ['version' => '2.0.2', 'type' => 'css'],
+    'chart.js/auto' => ['version' => '4.6.1'],
+    '@kurkle/color' => ['version' => '0.6.5'],
 ];
