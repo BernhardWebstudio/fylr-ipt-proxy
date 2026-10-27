@@ -167,4 +167,57 @@ class ImportExportManagementControllerTest extends TestCase
         $this->assertEquals(400, $response->getStatusCode());
         $this->assertStringContainsString('Invalid webhook payload', $response->getContent());
     }
+
+    public function testImportWebhookHandlesGetRequestAsHealthCheck(): void
+    {
+        $controller = new ImportExportManagementController();
+
+        $request = new Request();
+        $request->setMethod('GET');
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects($this->never())->method('error');
+
+        $easydbApiService = $this->createMock(EasydbApiService::class);
+        $translator = $this->createMock(TranslatorInterface::class);
+        $specimenImportService = $this->createMock(SpecimenImportService::class);
+
+        $response = $controller->importWebhook(
+            $request,
+            $logger,
+            $easydbApiService,
+            $specimenImportService,
+            $translator
+        );
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertSame('Webhook endpoint is active', $response->getContent());
+    }
+
+    public function testImportWebhookHandlesEmptyPayloadAsProbe(): void
+    {
+        $controller = new ImportExportManagementController();
+
+        $request = new Request([], [], [], [], [], [], '');
+        $request->setMethod('POST');
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects($this->once())->method('info')->with('Empty webhook payload received (ping/probe)');
+        $logger->expects($this->never())->method('error');
+
+        $easydbApiService = $this->createMock(EasydbApiService::class);
+        $translator = $this->createMock(TranslatorInterface::class);
+        $specimenImportService = $this->createMock(SpecimenImportService::class);
+
+        $response = $controller->importWebhook(
+            $request,
+            $logger,
+            $easydbApiService,
+            $specimenImportService,
+            $translator
+        );
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertSame('Empty webhook payload', $response->getContent());
+    }
 }

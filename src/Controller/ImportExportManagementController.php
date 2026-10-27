@@ -198,8 +198,8 @@ final class ImportExportManagementController extends AbstractController
         ]);
     }
 
-    #[Route('/import/webhook')]
-    #[Route('/import-webhook', name: 'app_import_management_webhook')]
+    #[Route('/import/webhook', methods: ['GET', 'POST', 'HEAD'])]
+    #[Route('/import-webhook', name: 'app_import_management_webhook', methods: ['GET', 'POST', 'HEAD'])]
     public function importWebhook(
         Request $request,
         LoggerInterface $logger,
@@ -209,6 +209,14 @@ final class ImportExportManagementController extends AbstractController
     ): Response {
         try {
             $content = $request->getContent();
+            if (trim($content) === '') {
+                if ($request->isMethod('GET') || $request->isMethod('HEAD')) {
+                    return new Response('Webhook endpoint is active', 200, ['Content-Type' => 'text/plain']);
+                }
+                $logger->info('Empty webhook payload received (ping/probe)');
+                return new Response('Empty webhook payload', 200, ['Content-Type' => 'text/plain']);
+            }
+
             $data = json_decode($content, true, 512, JSON_INVALID_UTF8_SUBSTITUTE | JSON_BIGINT_AS_STRING);
 
             if (!is_array($data) || !isset($data['objects']) || !is_array($data['objects'])) {
