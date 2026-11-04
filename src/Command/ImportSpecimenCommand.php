@@ -34,12 +34,14 @@ class ImportSpecimenCommand extends Command
             ->addArgument('query', InputArgument::IS_ARRAY, 'Global object IDs (format: 123@abc-123) or search terms to find specimens')
             ->addOption('login', 'l', InputOption::VALUE_OPTIONAL, 'EasyDB login username')
             ->addOption('password', 'p', InputOption::VALUE_OPTIONAL, 'EasyDB login password')
+            ->addOption('force', 'f', InputOption::VALUE_NONE, 'Force re-mapping even if remote data has not changed');
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
+        $force = $input->getOption('force');
         $queries = $input->getArgument('query');
         $login = $input->getOption('login') ?? $_ENV['EASYDB_LOGIN'] ?? getenv('EASYDB_LOGIN');
         $password = $input->getOption('password') ?? $_ENV['EASYDB_PASSWORD'] ?? getenv('EASYDB_PASSWORD');
@@ -85,7 +87,7 @@ class ImportSpecimenCommand extends Command
         foreach ($globalObjectIds as $goi) {
             $io->section(sprintf('Importing: %s', $goi));
             try {
-                $this->specimenImportService->importByGlobalObjectId($goi);
+                $this->specimenImportService->importByGlobalObjectId($goi, null, true, $force);
                 $successCount++;
                 $io->success(sprintf('Successfully imported %s', $goi));
             } catch (\Throwable $e) {

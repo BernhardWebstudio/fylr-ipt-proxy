@@ -420,7 +420,7 @@ class EasydbApiService implements ResetInterface
                     'search' => [$searchQuery],
                 ]
             ],
-            'format' => 'standard',
+            'format' => 'long',
             'sort' => [
                 [
                     'field' => '_system_object_id',
