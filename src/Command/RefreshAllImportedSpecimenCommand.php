@@ -121,76 +121,84 @@ class RefreshAllImportedSpecimenCommand extends Command
         $errors = [];
         $processedCount = 0;
 
-        // Use Doctrine's iterate() method for memory-efficient processing
-        $queryBuilder = $this->occurrenceImportRepository->createQueryBuilder('oi')
-            ->orderBy('oi.id', 'ASC');
+        // Keyset pagination: fetch only a small chunk of rows at a time. A single
+        // toIterable() over a buffered MySQL result keeps all rows in PHP memory.
+        $lastId = null;
+        $skipped = $offset;
+        $aborted = false;
 
-        if ($offset > 0) {
-            $queryBuilder->setFirstResult($offset);
-        }
-
-        $query = $queryBuilder->getQuery();
-
-        foreach ($query->toIterable() as $import) {
-            $globalObjectId = $import->getGlobalObjectID();
-
-            try {
-                // Re-import the specimen using the service
-                $wasUpdated = $this->specimenImportService->importByGlobalObjectId(
-                    $globalObjectId,
-                    null, // no specific user
-                    true, // don't flush yet - we'll batch flush
-                    $force // force re-mapping even if remote hasn't changed
-                );
-
-                if ($wasUpdated) {
-                    $successCount++;
-                } else {
-                    $skippedCount++;
-                }
-            } catch (\Exception $e) {
-                $errorCount++;
-                $errorMessage = sprintf(
-                    'Failed to refresh %s: %s',
-                    $globalObjectId,
-                    $e->getMessage()
-                );
-                $errors[] = $errorMessage;
-
-                $this->logger->error('Error refreshing specimen', [
-                    'globalObjectId' => $globalObjectId,
-                    'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString(),
-                ]);
-
-                if (!$this->entityManager->isOpen()) {
-                    $io->error('The EntityManager is closed. Aborting execution to prevent cascading errors.');
-                    break;
-                }
+        while (!$aborted) {
+            $qb = $this->occurrenceImportRepository->createQueryBuilder('oi')
+                ->select('oi.id AS id, oi.globalObjectID AS gid')
+                ->orderBy('oi.id', 'ASC')
+                ->setMaxResults($batchSize);
+            if ($lastId !== null) {
+                $qb->where('oi.id > :lastId')->setParameter('lastId', $lastId);
+            } elseif ($skipped > 0) {
+                $qb->setFirstResult($skipped);
+            }
+            $rows = $qb->getQuery()->getArrayResult();
+            if (!$rows) {
+                break;
             }
 
-            $processedCount++;
-            $progressBar->advance();
+            foreach ($rows as $row) {
+                $lastId = $row['id'];
+                $globalObjectId = $row['gid'];
 
-            // Flush and clear EntityManager periodically to free memory
-            if ($processedCount % $batchSize === 0) {
-                if (!$dryRun) {
-                    $this->entityManager->flush();
+
+                try {
+                    // Re-import the specimen using the service
+                    $wasUpdated = $this->specimenImportService->importByGlobalObjectId(
+                        $globalObjectId,
+                        null, // no specific user
+                        true, // don't flush yet - we'll batch flush
+                        $force // force re-mapping even if remote hasn't changed
+                    );
+
+                    if ($wasUpdated) {
+                        $successCount++;
+                    } else {
+                        $skippedCount++;
+                    }
+                } catch (\Exception $e) {
+                    $errorCount++;
+                    $errorMessage = sprintf(
+                        'Failed to refresh %s: %s',
+                        $globalObjectId,
+                        $e->getMessage()
+                    );
+                    $errors[] = $errorMessage;
+
+                    $this->logger->error('Error refreshing specimen', [
+                        'globalObjectId' => $globalObjectId,
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString(),
+                    ]);
+
+                    if (!$this->entityManager->isOpen()) {
+                        $io->error('The EntityManager is closed. Aborting execution to prevent cascading errors.');
+                        $aborted = true;
+                        break;
+                    }
                 }
-                $this->entityManager->clear();
 
-                // Reset logger buffers if supported
-                if ($this->logger instanceof ResetInterface) {
-                    $this->logger->reset();
-                }
-
-                // Force garbage collection to free memory
-                gc_collect_cycles();
+                $processedCount++;
+                $progressBar->advance();
             }
+
+            if (!$dryRun && $this->entityManager->isOpen()) {
+                $this->entityManager->flush();
+            }
+            $this->entityManager->clear();
+            if ($this->logger instanceof ResetInterface) {
+                $this->logger->reset();
+            }
+            gc_collect_cycles();
         }
 
         // Final flush for remaining items
-        if (!$dryRun && ($successCount % $batchSize !== 0)) {
+        if (!$dryRun && $this->entityManager->isOpen()) {
             $this->entityManager->flush();
         }
 
