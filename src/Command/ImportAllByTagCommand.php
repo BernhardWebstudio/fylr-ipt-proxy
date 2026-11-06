@@ -4,8 +4,10 @@ namespace App\Command;
 
 use App\Service\EasydbApiService;
 use App\Service\SpecimenImportService;
+use Doctrine\DBAL\Logging\Middleware as LoggingMiddleware;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\EntityManagerClosed;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -15,6 +17,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\Lock\LockFactory;
+use Symfony\Contracts\Service\ResetInterface;
 
 #[AsCommand(
     name: 'app:import-all-by-tag',
@@ -28,6 +31,7 @@ class ImportAllByTagCommand extends Command
         #[AutowireIterator("app.easydb_dwc_mapping")] private readonly iterable $mappings,
         private readonly LockFactory $lockFactory,
         private readonly EntityManagerInterface $entityManager,
+        private readonly ?LoggerInterface $logger = null,
     ) {
         parent::__construct();
     }
@@ -55,6 +59,20 @@ class ImportAllByTagCommand extends Command
         $initialOffset = (int) $input->getOption('offset');
         $retryOnClose = (int) $input->getOption('retry-on-close');
         $retryCount = 0;
+
+        // Disable DBAL SQL logging to prevent query logs accumulating in memory
+        $connection = $this->entityManager->getConnection();
+        $config = $connection->getConfiguration();
+        if (method_exists($config, 'setSQLLogger')) {
+            $config->setSQLLogger(null);
+        }
+        if (method_exists($config, 'getMiddlewares')) {
+            $filteredMiddlewares = array_filter(
+                $config->getMiddlewares(),
+                fn($m) => !($m instanceof LoggingMiddleware)
+            );
+            $config->setMiddlewares($filteredMiddlewares);
+        }
 
         $lock = $this->lockFactory->createLock('import-all-by-tag-' . $tagId);
         if (!$lock->acquire()) {
@@ -180,6 +198,9 @@ class ImportAllByTagCommand extends Command
                 // Clear EntityManager periodically to prevent memory exhaustion
                 if ($processed % 50 === 0) {
                     $this->safeClearEntityManager();
+                    if ($this->logger instanceof ResetInterface) {
+                        $this->logger->reset();
+                    }
                     gc_collect_cycles();
                 }
             }

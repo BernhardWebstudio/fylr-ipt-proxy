@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Repository\OccurrenceImportRepository;
 use App\Service\EasydbApiService;
 use App\Service\SpecimenImportService;
+use Doctrine\DBAL\Logging\Middleware as LoggingMiddleware;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -13,6 +14,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Contracts\Service\ResetInterface;
 
 #[AsCommand(
     name: 'app:refresh-all-imported-specimen',
@@ -37,6 +39,8 @@ class RefreshAllImportedSpecimenCommand extends Command
             ->addOption('password', 'p', InputOption::VALUE_OPTIONAL, 'EasyDB login password')
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Run without making any changes to the database')
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Force re-mapping even if remote data has not changed (useful after fixing mapping code)')
+            ->addOption('offset', 'o', InputOption::VALUE_OPTIONAL, 'Start at this offset (for resuming interrupted runs)', 0)
+            ->addOption('batch-size', 'b', InputOption::VALUE_OPTIONAL, 'Batch size for flushing and clearing memory', 50)
         ;
     }
 
@@ -47,6 +51,22 @@ class RefreshAllImportedSpecimenCommand extends Command
         $password = $input->getOption('password') ?? $_ENV['EASYDB_PASSWORD'] ?? getenv('EASYDB_PASSWORD');
         $dryRun = $input->getOption('dry-run');
         $force = $input->getOption('force');
+        $offset = max(0, (int) $input->getOption('offset'));
+        $batchSize = max(1, (int) $input->getOption('batch-size'));
+
+        // Disable DBAL SQL logging to prevent query logs accumulating in memory
+        $connection = $this->entityManager->getConnection();
+        $config = $connection->getConfiguration();
+        if (method_exists($config, 'setSQLLogger')) {
+            $config->setSQLLogger(null);
+        }
+        if (method_exists($config, 'getMiddlewares')) {
+            $filteredMiddlewares = array_filter(
+                $config->getMiddlewares(),
+                fn($m) => !($m instanceof LoggingMiddleware)
+            );
+            $config->setMiddlewares($filteredMiddlewares);
+        }
 
         // Initialize EasyDB session with credentials if provided
         if ($login && $password) {
@@ -78,22 +98,37 @@ class RefreshAllImportedSpecimenCommand extends Command
             return Command::SUCCESS;
         }
 
-        $io->info(sprintf('Found %d specimens to refresh', $totalCount));
+        $remainingCount = $totalCount - $offset;
+        if ($remainingCount <= 0) {
+            $io->warning(sprintf('Offset %d is greater than or equal to total count %d.', $offset, $totalCount));
+            return Command::SUCCESS;
+        }
+
+        if ($offset > 0) {
+            $io->info(sprintf('Resuming from offset %d (%d of %d specimens remaining to refresh)', $offset, $remainingCount, $totalCount));
+        } else {
+            $io->info(sprintf('Found %d specimens to refresh', $totalCount));
+        }
 
         // Process each specimen using iteration to avoid memory issues
         $io->section('Refreshing specimens from EasyDB...');
-        $progressBar = $io->createProgressBar($totalCount);
+        $progressBar = $io->createProgressBar($remainingCount);
         $progressBar->start();
 
         $successCount = 0;
         $errorCount = 0;
         $skippedCount = 0;
         $errors = [];
-        $batchSize = 50; // Process in batches to avoid memory exhaustion
         $processedCount = 0;
 
         // Use Doctrine's iterate() method for memory-efficient processing
-        $queryBuilder = $this->occurrenceImportRepository->createQueryBuilder('oi');
+        $queryBuilder = $this->occurrenceImportRepository->createQueryBuilder('oi')
+            ->orderBy('oi.id', 'ASC');
+
+        if ($offset > 0) {
+            $queryBuilder->setFirstResult($offset);
+        }
+
         $query = $queryBuilder->getQuery();
 
         foreach ($query->toIterable() as $import) {
@@ -143,6 +178,11 @@ class RefreshAllImportedSpecimenCommand extends Command
                     $this->entityManager->flush();
                 }
                 $this->entityManager->clear();
+
+                // Reset logger buffers if supported
+                if ($this->logger instanceof ResetInterface) {
+                    $this->logger->reset();
+                }
 
                 // Force garbage collection to free memory
                 gc_collect_cycles();

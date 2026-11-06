@@ -4,6 +4,7 @@ namespace App\Command;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception as DBALException;
+use Doctrine\DBAL\Logging\Middleware as LoggingMiddleware;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Statement;
 use Doctrine\ORM\EntityManagerInterface;
@@ -51,6 +52,10 @@ final class MirrorDatabaseToMysqlCommand extends Command
 
         $chunkSize = max(1, (int) $input->getOption('chunk-size'));
         $truncateFirst = (bool) $input->getOption('truncate-first');
+
+        // Disable query logging middlewares on both connections to prevent memory buildup in bulk mirroring
+        $this->disableQueryLogging($this->sourceConnection);
+        $this->disableQueryLogging($this->mirrorConnection);
 
         if (!$this->ensureConnections($io)) {
             return Command::FAILURE;
@@ -119,6 +124,8 @@ final class MirrorDatabaseToMysqlCommand extends Command
 
             $lastSeenId = $rows[array_key_last($rows)][$primaryKeyColumn] ?? null;
             $progress->advance(count($rows));
+            unset($rows);
+            gc_collect_cycles();
         }
 
         $progress->finish();
@@ -207,6 +214,21 @@ final class MirrorDatabaseToMysqlCommand extends Command
         }
 
         return $row;
+    }
+
+    private function disableQueryLogging(Connection $connection): void
+    {
+        $config = $connection->getConfiguration();
+        if (method_exists($config, 'setSQLLogger')) {
+            $config->setSQLLogger(null);
+        }
+        if (method_exists($config, 'getMiddlewares')) {
+            $filteredMiddlewares = array_filter(
+                $config->getMiddlewares(),
+                fn($m) => !($m instanceof LoggingMiddleware)
+            );
+            $config->setMiddlewares($filteredMiddlewares);
+        }
     }
 
     private function ensureConnections(SymfonyStyle $io): bool
