@@ -34,3 +34,6 @@ vendor/
 .env.local
 .env.local.php
 .env.test
+
+docker/db/data
+docker/db/ssl/*.key
