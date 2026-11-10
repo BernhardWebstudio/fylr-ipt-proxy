@@ -6,6 +6,7 @@ use App\Entity\JobStatus;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use SortDirection;
 
 /**
  * @extends ServiceEntityRepository<JobStatus>
@@ -27,7 +28,7 @@ class JobStatusRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('j')
             ->andWhere('j.user = :user')
             ->setParameter('user', $user)
-            ->orderBy('j.createdAt', 'DESC')
+            ->orderBy('j.createdAt', SortDirection::Descending)
             ->setMaxResults($limit)
             ->getQuery()
             ->getResult();
@@ -43,7 +44,7 @@ class JobStatusRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('j')
             ->andWhere('j.status = :status')
             ->setParameter('status', JobStatus::STATUS_PENDING)
-            ->orderBy('j.createdAt', 'ASC')
+            ->orderBy('j.createdAt', SortDirection::Ascending)
             ->getQuery()
             ->getResult();
     }
@@ -58,7 +59,7 @@ class JobStatusRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('j')
             ->andWhere('j.status = :status')
             ->setParameter('status', JobStatus::STATUS_RUNNING)
-            ->orderBy('j.createdAt', 'ASC')
+            ->orderBy('j.createdAt', SortDirection::Ascending)
             ->getQuery()
             ->getResult();
     }

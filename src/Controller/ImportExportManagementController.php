@@ -22,6 +22,7 @@ use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -544,45 +545,71 @@ final class ImportExportManagementController extends AbstractController
             $isExportClicked = $form->get('export')->isClicked() || $form->getClickedButton()?->getName() === 'export';
 
             try {
-                // Search for entities based on form criteria
-                $entities = $entityManager->getRepository(OccurrenceImport::class)->searchEntities(
-                    $data['globalObjectId'],
-                    $data['tagId'],
-                    $data['objectType']
+                $repository = $entityManager->getRepository(OccurrenceImport::class);
+                $tagId = !empty($data['tagId']) ? (string) $data['tagId'] : null;
+
+                // Check if matching records exist without loading entities into memory
+                $totalMatching = $repository->countEntities(
+                    $data['globalObjectId'] ?: null,
+                    $tagId,
+                    $data['objectType'] ?: null
                 );
 
-                if (empty($entities)) {
+                if ($totalMatching === 0) {
                     $this->addFlash('warning', 'No data found matching your criteria. Please adjust your filters and try again.');
                     return $this->redirectToRoute('app_export_management');
                 }
 
-                // If Export button was clicked, perform the export
+                // If Export button was clicked, perform the export via streaming in batches
                 if ($isExportClicked) {
-                    $logger->info('Export initiated', ['format' => $data['exportFormat']]);
+                    $logger->info('Export initiated', ['format' => $data['exportFormat'], 'total_records' => $totalMatching]);
                     $format = $data['exportFormat'];
 
-                    switch ($format) {
-                        case 'csv':
-                            $response = new Response();
-                            $response->headers->set('Content-Type', 'text/csv');
-                            $response->setContent($dataExportService->convertToCsv($entities));
-                            $response->headers->set('Content-Disposition', 'attachment; filename="export_' . date('Y-m-d_H-i-s') . '.csv"');
-                            return $response;
-                        case 'json':
-                            return new Response(json_encode($entities), 200, [
-                                'Content-Type' => 'application/json',
-                                'Content-Disposition' => 'attachment; filename="export_' . date('Y-m-d_H-i-s') . '.json"'
-                            ]);
-                        case 'xml':
-                            $response = new Response();
-                            $response->headers->set('Content-Type', 'application/xml');
-                            $response->setContent($dataExportService->convertToXml($entities));
-                            $response->headers->set('Content-Disposition', 'attachment; filename="export_' . date('Y-m-d_H-i-s') . '.xml"');
-                            return $response;
-                        default:
-                            $this->addFlash('error', 'Unsupported export format: ' . $format);
-                            return $this->redirectToRoute('app_export_management');
+                    $contentType = match ($format) {
+                        'csv' => 'text/csv',
+                        'json' => 'application/json',
+                        'xml' => 'application/xml',
+                        default => null,
+                    };
+
+                    if (!$contentType) {
+                        $this->addFlash('error', 'Unsupported export format: ' . $format);
+                        return $this->redirectToRoute('app_export_management');
                     }
+
+                    $batches = $repository->getBatches(
+                        $data['globalObjectId'] ?: null,
+                        $tagId,
+                        $data['objectType'] ?: null
+                    );
+
+                    $response = new StreamedResponse(function () use ($dataExportService, $batches, $format, $entityManager) {
+                        $output = fopen('php://output', 'w');
+                        $onBatchEnd = function () use ($entityManager) {
+                            $entityManager->clear();
+                        };
+
+                        switch ($format) {
+                            case 'csv':
+                                $dataExportService->streamCsv($batches, $output, $onBatchEnd);
+                                break;
+                            case 'json':
+                                $dataExportService->streamJson($batches, $output, $onBatchEnd);
+                                break;
+                            case 'xml':
+                                $dataExportService->streamXml($batches, $output, $onBatchEnd);
+                                break;
+                        }
+
+                        if (is_resource($output)) {
+                            fclose($output);
+                        }
+                    });
+
+                    $response->headers->set('Content-Type', $contentType);
+                    $response->headers->set('Content-Disposition', 'attachment; filename="export_' . date('Y-m-d_H-i-s') . '.' . $format . '"');
+
+                    return $response;
                 } else {
                     $logger->info('Preview requested for export', [
                         'globalObjectId' => $data['globalObjectId'] ?? null,
@@ -686,36 +713,46 @@ final class ImportExportManagementController extends AbstractController
         }
 
         $repository = $entityManager->getRepository(OccurrenceImport::class);
-        $data = $repository->findBy(['objectType' => $type]);
-        if (!$data) {
+        $totalMatching = $repository->countEntities(null, null, $type);
+        if ($totalMatching === 0) {
             $this->addFlash('error', 'No data found for type: ' . $type);
             return $this->redirectToRoute('app_import_management');
         }
 
-        // Convert data to the requested format
-        switch ($format) {
-            case 'csv':
-                $response = new Response();
-                $response->headers->set('Content-Type', 'text/csv');
-                $response->setContent($dataExportService->convertToCsv($data));
-                $response->headers->set('Content-Disposition', 'attachment; filename="export_' . $type . '.csv"');
-                break;
-            case 'json':
-                $response = new Response($dataExportService->convertToJson($data), 200, [
-                    'Content-Type' => 'application/json',
-                    'Content-Disposition' => 'attachment; filename="export_' . $type . '.json"'
-                ]);
-                break;
-            case 'xml':
-                $response = new Response();
-                $response->headers->set('Content-Type', 'application/xml');
-                $response->setContent($dataExportService->convertToXml($data));
-                $response->headers->set('Content-Disposition', 'attachment; filename="export_' . $type . '.xml"');
-                break;
-            default:
-                $this->addFlash('error', 'Unsupported export format: ' . $format);
-                return $this->redirectToRoute('app_import_management');
-        }
+        $batches = $repository->getBatches(null, null, $type);
+
+        $contentType = match ($format) {
+            'csv' => 'text/csv',
+            'json' => 'application/json',
+            'xml' => 'application/xml',
+            default => 'application/octet-stream',
+        };
+
+        $response = new StreamedResponse(function () use ($dataExportService, $batches, $format, $entityManager) {
+            $output = fopen('php://output', 'w');
+            $onBatchEnd = function () use ($entityManager) {
+                $entityManager->clear();
+            };
+
+            switch ($format) {
+                case 'csv':
+                    $dataExportService->streamCsv($batches, $output, $onBatchEnd);
+                    break;
+                case 'json':
+                    $dataExportService->streamJson($batches, $output, $onBatchEnd);
+                    break;
+                case 'xml':
+                    $dataExportService->streamXml($batches, $output, $onBatchEnd);
+                    break;
+            }
+
+            if (is_resource($output)) {
+                fclose($output);
+            }
+        });
+
+        $response->headers->set('Content-Type', $contentType);
+        $response->headers->set('Content-Disposition', 'attachment; filename="export_' . $type . '.' . $format . '"');
 
         // Set cache headers for HTTP caching
         $response->setPublic();

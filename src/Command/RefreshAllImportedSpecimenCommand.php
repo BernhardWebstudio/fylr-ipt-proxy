@@ -8,6 +8,7 @@ use App\Service\SpecimenImportService;
 use Doctrine\DBAL\Logging\Middleware as LoggingMiddleware;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use SortDirection;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -130,7 +131,7 @@ class RefreshAllImportedSpecimenCommand extends Command
         while (!$aborted) {
             $qb = $this->occurrenceImportRepository->createQueryBuilder('oi')
                 ->select('oi.id AS id, oi.globalObjectID AS gid')
-                ->orderBy('oi.id', 'ASC')
+                ->orderBy('oi.id', SortDirection::Ascending)
                 ->setMaxResults($batchSize);
             if ($lastId !== null) {
                 $qb->where('oi.id > :lastId')->setParameter('lastId', $lastId);

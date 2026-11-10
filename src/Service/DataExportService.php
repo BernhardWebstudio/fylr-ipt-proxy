@@ -30,47 +30,65 @@ class DataExportService
         }
 
         $output = fopen('php://temp', 'r+');
-
-        // Collect all unique flattened properties across all data
-        $allKeys = [];
-        foreach ($data as $occurrence) {
-            $flattenedProperties = $this->getFlattenedProperties($occurrence);
-            $allKeys = array_merge($allKeys, array_keys($flattenedProperties));
-        }
-        $allKeys = array_unique($allKeys);
-
-        // Filter keys to only include those with at least one non-empty value
-        $validKeys = [];
-        foreach ($allKeys as $key) {
-            $hasValue = false;
-            foreach ($data as $occurrence) {
-                $flattenedData = $this->getFlattenedProperties($occurrence);
-                $value = $flattenedData[$key] ?? '';
-                if ($value !== null && $value !== '') {
-                    $hasValue = true;
-                    break;
-                }
-            }
-            if ($hasValue) {
-                $validKeys[] = $key;
-            }
-        }
-
-        // Write header row
-        fputcsv($output, $validKeys);
-
-        // Write data rows
-        foreach ($data as $occurrence) {
-            $flattenedData = $this->getFlattenedProperties($occurrence);
-            $row = array_map(fn($key) => $flattenedData[$key] ?? '', $validKeys);
-            fputcsv($output, $row);
-        }
-
+        $this->streamCsv([$data], $output);
         rewind($output);
         $content = stream_get_contents($output);
         fclose($output);
 
-        return $content;
+        return $content !== false ? $content : '';
+    }
+
+    /**
+     * Stream data to CSV format in batches to minimize memory consumption.
+     *
+     * @param iterable<array<object>> $batches An iterable yielding batches of entities
+     * @param resource $outputStream Stream to write CSV data to (e.g. php://output or php://temp)
+     * @param callable|null $onBatchProcessed Optional callback invoked after each batch (e.g. to clear EntityManager)
+     */
+    public function streamCsv(iterable $batches, $outputStream, ?callable $onBatchProcessed = null): void
+    {
+        $tempFile = fopen('php://temp', 'r+');
+        $validKeyMap = [];
+        $hasData = false;
+
+        foreach ($batches as $batch) {
+            foreach ($batch as $occurrence) {
+                $hasData = true;
+                $flattened = $this->getFlattenedProperties($occurrence);
+                foreach ($flattened as $key => $value) {
+                    if ($value !== null && $value !== '') {
+                        $validKeyMap[$key] = true;
+                    }
+                }
+                fwrite($tempFile, json_encode($flattened) . "\n");
+            }
+
+            if ($onBatchProcessed !== null) {
+                $onBatchProcessed();
+            }
+        }
+
+        if (!$hasData) {
+            fclose($tempFile);
+            return;
+        }
+
+        $validKeys = array_keys($validKeyMap);
+
+        if (!empty($validKeys)) {
+            fputcsv($outputStream, $validKeys, escape: '\\');
+
+            rewind($tempFile);
+            while (($line = fgets($tempFile)) !== false) {
+                $flattened = json_decode($line, true);
+                if (is_array($flattened)) {
+                    $row = array_map(fn($key) => $flattened[$key] ?? '', $validKeys);
+                    fputcsv($outputStream, $row, escape: '\\');
+                }
+            }
+        }
+
+        fclose($tempFile);
     }
 
     /**
@@ -81,20 +99,53 @@ class DataExportService
      */
     public function convertToXml(array $data): string
     {
-        $dom = new \DOMDocument('1.0', 'UTF-8');
-        $dom->formatOutput = true;
-
-        $root = $dom->createElement('occurrences');
-        $dom->appendChild($root);
-
-        foreach ($data as $occurrence) {
-            $occurrenceElement = $dom->createElement('occurrence');
-            $root->appendChild($occurrenceElement);
-
-            $this->addObjectToXmlElement($dom, $occurrenceElement, $occurrence);
+        if (empty($data)) {
+            return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<occurrences/>\n";
         }
 
-        return $dom->saveXML();
+        $output = fopen('php://temp', 'r+');
+        $this->streamXml([$data], $output);
+        rewind($output);
+        $content = stream_get_contents($output);
+        fclose($output);
+
+        return $content !== false ? $content : '';
+    }
+
+    /**
+     * Stream data to XML format in batches to minimize memory consumption.
+     *
+     * @param iterable<array<object>> $batches An iterable yielding batches of entities
+     * @param resource $outputStream Stream to write XML data to
+     * @param callable|null $onBatchProcessed Optional callback invoked after each batch
+     */
+    public function streamXml(iterable $batches, $outputStream, ?callable $onBatchProcessed = null): void
+    {
+        fwrite($outputStream, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<occurrences>\n");
+
+        foreach ($batches as $batch) {
+            foreach ($batch as $occurrence) {
+                $dom = new \DOMDocument('1.0', 'UTF-8');
+                $dom->formatOutput = true;
+
+                $occurrenceElement = $dom->createElement('occurrence');
+                $dom->appendChild($occurrenceElement);
+
+                $this->addObjectToXmlElement($dom, $occurrenceElement, $occurrence);
+
+                $xml = $dom->saveXML($occurrenceElement);
+                if ($xml) {
+                    $indented = implode("\n", array_map(fn($line) => '  ' . $line, explode("\n", trim($xml))));
+                    fwrite($outputStream, $indented . "\n");
+                }
+            }
+
+            if ($onBatchProcessed !== null) {
+                $onBatchProcessed();
+            }
+        }
+
+        fwrite($outputStream, "</occurrences>\n");
     }
 
     /**
@@ -105,8 +156,52 @@ class DataExportService
      */
     public function convertToJson(array $data): string
     {
-        $filteredData = array_map([$this, 'filterEmptyProperties'], $data);
-        return json_encode($filteredData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        if (empty($data)) {
+            return "[]";
+        }
+
+        $output = fopen('php://temp', 'r+');
+        $this->streamJson([$data], $output);
+        rewind($output);
+        $content = stream_get_contents($output);
+        fclose($output);
+
+        return $content !== false ? $content : '[]';
+    }
+
+    /**
+     * Stream data to JSON format in batches to minimize memory consumption.
+     *
+     * @param iterable<array<object>> $batches An iterable yielding batches of entities
+     * @param resource $outputStream Stream to write JSON data to
+     * @param callable|null $onBatchProcessed Optional callback invoked after each batch
+     */
+    public function streamJson(iterable $batches, $outputStream, ?callable $onBatchProcessed = null): void
+    {
+        fwrite($outputStream, "[\n");
+        $isFirst = true;
+
+        foreach ($batches as $batch) {
+            foreach ($batch as $occurrence) {
+                $filtered = $this->filterEmptyProperties($occurrence);
+                $json = json_encode($filtered, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+                if (!$isFirst) {
+                    fwrite($outputStream, ",\n");
+                } else {
+                    $isFirst = false;
+                }
+
+                $indented = implode("\n", array_map(fn($line) => '  ' . $line, explode("\n", $json)));
+                fwrite($outputStream, $indented);
+            }
+
+            if ($onBatchProcessed !== null) {
+                $onBatchProcessed();
+            }
+        }
+
+        fwrite($outputStream, "\n]\n");
     }
 
     /**

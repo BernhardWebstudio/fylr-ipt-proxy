@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\OccurrenceImport;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use SortDirection;
 
 /**
  * @extends ServiceEntityRepository<OccurrenceImport>
@@ -37,7 +38,7 @@ class OccurrenceImportRepository extends ServiceEntityRepository
         $rows = $this->createQueryBuilder('oi')
             ->select('oi.objectType AS objectType, COUNT(oi.id) AS count')
             ->groupBy('oi.objectType')
-            ->orderBy('count', 'DESC')
+            ->orderBy('count', SortDirection::Descending)
             ->getQuery()
             ->getArrayResult();
 
@@ -60,7 +61,7 @@ class OccurrenceImportRepository extends ServiceEntityRepository
         $rows = $this->createQueryBuilder('oi')
             ->select('oi.tagId AS tagId, COUNT(oi.id) AS count')
             ->groupBy('oi.tagId')
-            ->orderBy('count', 'DESC')
+            ->orderBy('count', SortDirection::Descending)
             ->getQuery()
             ->getArrayResult();
 
@@ -72,7 +73,64 @@ class OccurrenceImportRepository extends ServiceEntityRepository
         }, $rows);
     }
 
-    public function searchEntities(?string $globalObjectId, ?string $tagId, ?string $objectType, ?int $limit = null, ?int $offset = null): array
+    /**
+     * Count matching entities for filtering or pre-export validation.
+     */
+    public function countEntities(?string $globalObjectId = null, string|int|null $tagId = null, ?string $objectType = null): int
+    {
+        $qb = $this->createQueryBuilder('oi')
+            ->select('COUNT(oi.id)');
+
+        if ($globalObjectId) {
+            $qb->andWhere('oi.globalObjectID = :globalObjectId')
+                ->setParameter('globalObjectId', $globalObjectId);
+        }
+
+        if ($tagId !== null && $tagId !== '') {
+            $qb->andWhere('oi.tagId = :tagId')
+                ->setParameter('tagId', (int) $tagId);
+        }
+
+        if ($objectType) {
+            $qb->andWhere('oi.objectType = :objectType')
+                ->setParameter('objectType', $objectType);
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
+    }
+
+    /**
+     * Generator yielding batches of OccurrenceImport entities for memory-safe processing.
+     *
+     * @return \Generator<int, OccurrenceImport[]>
+     */
+    public function getBatches(?string $globalObjectId = null, string|int|null $tagId = null, ?string $objectType = null, int $batchSize = 250): \Generator
+    {
+        $offset = 0;
+        while (true) {
+            $entities = $this->searchEntities(
+                $globalObjectId,
+                $tagId !== null && $tagId !== '' ? (string) $tagId : null,
+                $objectType,
+                $batchSize,
+                $offset
+            );
+
+            if (empty($entities)) {
+                break;
+            }
+
+            yield $entities;
+
+            if (count($entities) < $batchSize) {
+                break;
+            }
+
+            $offset += $batchSize;
+        }
+    }
+
+    public function searchEntities(?string $globalObjectId = null, string|int|null $tagId = null, ?string $objectType = null, ?int $limit = null, ?int $offset = null): array
     {
         $qb = $this->createQueryBuilder('oi')
             ->innerJoin('oi.occurrence', 'o')
@@ -83,9 +141,9 @@ class OccurrenceImportRepository extends ServiceEntityRepository
                 ->setParameter('globalObjectId', $globalObjectId);
         }
 
-        if ($tagId) {
+        if ($tagId !== null && $tagId !== '') {
             $qb->andWhere('oi.tagId = :tagId')
-                ->setParameter('tagId', $tagId);
+                ->setParameter('tagId', (int) $tagId);
         }
 
         if ($objectType) {
@@ -101,7 +159,7 @@ class OccurrenceImportRepository extends ServiceEntityRepository
             $qb->setFirstResult($offset);
         }
 
-        $qb->orderBy('oi.id', 'DESC');
+        $qb->orderBy('oi.id', SortDirection::Descending);
 
         return $qb->getQuery()->getResult();
     }
