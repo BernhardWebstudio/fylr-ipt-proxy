@@ -5,6 +5,7 @@ namespace App\Command;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\Logging\Middleware as LoggingMiddleware;
+use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Statement;
 use Doctrine\ORM\EntityManagerInterface;
@@ -109,6 +110,7 @@ final class MirrorDatabaseToMysqlCommand extends Command
 
         $lastSeenId = null;
         $insertStatement = null;
+        $columns = null;
 
         while (true) {
             $rows = $this->fetchChunk($classMetadata, $primaryKeyColumn, $chunkSize, $lastSeenId, $sourcePlatform);
@@ -116,10 +118,19 @@ final class MirrorDatabaseToMysqlCommand extends Command
                 break;
             }
 
-            $insertStatement ??= $this->prepareUpsert($classMetadata, $primaryKeyColumn, $rows[0], $targetPlatform);
+            if ($insertStatement === null) {
+                $columns = array_keys($rows[0]);
+                $insertStatement = $this->prepareUpsert($classMetadata, $primaryKeyColumn, $columns, $targetPlatform);
+            }
 
             foreach ($rows as $row) {
-                $insertStatement->executeStatement($this->normalizeRow($row));
+                $normalizedRow = $this->normalizeRow($row);
+                $paramIndex = 1;
+                foreach ($columns as $column) {
+                    $value = $normalizedRow[$column] ?? null;
+                    $insertStatement->bindValue($paramIndex++, $value, $this->getParameterType($value));
+                }
+                $insertStatement->executeStatement();
             }
 
             $lastSeenId = $rows[array_key_last($rows)][$primaryKeyColumn] ?? null;
@@ -139,36 +150,38 @@ final class MirrorDatabaseToMysqlCommand extends Command
         $qb = $this->sourceConnection->createQueryBuilder();
         $qb->select('*')
             ->from($qualifiedTable)
-            ->orderBy($platform->quoteIdentifier($primaryKeyColumn), 'ASC')
+            ->orderBy($platform->quoteSingleIdentifier($primaryKeyColumn), 'ASC')
             ->setMaxResults($chunkSize);
 
         if ($lastSeenId !== null) {
-            $qb->where($qb->expr()->gt($platform->quoteIdentifier($primaryKeyColumn), ':lastId'))
+            $qb->where($qb->expr()->gt($platform->quoteSingleIdentifier($primaryKeyColumn), ':lastId'))
                 ->setParameter('lastId', $lastSeenId);
         }
 
         return $qb->executeQuery()->fetchAllAssociative();
     }
 
-    private function prepareUpsert(ClassMetadata $classMetadata, string $primaryKeyColumn, array $sampleRow, AbstractPlatform $platform): Statement
+    /**
+     * @param list<string> $columns
+     */
+    private function prepareUpsert(ClassMetadata $classMetadata, string $primaryKeyColumn, array $columns, AbstractPlatform $platform): Statement
     {
         $qualifiedTable = $this->qualifyTableName($classMetadata, $platform);
-        $columns = array_keys($sampleRow);
 
-        $quotedColumns = array_map(static fn (string $column): string => $platform->quoteIdentifier($column), $columns);
-        $placeholders = array_map(static fn (string $column): string => ':' . $column, $columns);
+        $quotedColumns = array_map(static fn (string $column): string => $platform->quoteSingleIdentifier($column), $columns);
+        $placeholders = array_fill(0, count($columns), '?');
 
         $updateAssignments = [];
         foreach ($columns as $column) {
             if ($column === $primaryKeyColumn) {
                 continue;
             }
-            $quoted = $platform->quoteIdentifier($column);
+            $quoted = $platform->quoteSingleIdentifier($column);
             $updateAssignments[] = sprintf('%s = VALUES(%s)', $quoted, $quoted);
         }
 
         if ($updateAssignments === []) {
-            $quotedPk = $platform->quoteIdentifier($primaryKeyColumn);
+            $quotedPk = $platform->quoteSingleIdentifier($primaryKeyColumn);
             $updateAssignments[] = sprintf('%s = %s', $quotedPk, $quotedPk);
         }
 
@@ -195,10 +208,10 @@ final class MirrorDatabaseToMysqlCommand extends Command
 
     private function qualifyTableName(ClassMetadata $classMetadata, AbstractPlatform $platform): string
     {
-        $tableName = $platform->quoteIdentifier($classMetadata->getTableName());
+        $tableName = $platform->quoteSingleIdentifier($classMetadata->getTableName());
 
         if ($classMetadata->getSchemaName()) {
-            $schema = $platform->quoteIdentifier($classMetadata->getSchemaName());
+            $schema = $platform->quoteSingleIdentifier($classMetadata->getSchemaName());
             return sprintf('%s.%s', $schema, $tableName);
         }
 
@@ -210,10 +223,23 @@ final class MirrorDatabaseToMysqlCommand extends Command
         foreach ($row as $key => $value) {
             if (is_bool($value)) {
                 $row[$key] = (int) $value;
+            } elseif (is_array($value)) {
+                $row[$key] = json_encode($value, JSON_THROW_ON_ERROR);
             }
         }
 
         return $row;
+    }
+
+    private function getParameterType(mixed $value): ParameterType
+    {
+        return match (true) {
+            $value === null => ParameterType::NULL,
+            is_int($value) => ParameterType::INTEGER,
+            is_bool($value) => ParameterType::BOOLEAN,
+            is_resource($value) => ParameterType::LARGE_OBJECT,
+            default => ParameterType::STRING,
+        };
     }
 
     private function disableQueryLogging(Connection $connection): void
